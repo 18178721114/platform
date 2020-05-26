@@ -63,6 +63,7 @@ class a4399HandworkHandleProcesses extends Command
         $map['c_channel.id'] = $channel_id ;
         $fields = ['c_channel.*','c_channel_ad_platform_mapping.ad_platform_id'];
 
+        
         $map['leftjoin'] = [
             ['c_channel_ad_platform_mapping','c_channel.id', 'c_channel_ad_platform_mapping.channel_id'],
         ];
