@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>ContentFilters</key>
+	<dict/>
+	<key>auto_connect</key>
+	<true/>
+	<key>data</key>
+	<dict>
+		<key>connection</key>
+		<dict>
+			<key>colorIndex</key>
+			<integer>4</integer>
+			<key>database</key>
+			<string>zplay_erm_data</string>
+			<key>host</key>
+			<string>rm-2zes95mb3tk1ekr02lo.mysql.rds.aliyuncs.com</string>
+			<key>kcid</key>
+			<string>-4953870424291707517</string>
+			<key>name</key>
+			<string>zplay_platform_pro</string>
+			<key>rdbms_type</key>
+			<string>mysql</string>
+			<key>sslCACertFileLocation</key>
+			<string></string>
+			<key>sslCACertFileLocationEnabled</key>
+			<integer>0</integer>
+			<key>sslCertificateFileLocation</key>
+			<string></string>
+			<key>sslCertificateFileLocationEnabled</key>
+			<integer>0</integer>
+			<key>sslKeyFileLocation</key>
+			<string></string>
+			<key>sslKeyFileLocationEnabled</key>
+			<integer>0</integer>
+			<key>type</key>
+			<string>SPTCPIPConnection</string>
+			<key>useSSL</key>
+			<integer>0</integer>
+			<key>user</key>
+			<string>zplay_erm_data1</string>
+		</dict>
+		<key>session</key>
+		<dict>
+			<key>connectionEncoding</key>
+			<string>utf8</string>
+			<key>contentFilterV2</key>
+			<dict>
+				<key>children</key>
+				<array/>
+				<key>filterClass</key>
+				<string>groupNode</string>
+				<key>isConjunction</key>
+				<true/>
+			</dict>
+			<key>contentPageNumber</key>
+			<integer>1</integer>
+			<key>contentSelection</key>
+			<data>
+			YnBsaXN0MDDUAQIDBAUGNjdYJHZlcnNpb25YJG9iamVjdHNZJGFy
+			Y2hpdmVyVCR0b3ASAAGGoK0HCBUWFxgZHSQoLDA0VSRudWxs0wkK
+			CwwQFFdOUy5rZXlzWk5TLm9iamVjdHNWJGNsYXNzow0OD4ACgAOA
+			BKMREhOABYAGgAiADFR0eXBlVHJvd3NUa2V5c18QJlNlbGVjdGlv
+			bkRldGFpbFR5cGVQcmltYXJ5S2V5ZWREZXRhaWxz0wkKCxobHKCg
+			gAfSHh8gIVokY2xhc3NuYW1lWCRjbGFzc2VzXxATTlNNdXRhYmxl
+			RGljdGlvbmFyeaMgIiNcTlNEaWN0aW9uYXJ5WE5TT2JqZWN00goL
+			JSehJoAJgAvSCykqK1lOUy5zdHJpbmeAClJpZNIeHy0uXxAPTlNN
+			dXRhYmxlU3RyaW5noy0vI1hOU1N0cmluZ9IeHzEyXk5TTXV0YWJs
+			ZUFycmF5ozEzI1dOU0FycmF50h4fIjWiIiNfEA9OU0tleWVkQXJj
+			aGl2ZXLRODlUZGF0YYABAAgAEQAaACMALQAyADcARQBLAFIAWgBl
+			AGwAcAByAHQAdgB6AHwAfgCAAIIAhwCMAJEAugDBAMIAwwDFAMoA
+			1QDeAPQA+AEFAQ4BEwEVARcBGQEeASgBKgEtATIBRAFIAVEBVgFl
+			AWkBcQF2AXkBiwGOAZMAAAAAAAACAQAAAAAAAAA6AAAAAAAAAAAA
+			AAAAAAABlQ==
+			</data>
+			<key>contentSortColIsAsc</key>
+			<true/>
+			<key>contentViewport</key>
+			<string>{{0, 0}, {1131, 729}}</string>
+			<key>isToolbarVisible</key>
+			<true/>
+			<key>queries</key>
+			<string>select distinct a.platform_id,a.data_account as company_account,b.token as token from c_platform_account_mapping a left join c_generalize b on b.platform_id = a.platform_id and a.account = b.data_account where a.platform_id = 'ptg75'  
+;
+
+select * from `c_platform_account_mapping` where platform_id = 'ptg75';
+
+select data_account,count(1) from c_generalize where platform_id = 'ptg75' group by data_account;
+
+
+
+
+-- SnapchatTg
+update c_generalize set token = 'eyJraWQiOiJyZWZyZXNoLXRva2VuLWExMjhnY20uMCIsInR5cCI6IkpXVCIsImVuYyI6IkExMjhHQ00iLCJhbGciOiJkaXIifQ..FyQiPixWHZMWyRPu.HTN0ERNwyK5fQt1rwq82c1n_274VkhSObClWqBst-Xs1mnNlCT609H0c81we__JWH6g-Wv8pDntK1w8Gr3lR7WR1M5Qb_yahoERGULph66aMRlU0CBW9mD8OTHiHQ3F5xcIRq23EeAdQqCyof_I9WcPvoNYtHw3RWU39Vcfhwo21yguhI0CDR-wyyAgchWuqbVs6BEF3-MMa1wbepCooD1z70cfNmUt8uH1ScKOTiySvtxxsYRumshw8PH9vjn_K8MJNz5lPqEuuHUA.jVOgUPkI7A8pYgsGPdGDjw'  where platform_id = 'ptg75' and data_account = 'weibo@zplay.com';
+
+-- Chartboost
+update c_generalize set secret_key = '28f309e6a207cf6b4e722d0adad722b1'  where platform_id = 'ptg03' and data_account = 'duzonghuan@zplay.cn';
+
+-- Chartboost
+update c_generalize set user_id = '5900077504b0166595513a98', user_signature = '60ebd67af1c67184d70c6e760c505e7b2d53a15748c908321c57309ff558d72c'  where platform_id = 'ptg25' and data_account = 'lixiaoxuan@zplay.com';
+
+-- Appsflyer
+update c_generalize set token = '6efa7c19-07c0-4457-bfd4-67e5c19f0997'  where platform_id = 'ptg02' and data_account = 'contact@zplay.cn';
+
+-- ApplovinTg
+update c_generalize set api_key = 'Ol8T_oR3byyn72T-JX-nifG0Bmii0JQP3Ty2KN5xK2hS4FQOnP9T3QUEBByBVNbZwXbFwhAFkthp67BuWLMamr'  where platform_id = 'ptg21' and data_account = 'wangdan@zplay.com';
+
+</string>
+			<key>table</key>
+			<string>c_generalize</string>
+			<key>view</key>
+			<string>SP_VIEW_CUSTOMQUERY</string>
+			<key>windowVerticalDividerPosition</key>
+			<real>244</real>
+		</dict>
+	</dict>
+	<key>encrypted</key>
+	<false/>
+	<key>format</key>
+	<string>connection</string>
+	<key>queryFavorites</key>
+	<array/>
+	<key>queryHistory</key>
+	<array>
+		<string>SELECT  distinct
+                c_app.id,c_app.app_id,c_generalize.platform_id,c_generalize.data_account,c_generalize.application_id,c_generalize.application_name,c_generalize.agency_platform_id,c_generalize_ad_app.campaign_id,c_generalize_ad_app.campaign_name,c_generalize_ad_app.ad_group_id,c_platform.currency_type_id,cpp.currency_type_id as ageccy_currency_type_id
+                FROM c_app 
+                LEFT JOIN c_generalize ON c_app.id = c_generalize.app_id 
+                LEFT JOIN c_generalize_ad_app ON c_generalize.id = c_generalize_ad_app.generalize_id 
+                LEFT JOIN c_platform ON c_generalize.platform_id = c_platform.platform_id 
+                LEFT JOIN c_platform as cpp ON c_generalize.agency_platform_id = cpp.platform_id 
+                WHERE 
+                c_generalize.platform_id = 'ptg67'</string>
+		<string>SELECT  * from tapjoy_campaign_conf</string>
+		<string>select `app_name`, `id`, `app_id`, `1release_region_id`, `os_id` from `c_app` where `company_id` not in (9) and `status` = 1 group by `app_name`, `id`；
+
+
+
+
+
+SELECT  distinct
+                c_app.id,c_app.app_id,c_generalize.platform_id,c_generalize.data_account,c_generalize.application_id,c_generalize.application_name,c_generalize.agency_platform_id,c_generalize_ad_app.campaign_id,c_generalize_ad_app.campaign_name,c_generalize_ad_app.ad_group_id,c_platform.currency_type_id,cpp.currency_type_id as ageccy_currency_type_id
+                FROM c_app 
+                LEFT JOIN c_generalize ON c_app.id = c_generalize.app_id 
+                LEFT JOIN c_generalize_ad_app ON c_generalize.id = c_generalize_ad_app.generalize_id 
+                LEFT JOIN c_platform ON c_generalize.platform_id = c_platform.platform_id 
+                LEFT JOIN c_platform as cpp ON c_generalize.agency_platform_id = cpp.platform_id 
+                WHERE 
+                c_generalize.platform_id = 'ptg67'</string>
+		<string>SELECT  distinct
+                c_app.id,c_app.app_id,c_generalize.platform_id,c_generalize.data_account,c_generalize.application_id,c_generalize.application_name,c_generalize.agency_platform_id,c_generalize_ad_app20190906.campaign_id,c_generalize_ad_app20190906.campaign_name,c_generalize_ad_app20190906.ad_group_id,c_platform.currency_type_id,cpp.currency_type_id as ageccy_currency_type_id
+                FROM c_app 
+                LEFT JOIN c_generalize ON c_app.id = c_generalize.app_id 
+                LEFT JOIN c_generalize_ad_app20190906 ON c_generalize.id = c_generalize_ad_app20190906.generalize_id 
+                LEFT JOIN c_platform ON c_generalize.platform_id = c_platform.platform_id 
+                LEFT JOIN c_platform as cpp ON c_generalize.agency_platform_id = cpp.platform_id 
+                WHERE 
+                c_generalize.platform_id = 'ptg67'</string>
+		<string>SELECT  distinct
+                c_app.id,c_app.app_id,c_generalize.platform_id,c_generalize.data_account,c_generalize.application_id,c_generalize.application_name,c_generalize.agency_platform_id,c_generalize_ad_app.campaign_id,c_generalize_ad_app20190906.campaign_name,c_generalize_ad_app20190906.ad_group_id,c_platform.currency_type_id,cpp.currency_type_id as ageccy_currency_type_id
+                FROM c_app 
+                LEFT JOIN c_generalize ON c_app.id = c_generalize.app_id 
+                LEFT JOIN c_generalize_ad_app20190906 ON c_generalize.id = c_generalize_ad_app20190906.generalize_id 
+                LEFT JOIN c_platform ON c_generalize.platform_id = c_platform.platform_id 
+                LEFT JOIN c_platform as cpp ON c_generalize.agency_platform_id = cpp.platform_id 
+                WHERE 
+                c_generalize.platform_id = 'ptg67'</string>
+		<string>SELECT  distinct
+                c_app.id,c_app.app_id,c_generalize.platform_id,c_generalize.data_account,c_generalize.application_id,c_generalize.application_name,c_generalize.agency_platform_id,c_generalize_ad_app.campaign_id,c_generalize_ad_app.campaign_name,c_generalize_ad_app20190906.ad_group_id,c_platform.currency_type_id,cpp.currency_type_id as ageccy_currency_type_id
+                FROM c_app 
+                LEFT JOIN c_generalize ON c_app.id = c_generalize.app_id 
+                LEFT JOIN c_generalize_ad_app20190906 ON c_generalize.id = c_generalize_ad_app20190906.generalize_id 
+                LEFT JOIN c_platform ON c_generalize.platform_id = c_platform.platform_id 
+                LEFT JOIN c_platform as cpp ON c_generalize.agency_platform_id = cpp.platform_id 
+                WHERE 
+                c_generalize.platform_id = 'ptg67'</string>
+		<string>SELECT  distinct
+                c_app.id,c_app.app_id,c_generalize.platform_id,c_generalize.data_account,c_generalize.application_id,c_generalize.application_name,c_generalize.agency_platform_id,c_generalize_ad_app.campaign_id,c_generalize_ad_app.campaign_name,c_generalize_ad_app.ad_group_id,c_platform.currency_type_id,cpp.currency_type_id as ageccy_currency_type_id
+                FROM c_app 
+                LEFT JOIN c_generalize ON c_app.id = c_generalize.app_id 
+                LEFT JOIN c_generalize_ad_app20190906 ON c_generalize.id = c_generalize_ad_app20190906.generalize_id 
+                LEFT JOIN c_platform ON c_generalize.platform_id = c_platform.platform_id 
+                LEFT JOIN c_platform as cpp ON c_generalize.agency_platform_id = cpp.platform_id 
+                WHERE 
+                c_generalize.platform_id = 'ptg67'</string>
+		<string>SELECT  distinct
+                c_app.id,c_app.app_id,c_generalize.platform_id,c_generalize.data_account,c_generalize.application_id,c_generalize.application_name,c_generalize.agency_platform_id,c_generalize_ad_app.campaign_id,c_generalize_ad_app.campaign_name,c_generalize_ad_app.ad_group_id,c_platform.currency_type_id,cpp.currency_type_id as ageccy_currency_type_id
+                FROM c_app 
+                LEFT JOIN c_generalize ON c_app.id = c_generalize.app_id 
+                LEFT JOIN c_generalize_ad_app20190906 ON c_generalize.id = c_generalize_ad_app.generalize_id 
+                LEFT JOIN c_platform ON c_generalize.platform_id = c_platform.platform_id 
+                LEFT JOIN c_platform as cpp ON c_generalize.agency_platform_id = cpp.platform_id 
+                WHERE 
+                c_generalize.platform_id = 'ptg67'</string>
+		<string>select `app_name`, `id`, `app_id`, `release_region_id`, `os_id` from `c_app` where `company_id` not in (9) and `status` = 1</string>
+		<string>select `app_name`, `id`, `app_id`, `release_region_id`, `os_id` from `c_app` where `company_id` not in (9) and `status` = 1 group by `app_name`, `id`</string>
+		<string>select `app_name`, `id`, `app_id`, `1release_region_id`, `os_id` from `c_app` where `company_id` not in (9) and `status` = 1 group by `app_name`, `id`</string>
+		<string>-- 分国家 新增 活跃
+select day,channel_name,version,sum(new_user),sum(active_user) from talkingdata_foreign_user where day between '2019-08-01' and '2019-09-02' and appid = '26FC7A219272E84760EA368672CFBD84' group by day</string>
+		<string>-- 中国总 新增 活跃
+select day,sum(new_user),sum(active_user) from talkingdata_china_session where day between '2019-09-01' and '2019-09-02' and appid = '26FC7A219272E84760EA368672CFBD84' group by day</string>
+		<string>-- 分国家 新增 活跃
+select day,channel_name,version,sum(new_user),sum(active_user) from talkingdata_foreign_user where day between '2019-09-01' and '2019-09-02' and appid = '26FC7A219272E84760EA368672CFBD84' group by day</string>
+		<string>-- 分国家 新增 活跃
+select day,channel_name,version,sum(new_user),sum(active_user) from talkingdata_foreign_user where day between '2019-09-02' and '2019-09-02' and appid = '26FC7A219272E84760EA368672CFBD84' group by day</string>
+		<string>-- 中国总 新增 活跃
+select day,sum(new_user),sum(active_user) from talkingdata_china_session where day between '2019-09-02' and '2019-09-02' and appid = '26FC7A219272E84760EA368672CFBD84' group by day</string>
+		<string>-- 中国总 新增 活跃
+select day,sum(new_user),sum(active_user) from talkingdata_china_session where day between '2019-09-04' and '2019-09-04' and appid = '26FC7A219272E84760EA368672CFBD84' group by day</string>
+		<string>-- 分国家 新增 活跃
+select day,channel_name,version,sum(new_user),sum(active_user) from talkingdata_foreign_user where day between '2019-09-04' and '2019-09-04' and appid = '26FC7A219272E84760EA368672CFBD84' group by day</string>
+		<string>-- 分国家 新增 活跃
+select day,channel_name,version,sum(new_user),sum(active_user) from talkingdata_foreign_user where day between '2019-09-01' and '2019-09-10' and appid = '26FC7A219272E84760EA368672CFBD84' group by day</string>
+		<string>select * from zplay_user_tj_report_daily where date = '2019-09-04' and app_id = 'gi007008' and platform_id = 'ptj02'</string>
+	</array>
+	<key>rdbms_type</key>
+	<string>mysql</string>
+	<key>rdbms_version</key>
+	<string>5.6.16-log</string>
+	<key>version</key>
+	<integer>1</integer>
+</dict>
+</plist>

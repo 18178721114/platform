@@ -1,0 +1,22 @@
+2019-08-14 13:51:40：{"filter":{"start":"2019-08-13","end":"2019-08-13","platformids":["1"]},"accesskey":"edb287ab2e7296b2c9926cbbae6ba7b5","groupby":"channelid","metrics":["activeuser","session","avgsessionlength"]}
+
+2019-08-14 13:52:05：{"filter":{"start":"2019-08-12","end":"2019-08-12","platformids":["1"]},"accesskey":"edb287ab2e7296b2c9926cbbae6ba7b5","groupby":"channelid","metrics":["activeuser","session","avgsessionlength"]}
+
+2019-08-15 20:01:22：{"filter":{"start":"2019-08-14","end":"2019-08-14","platformids":[1]},"accesskey":"edb287ab2e7296b2c9926cbbae6ba7b5","groupby":"channelid","metrics":["activeuser","session","avgsessionlength"]}
+
+2019-08-15 20:01:32：{"filter":{"start":"2019-08-13","end":"2019-08-13","platformids":[1]},"accesskey":"edb287ab2e7296b2c9926cbbae6ba7b5","groupby":"channelid","metrics":["activeuser","session","avgsessionlength"]}
+
+2019-08-16 10:02:57：{"filter":{"start":"2019-08-14","end":"2019-08-14","platformids":[1]},"accesskey":"edb287ab2e7296b2c9926cbbae6ba7b5","groupby":"channelid","metrics":["activeuser","session","avgsessionlength"]}
+
+2019-08-16 18:49:07：{"filter":{"start":"2019-08-14","end":"2019-08-14","platformids":[1]},"accesskey":"edb287ab2e7296b2c9926cbbae6ba7b5","groupby":"channelid","metrics":["activeuser","session","avgsessionlength"]}
+
+2019-08-16 18:52:12：{"filter":{"start":"2019-08-14","end":"2019-08-14","platformids":[1]},"accesskey":"edb287ab2e7296b2c9926cbbae6ba7b5","groupby":"channelid","metrics":["activeuser","session","avgsessionlength"]}
+
+2019-08-16 19:16:15：{"filter":{"start":"2019-08-14","end":"2019-08-14","platformids":[1]},"accesskey":"b6a60cfcc92fd1254095130e6457ae44","groupby":"channelid","metrics":["activeuser","session","avgsessionlength"]}
+
+2019-08-16 19:16:27：{"filter":{"start":"2019-08-14","end":"2019-08-14","platformids":[1]},"accesskey":"edb287ab2e7296b2c9926cbbae6ba7b5","groupby":"channelid","metrics":["activeuser","session","avgsessionlength"]}
+
+2019-08-19 12:12:25：{"filter":{"start":"2019-08-17","end":"2019-08-17","platformids":[1]},"accesskey":"b6a60cfcc92fd1254095130e6457ae44","groupby":"channelid","metrics":["activeuser","session","avgsessionlength"]}
+
+2019-08-19 12:12:35：{"filter":{"start":"2019-08-17","end":"2019-08-17","platformids":[1]},"accesskey":"edb287ab2e7296b2c9926cbbae6ba7b5","groupby":"channelid","metrics":["activeuser","session","avgsessionlength"]}
+

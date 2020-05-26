@@ -1,0 +1,1229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>ContentFilters</key>
+	<dict/>
+	<key>auto_connect</key>
+	<true/>
+	<key>data</key>
+	<dict>
+		<key>connection</key>
+		<dict>
+			<key>colorIndex</key>
+			<integer>4</integer>
+			<key>database</key>
+			<string>erm_data</string>
+			<key>host</key>
+			<string>rm-2zes95mb3tk1ekr02lo.mysql.rds.aliyuncs.com</string>
+			<key>kcid</key>
+			<string>5722995950363575417</string>
+			<key>name</key>
+			<string>zplay_platform</string>
+			<key>rdbms_type</key>
+			<string>mysql</string>
+			<key>sslCACertFileLocation</key>
+			<string></string>
+			<key>sslCACertFileLocationEnabled</key>
+			<integer>0</integer>
+			<key>sslCertificateFileLocation</key>
+			<string></string>
+			<key>sslCertificateFileLocationEnabled</key>
+			<integer>0</integer>
+			<key>sslKeyFileLocation</key>
+			<string></string>
+			<key>sslKeyFileLocationEnabled</key>
+			<integer>0</integer>
+			<key>type</key>
+			<string>SPTCPIPConnection</string>
+			<key>useSSL</key>
+			<integer>0</integer>
+			<key>user</key>
+			<string>platform</string>
+		</dict>
+		<key>session</key>
+		<dict>
+			<key>connectionEncoding</key>
+			<string>utf8</string>
+			<key>contentFilterV2</key>
+			<dict>
+				<key>children</key>
+				<array/>
+				<key>filterClass</key>
+				<string>groupNode</string>
+				<key>isConjunction</key>
+				<true/>
+			</dict>
+			<key>contentPageNumber</key>
+			<integer>1</integer>
+			<key>contentSelection</key>
+			<data>
+			YnBsaXN0MDDUAQIDBAUGOjtYJHZlcnNpb25YJG9iamVjdHNZJGFy
+			Y2hpdmVyVCR0b3ASAAGGoK8QDwcIFRYXGBkfICEoLDA0OFUkbnVs
+			bNMJCgsMEBRXTlMua2V5c1pOUy5vYmplY3RzViRjbGFzc6MNDg+A
+			AoADgASjERITgAWABoAKgA5UdHlwZVRyb3dzVGtleXNfECZTZWxl
+			Y3Rpb25EZXRhaWxUeXBlUHJpbWFyeUtleWVkRGV0YWlsc9MJCgsa
+			HB6hG4AHoR2ACIAJUjYyCdIiIyQlWiRjbGFzc25hbWVYJGNsYXNz
+			ZXNfEBNOU011dGFibGVEaWN0aW9uYXJ5oyQmJ1xOU0RpY3Rpb25h
+			cnlYTlNPYmplY3TSCgspK6EqgAuADdILLS4vWU5TLnN0cmluZ4AM
+			VmRpbV9pZNIiIzEyXxAPTlNNdXRhYmxlU3RyaW5nozEzJ1hOU1N0
+			cmluZ9IiIzU2Xk5TTXV0YWJsZUFycmF5ozU3J1dOU0FycmF50iIj
+			JjmiJidfEA9OU0tleWVkQXJjaGl2ZXLRPD1UZGF0YYABAAgAEQAa
+			ACMALQAyADcASQBPAFYAXgBpAHAAdAB2AHgAegB+AIAAggCEAIYA
+			iwCQAJUAvgDFAMcAyQDLAM0AzwDSANMA2ADjAOwBAgEGARMBHAEh
+			ASMBJQEnASwBNgE4AT8BRAFWAVoBYwFoAXcBewGDAYgBiwGdAaAB
+			pQAAAAAAAAIBAAAAAAAAAD4AAAAAAAAAAAAAAAAAAAGn
+			</data>
+			<key>contentSortCol</key>
+			<string>dim_type</string>
+			<key>contentSortColIsAsc</key>
+			<true/>
+			<key>contentViewport</key>
+			<string>{{115, 0}, {1637, 934}}</string>
+			<key>isToolbarVisible</key>
+			<true/>
+			<key>queries</key>
+			<string>SELECT SQL_CALC_FOUND_ROWS
+	a.* 
+FROM
+	(
+	SELECT
+		SUBSTR( date_time, 1, 6 ) AS date_time,
+		app_id,
+		channel_id,
+		country_id,
+		platform_id,
+		earning_type,
+		plat_type,
+		os_id,
+		game_group,
+		game_creator,
+		game_category_id,
+		province_id,
+		version,
+		sum( new_ff ) AS,
+		sum( active_ff ) AS,
+		sum( new_ad ) AS,
+		sum( active_ad ) AS,
+		round( IF ( sum( active_ff ) = 0, 0, sum( sessions ) / sum( active_ff ) ), 2 ) AS,
+		round( IF ( sum( active_ff ) = 0, 0, sum( sessionlength ) / sum( active_ff ) / 60 ), 2 ) AS,
+		round( IF ( sum( sessions ) = 0, 0, sum( sessionlength ) / sum( sessions ) / 60 ), 2 ) AS,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_one ) * 100 / sum( new_ff ) ), 2 ) AS,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_three ) * 100 / sum( new_ff ) ), 2 ) AS,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_seven ) * 100 / sum( new_ff ) ), 2 ) AS,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_fourteen ) * 100 / sum( new_ff ) ), 2 ) AS,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_thirty ) * 100 / sum( new_ff ) ), 2 ) AS,
+		round(
+		IF
+			(
+				sum( new_ff ) = 0,
+				0,
+				(
+					sum( new_ff ) + sum( retn_new_one ) + ( sum( retn_new_one ) + sum( retn_new_three ) ) / 2.2+sum ( retn_new_three ) + ( sum( retn_new_three ) + sum( retn_new_seven ) ) * 3 / 2.2+sum ( retn_new_seven ) 
+				) / sum( new_ff ) 
+			),
+			2 
+		) AS,
+		round(
+		IF
+			(
+				sum( new_ff ) = 0,
+				0,
+				(
+					sum( new_ff ) + sum( retn_new_one ) + ( sum( retn_new_one ) + sum( retn_new_three ) ) / 2.2+sum ( retn_new_three ) + ( sum( retn_new_three ) + sum( retn_new_seven ) ) * 3 / 2.2+sum ( retn_new_seven ) + ( sum( retn_new_seven ) + sum( retn_new_fourteen ) ) * 6 / 1.9+sum ( retn_new_fourteen ) + ( sum( retn_new_fourteen ) + sum( retn_new_thirty ) ) * 15 / 1.9+sum ( retn_new_thirty ) 
+				) / sum( new_ff ) 
+			),
+			2 
+		) AS,
+		sum( pay_user ) AS,
+		sum( pay_time ) AS,
+		round( sum( earning_fix_ff ), 2 ) AS,
+		round( sum( income_fix_ff ), 2 ) AS,
+		round( sum( cost_ff ), 2 ) AS,
+		round( sum( income_fix_ff ) - sum( cost_ff ), 2 ) AS,
+		round( IF ( sum( active_ff ) = 0, 0, sum( pay_user ) * 100 / sum( active_ff ) ), 2 ) AS,
+		round( IF ( sum( pay_user ) = 0, 0, sum( earning_fix_ff ) / sum( pay_user ) ), 2 ) AS,
+		round( IF ( sum( pay_user ) = 0, 0, sum( pay_time ) / sum( pay_user ) ), 2 ) AS,
+		round( IF ( sum( active_ff ) = 0, 0, sum( earning_fix_ff ) / sum( active_ff ) ), 4 ) AS,
+		round( IF ( sum( active_ff ) = 0, 0, sum( income_fix_ff ) / sum( active_ff ) ), 4 ) AS,
+		round(
+		IF
+			( sum( active_ff ) = 0, 0, ( sum( income_fix_ff ) - sum( cost_ff ) ) / sum( active_ff ) ),
+			2 
+		) AS,
+		round(
+		IF
+			( sum( earning_fix_ff ) = 0, 0, ( sum( income_fix_ff ) - sum( cost_ff ) ) * 100 / sum( earning_fix_ff ) ),
+			2 
+		) AS,
+		sum( round ) AS,
+		sum( request_all ) AS,
+		sum( request ) AS,
+		sum( impression_port ) AS,
+		sum( impression ) AS,
+		round( IF ( sum( round ) = 0, 0, sum( request ) * 100 / sum( round ) ), 2 ) AS,
+		round( IF ( sum( request_all ) = 0, 0, sum( request ) * 100 / sum( request_all ) ), 2 ) AS,
+		round( IF ( sum( impression_port ) = 0, 0, sum( impression ) * 100 / sum( impression_port ) ), 2 ) AS,
+		round( IF ( sum( request ) = 0, 0, sum( impression ) * 100 / sum( request ) ), 2 ) AS,
+		sum( click ) AS,
+		round( IF ( sum( impression ) = 0, 0, sum( click ) * 100 / sum( impression ) ), 2 ) AS,
+		round( sum( earning_fix_ad ), 2 ) AS,
+		round( sum( income_fix_ad ), 2 ) AS,
+		round( sum( cost_ad ), 2 ) AS,
+		round( sum( income_fix_ad ) - sum( cost_ad ), 2 ) AS,
+		round( IF ( sum( active_ad ) = 0, 0, sum( impression ) / sum( active_ad ) ), 2 ) AS,
+		round( IF ( sum( impression ) = 0, 0, sum( earning_fix_ad ) * 1000 / sum( impression ) ), 2 ) AS,
+		round( IF ( sum( active_ad ) = 0, 0, sum( earning_fix_ad ) / sum( active_ad ) ), 4 ) AS,
+		round( IF ( sum( active_ad ) = 0, 0, sum( income_fix_ad ) / sum( active_ad ) ), 4 ) AS,
+		round(
+		IF
+			( sum( active_ad ) = 0, 0, ( sum( income_fix_ad ) - sum( cost_ad ) ) / sum( active_ad ) ),
+			4 
+		) AS,
+		round(
+		IF
+			( sum( earning_fix_ad ) = 0, 0, ( sum( income_fix_ad ) - sum( cost_ad ) ) * 100 / sum( earning_fix_ad ) ),
+			2 
+		) AS,
+		round(
+		IF
+			( sum( active_ad ) = 0, 0, sum( CASE WHEN basic_data.earning_type = '1' THEN impression ELSE NULL END ) / sum( active_ad ) ),
+			2 
+		) AS,
+		round(
+		IF
+			(
+				sum( CASE WHEN basic_data.earning_type = '1' THEN impression ELSE NULL END ) = 0,
+				0,
+				sum( CASE WHEN basic_data.earning_type = '1' THEN earning_fix_ad ELSE NULL END ) * 1000 / sum( CASE WHEN basic_data.earning_type = '1' THEN impression ELSE NULL END ) 
+			),
+			2 
+		) AS,
+		round(
+		IF
+			( sum( active_ad ) = 0, 0, sum( CASE WHEN basic_data.earning_type = '3' THEN impression ELSE NULL END ) / sum( active_ad ) ),
+			2 
+		) AS,
+		round(
+		IF
+			(
+				sum( CASE WHEN basic_data.earning_type = '3' THEN impression ELSE NULL END ) = 0,
+				0,
+				sum( CASE WHEN basic_data.earning_type = '3' THEN earning_fix_ad ELSE NULL END ) * 1000 / sum( CASE WHEN basic_data.earning_type = '3' THEN impression ELSE NULL END ) 
+			),
+			2 
+		) AS,
+		round(
+		IF
+			( sum( active_ad ) = 0, 0, sum( CASE WHEN basic_data.earning_type = '0' THEN impression ELSE NULL END ) / sum( active_ad ) ),
+			2 
+		) AS,
+		round(
+		IF
+			(
+				sum( CASE WHEN basic_data.earning_type = '0' THEN impression ELSE NULL END ) = 0,
+				0,
+				sum( CASE WHEN basic_data.earning_type = '0' THEN earning_fix_ad ELSE NULL END ) * 1000 / sum( CASE WHEN basic_data.earning_type = '0' THEN impression ELSE NULL END ) 
+			),
+			2 
+		) AS,
+		sum( cost_new ) AS,
+		round( sum( cost_tg ), 2 ) AS,
+		round( IF ( sum( cost_new ) = 0, 0, sum( cost_tg ) / sum( cost_new ) ), 2 ) AS,
+		round( sum( expense_tg ), 2 ) AS,
+		round( sum( earning_fix_ff ) + sum( earning_fix_ad ), 2 ) AS,
+		round( sum( income_fix_ff ) + sum( income_fix_ad ), 2 ) AS,
+		round( sum( cost_tg ) + sum( cost_ad ) + sum( cost_ff ) - sum( expense_tg ), 2 ) AS,
+		round(
+			( sum( income_fix_ff ) + sum( income_fix_ad ) ) - ( sum( cost_tg ) + sum( cost_ad ) + sum( cost_ff ) - sum( expense_tg ) ),
+			2 
+		) AS,
+		round( sum( income_fix_ff + income_fix_ad - cost_tg ), 2 ) AS,
+		round(
+		IF
+			( sum( active_ff ) = 0, 0, ( sum( earning_fix_ff ) + sum( earning_fix_ad ) ) / sum( active_ff ) ),
+			4 
+		) AS,
+		round(
+		IF
+			( sum( active_ff ) = 0, 0, ( sum( income_fix_ff ) + sum( income_fix_ad ) ) / sum( active_ff ) ),
+			4 
+		) AS,
+		round(
+		IF
+			(
+				sum( active_ff ) = 0,
+				0,
+				(
+					( sum( income_fix_ff ) + sum( income_fix_ad ) ) - ( sum( cost_tg ) + sum( cost_ad ) + sum( cost_ff ) - sum( expense_tg ) ) 
+				) / sum( active_ff ) 
+			),
+			4 
+		) AS,
+		round(
+		IF
+			(
+				sum( earning_fix_ff ) + sum( earning_fix_ad ) = 0,
+				0,
+				(
+					( sum( income_fix_ff ) + sum( income_fix_ad ) ) - ( sum( cost_tg ) + sum( cost_ad ) + sum( cost_ff ) - sum( expense_tg ) ) 
+				) * 100 / ( sum( earning_fix_ff ) + sum( earning_fix_ad ) ) 
+			),
+			2 
+		) AS,
+		round(
+		IF
+			( sum( new_ff ) = 0, 0, ( sum( earning_fix_ff ) + sum( earning_fix_ad ) ) / sum( new_ff ) ),
+			4 
+		) AS,
+		round(
+		IF
+			( sum( new_ff ) = 0, 0, ( sum( earning_fix_ff ) + sum( earning_fix_ad ) ) / sum( new_ff ) ),
+			4 
+		) AS,
+		round(
+		IF
+			(
+				sum( new_ff ) = 0,
+				0,
+				(
+					( sum( income_fix_ff ) + sum( income_fix_ad ) ) - ( sum( cost_tg ) + sum( cost_ad ) + sum( cost_ff ) - sum( expense_tg ) ) 
+				) / sum( new_ff ) 
+			),
+			4 
+		) AS,
+		0 AS,
+		round(
+		IF
+			(
+				sum( new_ff ) = 0,
+				0,
+				(
+					sum( new_ff ) + sum( retn_new_one ) + ( sum( retn_new_one ) + sum( retn_new_three ) ) / 2.2+sum ( retn_new_three ) + ( sum( retn_new_three ) + sum( retn_new_seven ) ) * 3 / 2.2+sum ( retn_new_seven ) 
+				) * ( IF ( sum( new_ff ) = 0, 0, ( sum( earning_fix_ff ) + sum( earning_fix_ad ) ) / sum( new_ff ) ) ) / sum( active_ff ) 
+			),
+			2 
+		) AS,
+		round(
+		IF
+			(
+				sum( new_ff ) = 0,
+				0,
+				(
+					sum( new_ff ) + sum( retn_new_one ) + ( sum( retn_new_one ) + sum( retn_new_three ) ) / 2.2+sum ( retn_new_three ) + ( sum( retn_new_three ) + sum( retn_new_seven ) ) * 3 / 2.2+sum ( retn_new_seven ) + ( sum( retn_new_seven ) + sum( retn_new_fourteen ) ) * 6 / 1.9+sum ( retn_new_fourteen ) + ( sum( retn_new_fourteen ) + sum( retn_new_thirty ) ) * 15 / 1.9+sum ( retn_new_thirty ) 
+				) * ( IF ( sum( new_ff ) = 0, 0, ( sum( earning_fix_ff ) + sum( earning_fix_ad ) ) / sum( new_ff ) ) ) / sum( active_ff ) 
+			),
+			2 
+		) AS,
+		max( zplay_basic_report_month.id ) AS data_id 
+	FROM
+		zplay_basic_report_month 
+	WHERE
+		1 = 1 
+		AND ( zplay_basic_report_month.channel_id = 'zw007' ) 
+		AND ( zplay_basic_report_month.country_id = 'AD' ) 
+		AND ( zplay_basic_report_month.platform_id = 'pad02' ) 
+		AND ( zplay_basic_report_month.earning_type = '2' ) 
+		AND ( zplay_basic_report_month.plat_type = 'ff' ) 
+		AND ( zplay_basic_report_month.os_id = 'iOS' ) 
+		AND ( zplay_basic_report_month.game_group = 'InTouch' ) 
+		AND ( zplay_basic_report_month.game_creator = 'Zplay' ) 
+		AND ( zplay_basic_report_month.game_category_id = '僵尸尖叫' ) 
+		AND ( zplay_basic_report_month.province_id = '13' ) 
+		AND ( zplay_basic_report_month.version = '003' ) 
+		AND date_time BETWEEN '20190623' 
+		AND '20190723' 
+	GROUP BY
+		app_id,
+		channel_id,
+		country_id,
+		platform_id,
+		earning_type,
+		plat_type,
+		os_id,
+		game_group,
+		game_creator,
+		game_category_id,
+		province_id,
+		version,
+		YEAR,
+	MONTH 
+	ORDER BY
+	SUBSTR( date_time, 1, 6 ) 
+	) a;</string>
+			<key>table</key>
+			<string>s_cfg_select_dim</string>
+			<key>view</key>
+			<string>SP_VIEW_STRUCTURE</string>
+			<key>windowVerticalDividerPosition</key>
+			<real>269</real>
+		</dict>
+	</dict>
+	<key>encrypted</key>
+	<false/>
+	<key>format</key>
+	<string>connection</string>
+	<key>queryFavorites</key>
+	<array/>
+	<key>queryHistory</key>
+	<array>
+		<string>sum( active_ff ) AS,
+		sum( new_ad ) AS,
+		sum( active_ad ) AS,
+		round( IF (</string>
+		<string>SELECT SQL_CALC_FOUND_ROWS
+	a.* 
+FROM
+	(
+	SELECT
+		SUBSTR( date_time, 1, 6 ) AS date_time,
+		app_id,
+		channel_id,
+		country_id,
+		platform_id,
+		earning_type,
+		plat_type,
+		os_id,
+		game_group,
+		game_creator,
+		game_category_id,
+		province_id,
+		version,
+		sum( new_ff ) AS,
+		sum( active_ff ) AS,
+		sum( new_ad ) AS,
+		sum( active_ad ) AS,
+		round( IF ( sum( active_ff ) = 0, 0, sum( sessions ) / sum( active_ff ) ), 2 ) AS,
+		round( IF ( sum( active_ff ) = 0, 0, sum( sessionlength ) / sum( active_ff ) / 60 ), 2 ) AS,
+		round( IF ( sum( sessions ) = 0, 0, sum( sessionlength ) / sum( sessions ) / 60 ), 2 ) AS,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_one ) * 100 / sum( new_ff ) ), 2 ) AS,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_three ) * 100 / sum( new_ff ) ), 2 ) AS,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_seven ) * 100 / sum( new_ff ) ), 2 ) AS,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_fourteen ) * 100 / sum( new_ff ) ), 2 ) AS,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_thirty ) * 100 / sum( new_ff ) ), 2 ) AS,
+		round(
+		IF
+			(
+				sum( new_ff ) = 0,
+				0,
+				(
+					sum( new_ff ) + sum( retn_new_one ) + ( sum( retn_new_one ) + sum( retn_new_three ) ) / 2.2+sum ( retn_new_three ) + ( sum( retn_new_three ) + sum( retn_new_seven ) ) * 3 / 2.2+sum ( retn_new_seven ) 
+				) / sum( new_ff ) 
+			),
+			2 
+		) AS,
+		round(
+		IF
+			(
+				sum( new_ff ) = 0,
+				0,
+				(
+					sum( new_ff ) + sum( retn_new_one ) + ( sum( retn_new_one ) + sum( retn_new_three ) ) / 2.2+sum ( retn_new_three ) + ( sum( retn_new_three ) + sum( retn_new_seven ) ) * 3 / 2.2+sum ( retn_new_seven ) + ( sum( retn_new_seven ) + sum( retn_new_fourteen ) ) * 6 / 1.9+sum ( retn_new_fourteen ) + ( sum( retn_new_fourteen ) + sum( retn_new_thirty ) ) * 15 / 1.9+sum ( retn_new_thirty ) 
+				) / sum( new_ff ) 
+			),
+			2 
+		) AS,
+		sum( pay_user ) AS,
+		sum( pay_time ) AS,
+		round( sum( earning_fix_ff ), 2 ) AS,
+		round( sum( income_fix_ff ), 2 ) AS,
+		round( sum( cost_ff ), 2 ) AS,
+		round( sum( income_fix_ff ) - sum( cost_ff ), 2 ) AS,
+		round( IF ( sum( active_ff ) = 0, 0, sum( pay_user ) * 100 / sum( active_ff ) ), 2 ) AS,
+		round( IF ( sum( pay_user ) = 0, 0, sum( earning_fix_ff ) / sum( pay_user ) ), 2 ) AS,
+		round( IF ( sum( pay_user ) = 0, 0, sum( pay_time ) / sum( pay_user ) ), 2 ) AS,
+		round( IF ( sum( active_ff ) = 0, 0, sum( earning_fix_ff ) / sum( active_ff ) ), 4 ) AS,
+		round( IF ( sum( active_ff ) = 0, 0, sum( income_fix_ff ) / sum( active_ff ) ), 4 ) AS,
+		round(
+		IF
+			( sum( active_ff ) = 0, 0, ( sum( income_fix_ff ) - sum( cost_ff ) ) / sum( active_ff ) ),
+			2 
+		) AS,
+		round(
+		IF
+			( sum( earning_fix_ff ) = 0, 0, ( sum( income_fix_ff ) - sum( cost_ff ) ) * 100 / sum( earning_fix_ff ) ),
+			2 
+		) AS,
+		sum( round ) AS,
+		sum( request_all ) AS,
+		sum( request ) AS,
+		sum( impression_port ) AS,
+		sum( impression ) AS,
+		round( IF ( sum( round ) = 0, 0, sum( request ) * 100 / sum( round ) ), 2 ) AS,
+		round( IF ( sum( request_all ) = 0, 0, sum( request ) * 100 / sum( request_all ) ), 2 ) AS,
+		round( IF ( sum( impression_port ) = 0, 0, sum( impression ) * 100 / sum( impression_port ) ), 2 ) AS,
+		round( IF ( sum( request ) = 0, 0, sum( impression ) * 100 / sum( request ) ), 2 ) AS,
+		sum( click ) AS,
+		round( IF ( sum( impression ) = 0, 0, sum( click ) * 100 / sum( impression ) ), 2 ) AS,
+		round( sum( earning_fix_ad ), 2 ) AS,
+		round( sum( income_fix_ad ), 2 ) AS,
+		round( sum( cost_ad ), 2 ) AS,
+		round( sum( income_fix_ad ) - sum( cost_ad ), 2 ) AS,
+		round( IF ( sum( active_ad ) = 0, 0, sum( impression ) / sum( active_ad ) ), 2 ) AS,
+		round( IF ( sum( impression ) = 0, 0, sum( earning_fix_ad ) * 1000 / sum( impression ) ), 2 ) AS,
+		round( IF ( sum( active_ad ) = 0, 0, sum( earning_fix_ad ) / sum( active_ad ) ), 4 ) AS,
+		round( IF ( sum( active_ad ) = 0, 0, sum( income_fix_ad ) / sum( active_ad ) ), 4 ) AS,
+		round(
+		IF
+			( sum( active_ad ) = 0, 0, ( sum( income_fix_ad ) - sum( cost_ad ) ) / sum( active_ad ) ),
+			4 
+		) AS,
+		round(
+		IF
+			( sum( earning_fix_ad ) = 0, 0, ( sum( income_fix_ad ) - sum( cost_ad ) ) * 100 / sum( earning_fix_ad ) ),
+			2 
+		) AS,
+		round(
+		IF
+			( sum( active_ad ) = 0, 0, sum( CASE WHEN basic_data.earning_type = '1' THEN impression ELSE NULL END ) / sum( active_ad ) ),
+			2 
+		) AS,
+		round(
+		IF
+			(
+				sum( CASE WHEN basic_data.earning_type = '1' THEN impression ELSE NULL END ) = 0,
+				0,
+				sum( CASE WHEN basic_data.earning_type = '1' THEN earning_fix_ad ELSE NULL END ) * 1000 / sum( CASE WHEN basic_data.earning_type = '1' THEN impression ELSE NULL END ) 
+			),
+			2 
+		) AS,
+		round(
+		IF
+			( sum( active_ad ) = 0, 0, sum( CASE WHEN basic_data.earning_type = '3' THEN impression ELSE NULL END ) / sum( active_ad ) ),
+			2 
+		) AS,
+		round(
+		IF
+			(
+				sum( CASE WHEN basic_data.earning_type = '3' THEN impression ELSE NULL END ) = 0,
+				0,
+				sum( CASE WHEN basic_data.earning_type = '3' THEN earning_fix_ad ELSE NULL END ) * 1000 / sum( CASE WHEN basic_data.earning_type = '3' THEN impression ELSE NULL END ) 
+			),
+			2 
+		) AS,
+		round(
+		IF
+			( sum( active_ad ) = 0, 0, sum( CASE WHEN basic_data.earning_type = '0' THEN impression ELSE NULL END ) / sum( active_ad ) ),
+			2 
+		) AS,
+		round(
+		IF
+			(
+				sum( CASE WHEN basic_data.earning_type = '0' THEN impression ELSE NULL END ) = 0,
+				0,
+				sum( CASE WHEN basic_data.earning_type = '0' THEN earning_fix_ad ELSE NULL END ) * 1000 / sum( CASE WHEN basic_data.earning_type = '0' THEN impression ELSE NULL END ) 
+			),
+			2 
+		) AS,
+		sum( cost_new ) AS,
+		round( sum( cost_tg ), 2 ) AS,
+		round( IF ( sum( cost_new ) = 0, 0, sum( cost_tg ) / sum( cost_new ) ), 2 ) AS,
+		round( sum( expense_tg ), 2 ) AS,
+		round( sum( earning_fix_ff ) + sum( earning_fix_ad ), 2 ) AS,
+		round( sum( income_fix_ff ) + sum( income_fix_ad ), 2 ) AS,
+		round( sum( cost_tg ) + sum( cost_ad ) + sum( cost_ff ) - sum( expense_tg ), 2 ) AS,
+		round(
+			( sum( income_fix_ff ) + sum( income_fix_ad ) ) - ( sum( cost_tg ) + sum( cost_ad ) + sum( cost_ff ) - sum( expense_tg ) ),
+			2 
+		) AS,
+		round( sum( income_fix_ff + income_fix_ad - cost_tg ), 2 ) AS,
+		round(
+		IF
+			( sum( active_ff ) = 0, 0, ( sum( earning_fix_ff ) + sum( earning_fix_ad ) ) / sum( active_ff ) ),
+			4 
+		) AS,
+		round(
+		IF
+			( sum( active_ff ) = 0, 0, ( sum( income_fix_ff ) + sum( income_fix_ad ) ) / sum( active_ff ) ),
+			4 
+		) AS,
+		round(
+		IF
+			(
+				sum( active_ff ) = 0,
+				0,
+				(
+					( sum( income_fix_ff ) + sum( income_fix_ad ) ) - ( sum( cost_tg ) + sum( cost_ad ) + sum( cost_ff ) - sum( expense_tg ) ) 
+				) / sum( active_ff ) 
+			),
+			4 
+		) AS,
+		round(
+		IF
+			(
+				sum( earning_fix_ff ) + sum( earning_fix_ad ) = 0,
+				0,
+				(
+					( sum( income_fix_ff ) + sum( income_fix_ad ) ) - ( sum( cost_tg ) + sum( cost_ad ) + sum( cost_ff ) - sum( expense_tg ) ) 
+				) * 100 / ( sum( earning_fix_ff ) + sum( earning_fix_ad ) ) 
+			),
+			2 
+		) AS,
+		round(
+		IF
+			( sum( new_ff ) = 0, 0, ( sum( earning_fix_ff ) + sum( earning_fix_ad ) ) / sum( new_ff ) ),
+			4 
+		) AS,
+		round(
+		IF
+			( sum( new_ff ) = 0, 0, ( sum( earning_fix_ff ) + sum( earning_fix_ad ) ) / sum( new_ff ) ),
+			4 
+		) AS,
+		round(
+		IF
+			(
+				sum( new_ff ) = 0,
+				0,
+				(
+					( sum( income_fix_ff ) + sum( income_fix_ad ) ) - ( sum( cost_tg ) + sum( cost_ad ) + sum( cost_ff ) - sum( expense_tg ) ) 
+				) / sum( new_ff ) 
+			),
+			4 
+		) AS,
+		0 AS,
+		round(
+		IF
+			(
+				sum( new_ff ) = 0,
+				0,
+				(
+					sum( new_ff ) + sum( retn_new_one ) + ( sum( retn_new_one ) + sum( retn_new_three ) ) / 2.2+sum ( retn_new_three ) + ( sum( retn_new_three ) + sum( retn_new_seven ) ) * 3 / 2.2+sum ( retn_new_seven ) 
+				) * ( IF ( sum( new_ff ) = 0, 0, ( sum( earning_fix_ff ) + sum( earning_fix_ad ) ) / sum( new_ff ) ) ) / sum( active_ff ) 
+			),
+			2 
+		) AS,
+		round(
+		IF
+			(
+				sum( new_ff ) = 0,
+				0,
+				(
+					sum( new_ff ) + sum( retn_new_one ) + ( sum( retn_new_one ) + sum( retn_new_three ) ) / 2.2+sum ( retn_new_three ) + ( sum( retn_new_three ) + sum( retn_new_seven ) ) * 3 / 2.2+sum ( retn_new_seven ) + ( sum( retn_new_seven ) + sum( retn_new_fourteen ) ) * 6 / 1.9+sum ( retn_new_fourteen ) + ( sum( retn_new_fourteen ) + sum( retn_new_thirty ) ) * 15 / 1.9+sum ( retn_new_thirty ) 
+				) * ( IF ( sum( new_ff ) = 0, 0, ( sum( earning_fix_ff ) + sum( earning_fix_ad ) ) / sum( new_ff ) ) ) / sum( active_ff ) 
+			),
+			2 
+		) AS,
+		max( zplay_basic_report_month.id ) AS data_id 
+	FROM
+		zplay_basic_report_month 
+	WHERE
+		1 = 1 
+		AND ( zplay_basic_report_month.channel_id = 'zw007' ) 
+		AND ( zplay_basic_report_month.country_id = 'AD' ) 
+		AND ( zplay_basic_report_month.platform_id = 'pad02' ) 
+		AND ( zplay_basic_report_month.earning_type = '2' ) 
+		AND ( zplay_basic_report_month.plat_type = 'ff' ) 
+		AND ( zplay_basic_report_month.os_id = 'iOS' ) 
+		AND ( zplay_basic_report_month.game_group = 'InTouch' ) 
+		AND ( zplay_basic_report_month.game_creator = 'Zplay' ) 
+		AND ( zplay_basic_report_month.game_category_id = '僵尸尖叫' ) 
+		AND ( zplay_basic_report_month.province_id = '13' ) 
+		AND ( zplay_basic_report_month.version = '003' ) 
+		AND date_time BETWEEN '20190623' 
+		AND '20190723' 
+	GROUP BY
+		app_id,
+		channel_id,
+		country_id,
+		platform_id,
+		earning_type,
+		plat_type,
+		os_id,
+		game_group,
+		game_creator,
+		game_category_id,
+		province_id,
+		version,
+		YEAR,
+	MONTH 
+	ORDER BY
+	SUBSTR( date_time, 1, 6 ) 
+	) a</string>
+		<string>SELECT SQL_CALC_FOUND_ROWS
+	a.* 
+FROM
+	(
+	SELECT
+		'201906-201907' AS date_time,
+		app_name,
+		channel_name,
+		china_name,
+		platform_name,
+		ad_type,
+		platform_type,
+		os_name,
+		game_group_name,
+		company_name,
+		app_category_name,
+		province_name,
+		version,
+		sum( new_ff ) AS new_ff,
+		sum( active_ff ) AS active_ff,
+		round( IF ( sum( active_ff ) = 0, 0, sum( sessions ) / sum( active_ff ) ), 2 ) AS sessions_pac,
+		round( IF ( sum( sessions ) = 0, 0, sum( sessionlength ) / sum( sessions ) / 60 ), 2 ) AS sessionslength_pse,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_one ) * 100 / sum( new_ff ) ), 2 ) AS retn_new_one,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_three ) * 100 / sum( new_ff ) ), 2 ) AS retn_new_three,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_seven ) * 100 / sum( new_ff ) ), 2 ) AS retn_new_seven,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_fourteen ) * 100 / sum( new_ff ) ), 2 ) AS retn_new_fourteen,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_thirty ) * 100 / sum( new_ff ) ), 2 ) AS retn_new_thirty,
+		round( sum( income_fix_ff ), 2 ) AS income_fix_ff,
+		round( sum( income_fix_ad ), 2 ) AS income_fix_ad,
+		round( sum( cost_tg ), 2 ) AS cost_tg,
+		round( sum( income_fix_ff ) + sum( income_fix_ad ), 2 ) AS income_sum,
+		round( sum( cost_tg ) + sum( cost_ad ) + sum( cost_ff ) - sum( expense_tg ), 2 ) AS cost_sum,
+		round(
+			( sum( income_fix_ff ) + sum( income_fix_ad ) ) - ( sum( cost_tg ) + sum( cost_ad ) + sum( cost_ff ) - sum( expense_tg ) ),
+			2 
+		) AS profit_sum,
+		round(
+		IF
+			( sum( active_ff ) = 0, 0, ( sum( income_fix_ff ) + sum( income_fix_ad ) ) / sum( active_ff ) ),
+			4 
+		) AS income_sum_arpu,
+		round(
+		IF
+			( sum( new_ff ) = 0, 0, ( sum( earning_fix_ff ) + sum( earning_fix_ad ) ) / sum( new_ff ) ),
+			4 
+		) AS income_sum_arpu_new,
+		max( zplay_basic_report_month.id ) AS data_id 
+	FROM
+		zplay_basic_report_month
+		LEFT JOIN c_app ON c_app.id = zplay_basic_report_month.app_id
+		LEFT JOIN c_channel ON c_channel.id = zplay_basic_report_month.channel_id
+		LEFT JOIN c_country_standard ON c_country_standard.id = zplay_basic_report_month.country_id
+		LEFT JOIN c_platform ON c_platform.platform_id = zplay_basic_report_month.platform_id
+		LEFT JOIN c_ad_type ON c_ad_type.id = zplay_basic_report_month.ad_type_id
+		LEFT JOIN c_platform ON c_platform.platform_type_id = c_platform_type.id
+		LEFT JOIN c_platform_type ON c_platform_type.id = zplay_basic_report_month.platform_type_id
+		LEFT JOIN c_zplay_company ON c_zplay_company.id = zplay_basic_report_month.game_creator
+		LEFT JOIN c_app_category ON c_app_category.id = zplay_basic_report_month.game_category_id
+		LEFT JOIN c_country_standard_province ON c_country_standard_province.id = zplay_basic_report_month.province_id 
+	WHERE
+		1 = 1 
+		AND ( zplay_basic_report_month.app_id = 'z037020' ) 
+		AND ( zplay_basic_report_month.channel_id = 'zw001' ) 
+		AND ( zplay_basic_report_month.country_id = 'AD' ) 
+		AND ( zplay_basic_report_month.platform_id = 'pad02' ) 
+		AND ( zplay_basic_report_month.ad_type_id = '3' OR zplay_basic_report_month.ad_type_id = '1' ) 
+		AND ( zplay_basic_report_month.os_name = 'Android' ) 
+		AND ( zplay_basic_report_month.platform_type_id = 'ff' ) 
+		AND ( zplay_basic_report_month.game_group_name = 'InTouch' ) 
+		AND ( zplay_basic_report_month.game_creator = 'Zplay' ) 
+		AND ( zplay_basic_report_month.game_category_id = 'Noodlecake' ) 
+		AND ( zplay_basic_report_month.province_id = '12' OR zplay_basic_report_month.province_id = '13' ) 
+		AND ( zplay_basic_report_month.version = '005' ) 
+		AND date BETWEEN '20190623' 
+		AND '20190723' 
+	GROUP BY
+		app_name,
+		channel_name,
+		china_name,
+		platform_name,
+		ad_type,
+		platform_type,
+		os_name,
+		game_group_name,
+		company_name,
+		app_category_name,
+		province_name,
+		version,
+	'201906-201907' 
+	) a</string>
+		<string>SELECT SQL_CALC_FOUND_ROWS
+	a.* 
+FROM
+	(
+	SELECT
+		'201906-201907' AS date_time,
+		app_name,
+		channel_name,
+		china_name,
+		platform_name,
+		ad_type,
+		platform_type,
+		os_name,
+		game_group_name,
+		company_name,
+		app_category_name,
+		province_name,
+		version,
+		sum( new_ff ) AS new_ff,
+		sum( active_ff ) AS active_ff,
+		round( IF ( sum( active_ff ) = 0, 0, sum( sessions ) / sum( active_ff ) ), 2 ) AS sessions_pac,
+		round( IF ( sum( sessions ) = 0, 0, sum( sessionlength ) / sum( sessions ) / 60 ), 2 ) AS sessionslength_pse,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_one ) * 100 / sum( new_ff ) ), 2 ) AS retn_new_one,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_three ) * 100 / sum( new_ff ) ), 2 ) AS retn_new_three,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_seven ) * 100 / sum( new_ff ) ), 2 ) AS retn_new_seven,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_fourteen ) * 100 / sum( new_ff ) ), 2 ) AS retn_new_fourteen,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_thirty ) * 100 / sum( new_ff ) ), 2 ) AS retn_new_thirty,
+		round( sum( income_fix_ff ), 2 ) AS income_fix_ff,
+		round( sum( income_fix_ad ), 2 ) AS income_fix_ad,
+		round( sum( cost_tg ), 2 ) AS cost_tg,
+		round( sum( income_fix_ff ) + sum( income_fix_ad ), 2 ) AS income_sum,
+		round( sum( cost_tg ) + sum( cost_ad ) + sum( cost_ff ) - sum( expense_tg ), 2 ) AS cost_sum,
+		round(
+			( sum( income_fix_ff ) + sum( income_fix_ad ) ) - ( sum( cost_tg ) + sum( cost_ad ) + sum( cost_ff ) - sum( expense_tg ) ),
+			2 
+		) AS profit_sum,
+		round(
+		IF
+			( sum( active_ff ) = 0, 0, ( sum( income_fix_ff ) + sum( income_fix_ad ) ) / sum( active_ff ) ),
+			4 
+		) AS income_sum_arpu,
+		round(
+		IF
+			( sum( new_ff ) = 0, 0, ( sum( earning_fix_ff ) + sum( earning_fix_ad ) ) / sum( new_ff ) ),
+			4 
+		) AS income_sum_arpu_new,
+		max( zplay_basic_report_month.id ) AS data_id 
+	FROM
+		zplay_basic_report_month
+		LEFT JOIN c_app ON c_app.id = zplay_basic_report_month.app_id
+		LEFT JOIN c_channel ON c_channel.id = zplay_basic_report_month.channel_id
+		LEFT JOIN c_country_standard ON c_country_standard.id = zplay_basic_report_month.country_id
+		LEFT JOIN c_platform ON c_platform.platform_id = zplay_basic_report_month.platform_id
+		LEFT JOIN c_ad_type ON c_ad_type.id = zplay_basic_report_month.ad_type_id
+		LEFT JOIN c_platform_type ON c_platform_type.id = zplay_basic_report_month.platform_type_id
+		LEFT JOIN c_zplay_company ON c_zplay_company.id = zplay_basic_report_month.game_creator
+		LEFT JOIN c_app_category ON c_app_category.id = zplay_basic_report_month.game_category_id
+		LEFT JOIN c_country_standard_province ON c_country_standard_province.id = zplay_basic_report_month.province_id 
+	WHERE
+		1 = 1 
+		AND ( zplay_basic_report_month.app_id = 'z037020' ) 
+		AND ( zplay_basic_report_month.channel_id = 'zw001' ) 
+		AND ( zplay_basic_report_month.country_id = 'AD' ) 
+		AND ( zplay_basic_report_month.platform_id = 'pad02' ) 
+		AND ( zplay_basic_report_month.ad_type_id = '3' OR zplay_basic_report_month.ad_type_id = '1' ) 
+		AND ( zplay_basic_report_month.os_name = 'Android' ) 
+		AND ( zplay_basic_report_month.platform_type_id = 'ff' ) 
+		AND ( zplay_basic_report_month.game_group_name = 'InTouch' ) 
+		AND ( zplay_basic_report_month.game_creator = 'Zplay' ) 
+		AND ( zplay_basic_report_month.game_category_id = 'Noodlecake' ) 
+		AND ( zplay_basic_report_month.province_id = '12' OR zplay_basic_report_month.province_id = '13' ) 
+		AND ( zplay_basic_report_month.version = '005' ) 
+		AND date BETWEEN '20190623' 
+		AND '20190723' 
+	GROUP BY
+		app_name,
+		channel_name,
+		china_name,
+		platform_name,
+		ad_type,
+		platform_type,
+		os_name,
+		game_group_name,
+		company_name,
+		app_category_name,
+		province_name,
+		app_version,
+	'201906-201907' 
+	) a</string>
+		<string>SELECT SQL_CALC_FOUND_ROWS
+	a.* 
+FROM
+	(
+	SELECT
+		'201906-201907' AS date_time,
+		app_name,
+		channel_name,
+		china_name,
+		platform_name,
+		ad_type,
+		platform_type,
+		os_name,
+		game_group_name,
+		company_name,
+		app_category_name,
+		province_name,
+		version,
+		sum( new_ff ) AS new_ff,
+		sum( active_ff ) AS active_ff,
+		round( IF ( sum( active_ff ) = 0, 0, sum( sessions ) / sum( active_ff ) ), 2 ) AS sessions_pac,
+		round( IF ( sum( sessions ) = 0, 0, sum( sessionlength ) / sum( sessions ) / 60 ), 2 ) AS sessionslength_pse,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_one ) * 100 / sum( new_ff ) ), 2 ) AS retn_new_one,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_three ) * 100 / sum( new_ff ) ), 2 ) AS retn_new_three,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_seven ) * 100 / sum( new_ff ) ), 2 ) AS retn_new_seven,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_fourteen ) * 100 / sum( new_ff ) ), 2 ) AS retn_new_fourteen,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_thirty ) * 100 / sum( new_ff ) ), 2 ) AS retn_new_thirty,
+		round( sum( income_fix_ff ), 2 ) AS income_fix_ff,
+		round( sum( income_fix_ad ), 2 ) AS income_fix_ad,
+		round( sum( cost_tg ), 2 ) AS cost_tg,
+		round( sum( income_fix_ff ) + sum( income_fix_ad ), 2 ) AS income_sum,
+		round( sum( cost_tg ) + sum( cost_ad ) + sum( cost_ff ) - sum( expense_tg ), 2 ) AS cost_sum,
+		round(
+			( sum( income_fix_ff ) + sum( income_fix_ad ) ) - ( sum( cost_tg ) + sum( cost_ad ) + sum( cost_ff ) - sum( expense_tg ) ),
+			2 
+		) AS profit_sum,
+		round(
+		IF
+			( sum( active_ff ) = 0, 0, ( sum( income_fix_ff ) + sum( income_fix_ad ) ) / sum( active_ff ) ),
+			4 
+		) AS income_sum_arpu,
+		round(
+		IF
+			( sum( new_ff ) = 0, 0, ( sum( earning_fix_ff ) + sum( earning_fix_ad ) ) / sum( new_ff ) ),
+			4 
+		) AS income_sum_arpu_new,
+		max( zplay_basic_report_month.id ) AS data_id 
+	FROM
+		zplay_basic_report_month
+		LEFT JOIN c_app ON c_app.id = zplay_basic_report_month.app_id
+		LEFT JOIN c_channel ON c_channel.id = zplay_basic_report_month.channel_id
+		LEFT JOIN c_country_standard ON c_country_standard.id = zplay_basic_report_month.country_id
+		LEFT JOIN c_platform ON c_platform.platform_id = zplay_basic_report_month.platform_id
+		LEFT JOIN c_ad_type ON c_ad_type.id = zplay_basic_report_month.ad_type_id
+		LEFT JOIN c_platform_type ON c_platform_type.id = zplay_basic_report_month.platform_type_id
+		LEFT JOIN c_zplay_company ON c_zplay_company.id = zplay_basic_report_month.game_creator
+		LEFT JOIN c_app_category ON c_app_category.id = zplay_basic_report_month.game_category_id
+		LEFT JOIN c_country_standard_province ON c_country_standard_province.id = zplay_basic_report_month.province_id 
+	WHERE
+		1 = 1 
+		AND ( zplay_basic_report_month.app_id = 'z037020' ) 
+		AND ( zplay_basic_report_month.channel_id = 'zw001' ) 
+		AND ( zplay_basic_report_month.country_id = 'AD' ) 
+		AND ( zplay_basic_report_month.platform_id = 'pad02' ) 
+		AND ( zplay_basic_report_month.ad_type_id = '3' OR zplay_basic_report_month.ad_type_id = '1' ) 
+		AND ( zplay_basic_report_month.os_id = 'Android' ) 
+		AND ( zplay_basic_report_month.platform_type_id = 'ff' ) 
+		AND ( zplay_basic_report_month.game_group = 'InTouch' ) 
+		AND ( zplay_basic_report_month.game_creator = 'Zplay' ) 
+		AND ( zplay_basic_report_month.game_category_id = 'Noodlecake' ) 
+		AND ( zplay_basic_report_month.province_id = '12' OR zplay_basic_report_month.province_id = '13' ) 
+		AND ( zplay_basic_report_month.version = '005' ) 
+		AND date BETWEEN '20190623' 
+		AND '20190723' 
+	GROUP BY
+		app_name,
+		channel_name,
+		china_name,
+		platform_name,
+		ad_type,
+		platform_type,
+		os_name,
+		game_group_name,
+		company_name,
+		app_category_name,
+		province_name,
+		app_version,
+	'201906-201907' 
+	) a</string>
+		<string>SELECT SQL_CALC_FOUND_ROWS
+	a.* 
+FROM
+	(
+	SELECT
+		'201906-201907' AS date_time,
+		app_name,
+		channel_name,
+		china_name,
+		platform_name,
+		ad_type,
+		platform_type,
+		os_name,
+		game_group_name,
+		company_name,
+		app_category_name,
+		province_name,
+		app_version,
+		sum( new_ff ) AS new_ff,
+		sum( active_ff ) AS active_ff,
+		round( IF ( sum( active_ff ) = 0, 0, sum( sessions ) / sum( active_ff ) ), 2 ) AS sessions_pac,
+		round( IF ( sum( sessions ) = 0, 0, sum( sessionlength ) / sum( sessions ) / 60 ), 2 ) AS sessionslength_pse,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_one ) * 100 / sum( new_ff ) ), 2 ) AS retn_new_one,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_three ) * 100 / sum( new_ff ) ), 2 ) AS retn_new_three,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_seven ) * 100 / sum( new_ff ) ), 2 ) AS retn_new_seven,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_fourteen ) * 100 / sum( new_ff ) ), 2 ) AS retn_new_fourteen,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_thirty ) * 100 / sum( new_ff ) ), 2 ) AS retn_new_thirty,
+		round( sum( income_fix_ff ), 2 ) AS income_fix_ff,
+		round( sum( income_fix_ad ), 2 ) AS income_fix_ad,
+		round( sum( cost_tg ), 2 ) AS cost_tg,
+		round( sum( income_fix_ff ) + sum( income_fix_ad ), 2 ) AS income_sum,
+		round( sum( cost_tg ) + sum( cost_ad ) + sum( cost_ff ) - sum( expense_tg ), 2 ) AS cost_sum,
+		round(
+			( sum( income_fix_ff ) + sum( income_fix_ad ) ) - ( sum( cost_tg ) + sum( cost_ad ) + sum( cost_ff ) - sum( expense_tg ) ),
+			2 
+		) AS profit_sum,
+		round(
+		IF
+			( sum( active_ff ) = 0, 0, ( sum( income_fix_ff ) + sum( income_fix_ad ) ) / sum( active_ff ) ),
+			4 
+		) AS income_sum_arpu,
+		round(
+		IF
+			( sum( new_ff ) = 0, 0, ( sum( earning_fix_ff ) + sum( earning_fix_ad ) ) / sum( new_ff ) ),
+			4 
+		) AS income_sum_arpu_new,
+		max( zplay_basic_report_month.id ) AS data_id 
+	FROM
+		zplay_basic_report_month
+		LEFT JOIN c_app ON c_app.id = zplay_basic_report_month.app_id
+		LEFT JOIN c_channel ON c_channel.id = zplay_basic_report_month.channel_id
+		LEFT JOIN c_country_standard ON c_country_standard.id = zplay_basic_report_month.country_id
+		LEFT JOIN c_platform ON c_platform.platform_id = zplay_basic_report_month.platform_id
+		LEFT JOIN c_ad_type ON c_ad_type.id = zplay_basic_report_month.ad_type_id
+		LEFT JOIN c_platform_type ON c_platform_type.id = zplay_basic_report_month.platform_type_id
+		LEFT JOIN c_zplay_company ON c_zplay_company.id = zplay_basic_report_month.game_creator
+		LEFT JOIN c_app_category ON c_app_category.id = zplay_basic_report_month.game_category_id
+		LEFT JOIN c_country_standard_province ON c_country_standard_province.id = zplay_basic_report_month.province_id 
+	WHERE
+		1 = 1 
+		AND ( zplay_basic_report_month.app_id = 'z037020' ) 
+		AND ( zplay_basic_report_month.channel_id = 'zw001' ) 
+		AND ( zplay_basic_report_month.country_id = 'AD' ) 
+		AND ( zplay_basic_report_month.platform_id = 'pad02' ) 
+		AND ( zplay_basic_report_month.ad_type_id = '3' OR zplay_basic_report_month.ad_type_id = '1' ) 
+		AND ( zplay_basic_report_month.os_id = 'Android' ) 
+		AND ( zplay_basic_report_month.platform_type_id = 'ff' ) 
+		AND ( zplay_basic_report_month.game_group = 'InTouch' ) 
+		AND ( zplay_basic_report_month.game_creator = 'Zplay' ) 
+		AND ( zplay_basic_report_month.game_category_id = 'Noodlecake' ) 
+		AND ( zplay_basic_report_month.province_id = '12' OR zplay_basic_report_month.province_id = '13' ) 
+		AND ( zplay_basic_report_month.version = '005' ) 
+		AND date BETWEEN '20190623' 
+		AND '20190723' 
+	GROUP BY
+		app_name,
+		channel_name,
+		china_name,
+		platform_name,
+		ad_type,
+		platform_type,
+		os_name,
+		game_group_name,
+		company_name,
+		app_category_name,
+		province_name,
+		app_version,
+	'201906-201907' 
+	) a</string>
+		<string>os_name</string>
+		<string>SELECT SQL_CALC_FOUND_ROWS
+	a.* 
+FROM
+	(
+	SELECT
+		'201906-201907' AS date_time,
+		app_name,
+		channel_name,
+		china_name,
+		platform_name,
+		ad_type,
+		platform_type,
+		os_name,
+		game_group_name,
+		company_name,
+		app_category_name,
+		province_name,
+		app_version,
+		sum( new_ff ) AS new_ff,
+		sum( active_ff ) AS active_ff,
+		round( IF ( sum( active_ff ) = 0, 0, sum( sessions ) / sum( active_ff ) ), 2 ) AS sessions_pac,
+		round( IF ( sum( sessions ) = 0, 0, sum( sessionlength ) / sum( sessions ) / 60 ), 2 ) AS sessionslength_pse,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_one ) * 100 / sum( new_ff ) ), 2 ) AS retn_new_one,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_three ) * 100 / sum( new_ff ) ), 2 ) AS retn_new_three,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_seven ) * 100 / sum( new_ff ) ), 2 ) AS retn_new_seven,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_fourteen ) * 100 / sum( new_ff ) ), 2 ) AS retn_new_fourteen,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_thirty ) * 100 / sum( new_ff ) ), 2 ) AS retn_new_thirty,
+		round( sum( income_fix_ff ), 2 ) AS income_fix_ff,
+		round( sum( income_fix_ad ), 2 ) AS income_fix_ad,
+		round( sum( cost_tg ), 2 ) AS cost_tg,
+		round( sum( income_fix_ff ) + sum( income_fix_ad ), 2 ) AS income_sum,
+		round( sum( cost_tg ) + sum( cost_ad ) + sum( cost_ff ) - sum( expense_tg ), 2 ) AS cost_sum,
+		round(
+			( sum( income_fix_ff ) + sum( income_fix_ad ) ) - ( sum( cost_tg ) + sum( cost_ad ) + sum( cost_ff ) - sum( expense_tg ) ),
+			2 
+		) AS profit_sum,
+		round(
+		IF
+			( sum( active_ff ) = 0, 0, ( sum( income_fix_ff ) + sum( income_fix_ad ) ) / sum( active_ff ) ),
+			4 
+		) AS income_sum_arpu,
+		round(
+		IF
+			( sum( new_ff ) = 0, 0, ( sum( earning_fix_ff ) + sum( earning_fix_ad ) ) / sum( new_ff ) ),
+			4 
+		) AS income_sum_arpu_new,
+		max( zplay_basic_report_month.id ) AS data_id 
+	FROM
+		zplay_basic_report_month
+		LEFT JOIN c_app ON c_app.id = zplay_basic_report_month.app_id
+		LEFT JOIN c_channel ON c_channel.id = zplay_basic_report_month.channel_id
+		LEFT JOIN c_country_standard ON c_country_standard.id = zplay_basic_report_month.country_id
+		LEFT JOIN c_platform ON c_platform.platform_id = zplay_basic_report_month.platform_id
+		LEFT JOIN c_ad_type ON c_ad_type.id = zplay_basic_report_month.ad_type_id
+		LEFT JOIN c_platform_type ON c_platform_type.id = zplay_basic_report_month.platform_type_id
+		LEFT JOIN c_zplay_company ON c_zplay_company.id = zplay_basic_report_month.game_creator
+		LEFT JOIN c_app_category ON c_app_category.id = zplay_basic_report_month.game_category_id
+		LEFT JOIN c_country_standard_province ON c_country_standard_province.id = zplay_basic_report_month.province_id
+		LEFT JOIN ON.os_id = zplay_basic_report_month.os_id
+		LEFT JOIN ON.game_group = zplay_basic_report_month.game_group
+		LEFT JOIN c_app_statistic_version ON c_app_statistic_version.id = zplay_basic_report_month.version 
+	WHERE
+		1 = 1 
+		AND ( zplay_basic_report_month.app_id = 'z037020' ) 
+		AND ( zplay_basic_report_month.channel_id = 'zw001' ) 
+		AND ( zplay_basic_report_month.country_id = 'AD' ) 
+		AND ( zplay_basic_report_month.platform_id = 'pad02' ) 
+		AND ( zplay_basic_report_month.ad_type_id = '3' OR zplay_basic_report_month.ad_type_id = '1' ) 
+		AND ( zplay_basic_report_month.os_id = 'Android' ) 
+		AND ( zplay_basic_report_month.platform_type_id = 'ff' ) 
+		AND ( zplay_basic_report_month.game_group = 'InTouch' ) 
+		AND ( zplay_basic_report_month.game_creator = 'Zplay' ) 
+		AND ( zplay_basic_report_month.game_category_id = 'Noodlecake' ) 
+		AND ( zplay_basic_report_month.province_id = '12' OR zplay_basic_report_month.province_id = '13' ) 
+		AND ( zplay_basic_report_month.version = '005' ) 
+		AND date BETWEEN '20190623' 
+		AND '20190723' 
+	GROUP BY
+		app_name,
+		channel_name,
+		china_name,
+		platform_name,
+		ad_type,
+		platform_type,
+		os_name,
+		game_group_name,
+		company_name,
+		app_category_name,
+		province_name,
+		app_version,
+	'201906-201907' 
+	) a</string>
+		<string>select count(*) c from (
+select zplay_basic_report_month.* from zplay_basic_report_month   
+left join c_app on c_app.id = zplay_basic_report_month.app_id where 1=1  and ( zplay_basic_report_month.app_id = 'zplay037017' ) and zplay_basic_report_month.date between '20190623' and '20190723' group by app_name,'201906-201907'
+) a</string>
+		<string>select count(*) c from (
+select c_app.id from zplay_basic_report_month   
+left join c_app on c_app.id = zplay_basic_report_month.app_id where 1=1  and ( zplay_basic_report_month.app_id = 'zplay037017' ) and zplay_basic_report_month.date between '20190623' and '20190723' group by app_name,'201906-201907'
+) a</string>
+		<string>select count(*) c from (
+select * from zplay_basic_report_month   
+left join c_app on c_app.id = zplay_basic_report_month.app_id where 1=1  and ( zplay_basic_report_month.app_id = 'zplay037017' ) and zplay_basic_report_month.date between '20190623' and '20190723' group by app_name,'201906-201907'
+) a</string>
+		<string>select count(*) c from (
+select * from zplay_basic_report_month   
+left join c_app on c_app.id = zplay_basic_report_month.app_id where 1=1  and ( zplay_basic_report_month.app_id = 'zplay037017' ) and date between '20190623' and '20190723' group by app_name,'201906-201907'
+) a</string>
+		<string>select count(*) c from (
+ select * from zplay_basic_report_month left join c_app on c_app.id = zplay_basic_report_month.app_id ( zplay_basic_report_month.app_id = 'zplay037017' ) and zplay_basic_report_month.date between '20190623' and '20190723' group by app_name,'201906-201907'
+) a</string>
+		<string>select count(*) c from (
+ select * from zplay_basic_report_month left join c_app on c_app.id = zplay_basic_report_month.app_id ( zplay_basic_report_month.app_id = 'zplay037017' ) and date between '20190623' and '20190723' group by app_name,'201906-201907'
+) a</string>
+		<string>select count(*) c from (
+select * from zplay_basic_report_month   
+left join c_app on c_app.id = zplay_basic_report_month.app_id ( zplay_basic_report_month.app_id = 'zplay037017' ) and date between '20190623' and '20190723' group by app_name,'201906-201907'
+) a</string>
+		<string>select * from zplay_basic_report_month   
+left join c_app on c_app.id = zplay_basic_report_month.app_id</string>
+		<string>select count(*) c from (
+select * from zplay_basic_report_month   
+where 1=1  and ( zplay_basic_report_month.app_id = 'zplay037017' ) and date between '20190623' and '20190723' group by app_name,'201906-201907'
+) a</string>
+		<string>select count(*) c from (select * from zplay_basic_report_month   left join c_app on c_app.id = zplay_basic_report_month.app_id where 1=1  and ( zplay_basic_report_month.app_id = 'zplay037017' ) and date between '20190623' and '20190723' group by app_name,'201906-201907')a</string>
+		<string>SELECT
+	a.* 
+FROM
+	(
+	SELECT
+		'201906-201907' AS date_time,
+		app_name,
+		sum( new_ff ) AS new_ff,
+		sum( active_ff ) AS active_ff,
+		round( IF ( sum( active_ff ) = 0, 0, sum( sessions ) / sum( active_ff ) ), 2 ) AS sessions_pac,
+		round( IF ( sum( sessions ) = 0, 0, sum( sessionlength ) / sum( sessions ) / 60 ), 2 ) AS sessionslength_pse,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_one ) * 100 / sum( new_ff ) ), 2 ) AS retn_new_one,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_three ) * 100 / sum( new_ff ) ), 2 ) AS retn_new_three,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_seven ) * 100 / sum( new_ff ) ), 2 ) AS retn_new_seven,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_fourteen ) * 100 / sum( new_ff ) ), 2 ) AS retn_new_fourteen,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_thirty ) * 100 / sum( new_ff ) ), 2 ) AS retn_new_thirty,
+		round( sum( income_fix_ff ), 2 ) AS income_fix_ff,
+		round( sum( income_fix_ad ), 2 ) AS income_fix_ad,
+		round( sum( cost_tg ), 2 ) AS cost_tg,
+		round( sum( income_fix_ff ) + sum( income_fix_ad ), 2 ) AS income_sum,
+		round( sum( cost_tg ) + sum( cost_ad ) + sum( cost_ff ) - sum( expense_tg ), 2 ) AS cost_sum,
+		round(
+			( sum( income_fix_ff ) + sum( income_fix_ad ) ) - ( sum( cost_tg ) + sum( cost_ad ) + sum( cost_ff ) - sum( expense_tg ) ),
+			2 
+		) AS profit_sum,
+		round(
+		IF
+			( sum( active_ff ) = 0, 0, ( sum( income_fix_ff ) + sum( income_fix_ad ) ) / sum( active_ff ) ),
+			4 
+		) AS income_sum_arpu,
+		round(
+		IF
+			( sum( new_ff ) = 0, 0, ( sum( earning_fix_ff ) + sum( earning_fix_ad ) ) / sum( new_ff ) ),
+			4 
+		) AS income_sum_arpu_new,
+		max( zplay_basic_report_month.id ) AS data_id 
+	FROM
+		zplay_basic_report_month
+		LEFT JOIN c_app ON c_app.id = zplay_basic_report_month.app_id 
+	WHERE
+		1 = 1 
+		AND ( zplay_basic_report_month.app_id = 'zplay037017' ) 
+		AND dayid BETWEEN '20190623' 
+		AND '20190723' 
+	GROUP BY
+		app_name,
+	'201906-201907' 
+	) a</string>
+		<string>SELECT
+	a.* 
+FROM
+	(
+	SELECT
+		'201906-201907' AS date_time,
+		app_name,
+		sum( new_ff ) AS new_ff,
+		sum( active_ff ) AS active_ff,
+		round( IF ( sum( active_ff ) = 0, 0, sum( sessions ) / sum( active_ff ) ), 2 ) AS sessions_pac,
+		round( IF ( sum( sessions ) = 0, 0, sum( sessionlength ) / sum( sessions ) / 60 ), 2 ) AS sessionslength_pse,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_one ) * 100 / sum( new_ff ) ), 2 ) AS retn_new_one,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_three ) * 100 / sum( new_ff ) ), 2 ) AS retn_new_three,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_seven ) * 100 / sum( new_ff ) ), 2 ) AS retn_new_seven,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_fourteen ) * 100 / sum( new_ff ) ), 2 ) AS retn_new_fourteen,
+		round( IF ( sum( new_ff ) = 0, 0, sum( retn_new_thirty ) * 100 / sum( new_ff ) ), 2 ) AS retn_new_thirty,
+		round( sum( income_fix_ff ), 2 ) AS income_fix_ff,
+		round( sum( income_fix_ad ), 2 ) AS income_fix_ad,
+		round( sum( cost_tg ), 2 ) AS cost_tg,
+		round( sum( income_fix_ff ) + sum( income_fix_ad ), 2 ) AS income_sum,
+		round( sum( cost_tg ) + sum( cost_ad ) + sum( cost_ff ) - sum( expense_tg ), 2 ) AS cost_sum,
+		round(
+			( sum( income_fix_ff ) + sum( income_fix_ad ) ) - ( sum( cost_tg ) + sum( cost_ad ) + sum( cost_ff ) - sum( expense_tg ) ),
+			2 
+		) AS profit_sum,
+		round(
+		IF
+			( sum( active_ff ) = 0, 0, ( sum( income_fix_ff ) + sum( income_fix_ad ) ) / sum( active_ff ) ),
+			4 
+		) AS income_sum_arpu,
+		round(
+		IF
+			( sum( new_ff ) = 0, 0, ( sum( earning_fix_ff ) + sum( earning_fix_ad ) ) / sum( new_ff ) ),
+			4 
+		) AS income_sum_arpu_new,
+		max( id ) AS data_id 
+	FROM
+		zplay_basic_report_month
+		LEFT JOIN c_app ON c_app.id = zplay_basic_report_month.app_id 
+	WHERE
+		1 = 1 
+		AND ( zplay_basic_report_month.app_id = 'zplay037017' ) 
+		AND dayid BETWEEN '20190623' 
+		AND '20190723' 
+	GROUP BY
+		app_name,
+	'201906-201907' 
+	) a</string>
+	</array>
+	<key>rdbms_type</key>
+	<string>mysql</string>
+	<key>rdbms_version</key>
+	<string>5.6.16-log</string>
+	<key>version</key>
+	<integer>1</integer>
+</dict>
+</plist>
