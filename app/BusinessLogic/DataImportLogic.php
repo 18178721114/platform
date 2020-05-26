@@ -340,4 +340,42 @@ class DataImportLogic
         return $bool;
     }
 
+    // 删除 移动基地 日付数据
+    public static function deleteOperatorsData($table_name, $map = []){
+
+        $com_obj = DB::table($table_name);
+
+        if (isset($map["in"])) {
+            $com_obj->whereIn($map["in"][0],$map["in"][1]);
+            unset($map["in"]);
+        }
+
+        if (isset($map["or_in"])) {
+            $com_obj->orWhereIn($map["or_in"][0],$map["or_in"][1]);
+            unset($map["or_in"]);
+        }
+
+        if(isset($map["between"])) {
+            $com_obj->whereBetween($map["between"][0],$map["between"][1]);
+            unset($map["between"]);
+        }
+
+        if ($map) {
+            $com_obj->where($map);
+        }
+
+
+        return $com_obj->delete();
+    }
+
+    // 插入 移动基地 日付数据
+    public static function insertOperatorsData($table_name,$insert_data){
+
+        $bool = DB::table($table_name)->insert($insert_data);
+        return $bool;
+    }
+
+
+
+
 }

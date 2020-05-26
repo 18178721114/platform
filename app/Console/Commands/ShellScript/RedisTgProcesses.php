@@ -77,6 +77,7 @@ class RedisTgProcesses extends Command
 
 
             $date_arr = [];
+            $platform_arr = [];
         	//需要修改
         	 $ad_sql = "insert into ".MYSQL_TG_TABLE_NAME." (`date`,`app_id`,`channel_id`,`country_id`,`platform_id`,`agency_platform_id`,`data_platform_id`,`type`,`platform_account`,`data_account`,`cost_type`,`platform_app_id`,`platform_app_name`,`ad_id`,`ad_name`,`ad_type`,`tongji_type`,`impression`,`click`,`new`,`new_phone`,`new_pad`,`cost`,`cost_exc`,`device_type`,`remark`,`create_time`,`update_time`,`cost_usd`)values";
         	 for ($i=1; $i <=$tg_len ; $i++) { 
@@ -85,7 +86,7 @@ class RedisTgProcesses extends Command
                 if(strpos($str,'lishuyang@lishuyang') !=false){
                     $plat_date = explode( 'lishuyang@lishuyang',$str);
                     $date_arr[$i] =$plat_date[1];
-
+                    $platform_arr[$i] = $plat_date[0];
                     $sel_info = DB::table('zplay_tg_report_daily')->where(["platform_id" => $plat_date[0], "date" => $plat_date[1]])->count();
                     var_dump($plat_date[0].'-'.$plat_date[1].'-'.'数据条数'.$sel_info);
 
@@ -111,6 +112,7 @@ class RedisTgProcesses extends Command
             /**************************处理到显示数据的表格******************************/
             DB::beginTransaction();
         	$platform_date = array_unique($date_arr);
+            $platform_id = array_unique($platform_arr);
             sort($platform_date);
         	if(count($platform_date) >1){
         		
@@ -123,12 +125,17 @@ class RedisTgProcesses extends Command
         	 	$begin_date = $platform_date[0];
                 $end_date = $platform_date[0];
             }
+            $platform_str = '';
+            foreach ($platform_id as  $v){
+                $platform_str .= "'".$v."',";
+            }
+            $platform_str = rtrim($platform_str,",");
 
             $sel_sql = "select count(1) as count  FROM
             zplay_basic_report_daily
             WHERE
             plat_type = 'ct'
-            AND date_time >= '$begin_date'  and   date_time <= '$end_date' ";
+            AND date_time >= '$begin_date'  and   date_time <= '$end_date' and platform_id in ($platform_str) ";
             $sel_info = DB::select($sel_sql);
             $sel_info = Service::data($sel_info);
             if($sel_info[0]['count'] !=0){
@@ -138,7 +145,7 @@ class RedisTgProcesses extends Command
                 zplay_basic_report_daily
                 WHERE
                 plat_type = 'ct'
-                AND date_time >= '$begin_date'  and   date_time <= '$end_date'" ; 
+                AND date_time >= '$begin_date'  and   date_time <= '$end_date' and platform_id in ($platform_str)" ;
                 $update_info =DB::delete($basic_del_sql);
 
                 if(!$update_info){
@@ -186,7 +193,7 @@ class RedisTgProcesses extends Command
             LEFT JOIN c_channel  ON tg.channel_id = c_channel.channel_id
             WHERE
             tg.date >= '$begin_date'
-            AND tg.date <= '$end_date'  -- and tg.tongji_type = 0
+            AND tg.date <= '$end_date' and tg.platform_id in ($platform_str)  -- and tg.tongji_type = 0
             GROUP BY
             tg.date,
             tg.app_id,

@@ -40,6 +40,7 @@ class Kernel extends ConsoleKernel
         Commands\TgDataProcesses\VungleTgReportCommond::class,
         Commands\TjDataProcesses\AppflurryTjReportCommond::class,
         Commands\AdDataProcesses\KewanReportCommond::class,
+        Commands\AdDataProcesses\TiktokReportCommond::class,
         Commands\TgDataProcesses\KewanTgReportCommond::class,
         Commands\TgDataProcesses\SnapchatTgCommond::class,
         Commands\TgDataProcesses\ToutiaoTgReportCommond::class,
