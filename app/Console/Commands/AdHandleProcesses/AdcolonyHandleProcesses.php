@@ -54,7 +54,6 @@ class AdcolonyHandleProcesses extends Command
      */
     public function handle()
     {
-
         set_time_limit(0);
         $dayid = $this->argument('dayid')?$this->argument('dayid'):date('Y-m-d',strtotime('-1 day'));
         //查询pgsql 的数据

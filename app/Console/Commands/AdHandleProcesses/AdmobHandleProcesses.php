@@ -55,7 +55,6 @@ class AdmobHandleProcesses extends Command
     public function handle()
     {
         set_time_limit(0);
-        //define('MYSQL_TABLE_NAME','zplay_ad_report_daily');
         $source_id = 'pad01';
         $source_name = 'Admob';
         $dayid = $this->argument('dayid') ? $this->argument('dayid'):date('Y-m-d',strtotime('-1 day'));
