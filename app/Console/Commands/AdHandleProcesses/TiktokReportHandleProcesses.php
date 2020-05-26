@@ -59,12 +59,7 @@ class TiktokReportHandleProcesses extends Command
         set_time_limit(0);
         $source_id ='pad271';
         $platform_name ='tiktok';
-
         $dayid = $this->argument('dayid')?$this->argument('dayid'):date('Y-m-d',strtotime('-1 day'));
-
-
-
-
         self::TiktokAdDataProcess($source_id,$platform_name,$dayid);
     }
 
