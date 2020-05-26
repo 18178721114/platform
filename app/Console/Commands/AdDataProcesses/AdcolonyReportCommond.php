@@ -52,7 +52,6 @@ class AdcolonyReportCommond extends Command
         // 入口方法
     	$dayid = $this->argument('dayid')?$this->argument('dayid'):date('Y-m-d',strtotime('-2 day'));
     	$appid = $this->argument('appid')?$this->argument('appid'):'';
-    	//var_dump($dayid);
 
         define('AD_PLATFORM', 'Adcolony');
         define('SCHEMA', 'ad_data');
