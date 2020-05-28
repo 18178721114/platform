@@ -473,7 +473,6 @@ class HomeUsdCommond extends Command
         UNION ALL
         SELECT
         app_id,
-        game_creator,
         90 as date_type,
 		sum(active_user) as active_user
         FROM
