@@ -59,7 +59,7 @@ class AdcolonyReportCommond extends Command
         define('SOURCE_ID', 'pad16'); // todo 这个需要根据平台信息表确定平台ID
 
 
-        // todo  数据库配置
+        // todo  数据库配置 测试
 
 
         $sql = " SELECT  data_account as company_account,account_api_key  as api_key from c_platform_account_mapping WHERE platform_id ='pad16' ";
