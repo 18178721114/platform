@@ -1690,10 +1690,20 @@ class DataSearchImp extends ApiBaseImp
                     if (isset($customData[30]['value'])) {
                         $new_arr['thirty'] = isset($customData[30]['value']) ? $customData[30]['value'] : 0;
                         $new_arr['thirtyRate'] = (isset($customData[60]['value']) && $customData[60]['value'] != '0.00' && $customData[60]['value']) ? round((($customData[30]['value'] - $customData[60]['value']) / abs($customData[60]['value'])) * 100) . "%" : "0%";
-                        if (abs(rtrim($new_arr['thirtyRate'], '%')) == '0') $new_arr['thirtyRate'] = '0%';
+//                        if (abs(rtrim($new_arr['thirtyRate'], '%')) == '0') $new_arr['thirtyRate'] = '0%';
+                        $new_arr['thirtyRate'] = "";
                     }else{
                         $new_arr['thirty'] = 0;
-                        $new_arr['thirtyRate'] = "0%";
+                        $new_arr['thirtyRate'] = "";
+                    }
+
+                    if (isset($customData[60]['value'])) {
+                        $new_arr['sixty'] = isset($customData[60]['value']) ? $customData[60]['value'] : 0;
+                        $new_arr['sixtyRate'] = (isset($customData[90]['value']) && $customData[90]['value'] != '0.00' && $customData[90]['value']) ? round((($customData[60]['value'] - $customData[90]['value']) / abs($customData[90]['value'])) * 100) . "%" : "0%";
+                        if (abs(rtrim($new_arr['sixtyRate'], '%')) == '0') $new_arr['sixtyRate'] = '0%';
+                    }else{
+                        $new_arr['sixty'] = 0;
+                        $new_arr['sixtyRate'] = "0%";
                     }
                     //$new_arr['total'] = isset($customData[-5]['value']) ? $customData[-5]['value'] : 0;
 
@@ -1736,11 +1746,21 @@ class DataSearchImp extends ApiBaseImp
 
                     if (isset($customData[30]['value'])) {
                         $new_arr['thirty'] = isset($customData[30]['value']) ? round($customData[30]['value'] / 30) : 0;
-                        $new_arr['thirtyRate'] = (isset($customData[60]['value']) && $customData[60]['value'] != '0.00' && $customData[60]['value']) ? round(((($customData[30]['value'] / 30) - ($customData[60]['value'] / 30)) / abs($customData[60]['value'] / 30)) * 100) . "%" : "0%";
-                        if (abs(rtrim($new_arr['thirtyRate'], '%')) == '0') $new_arr['thirtyRate'] = '0%';
+                        $new_arr['thirtyRate'] = (isset($customData[60]['value']) && $customData[60]['value'] != '0.00' && $customData[60]['value']) ? round(((($customData[30]['value']) - ($customData[60]['value'])) / abs($customData[60]['value'])) * 100) . "%" : "0%";
+//                        if (abs(rtrim($new_arr['thirtyRate'], '%')) == '0') $new_arr['thirtyRate'] = '0%';
+                        $new_arr['thirtyRate'] = "";
                     }else{
                         $new_arr['thirty'] = 0;
-                        $new_arr['thirtyRate'] = "0%";
+                        $new_arr['thirtyRate'] = "";
+                    }
+
+                    if (isset($customData[60]['value'])) {
+                        $new_arr['sixty'] = isset($customData[60]['value']) ? round($customData[60]['value']) : 0;
+                        $new_arr['sixtyRate'] = (isset($customData[90]['value']) && $customData[90]['value'] != '0.00' && $customData[90]['value']) ? round(((($customData[60]['value']) - ($customData[90]['value'])) / abs($customData[90]['value'])) * 100) . "%" : "0%";
+                        if (abs(rtrim($new_arr['sixtyRate'], '%')) == '0') $new_arr['sixtyRate'] = '0%';
+                    }else{
+                        $new_arr['sixty'] = 0;
+                        $new_arr['sixtyRate'] = "0%";
                     }
 
                     // $new_arr['total'] = '-';

@@ -143,7 +143,7 @@ class AppflurryTjMonthReportCommond extends Command
         }
         var_dump(date('Y-m-d H:i:s'));
         // todo flurry 月活处理过程
-//        Artisan::call('FlurryTjHandleProcesses' ,['dayid'=>$stime]);
+        Artisan::call('FlurryTjMonthHandleProcesses' ,['dayid'=>$stime]);
 
     }
 
