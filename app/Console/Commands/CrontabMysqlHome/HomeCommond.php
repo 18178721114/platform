@@ -163,7 +163,7 @@ class HomeCommond extends Command
         FROM
         zplay_basic_report_daily
         WHERE
-        date_time > DATE_SUB('{$dayid}',INTERVAL 30 DAY)  AND date_time <= '{$dayid}' and flow_type = 1 and statistics = 0 group by os_id,app_id,game_creator
+        date_time >= date_add(curdate(), interval - day(curdate()) + 1 day)  AND date_time <= '{$dayid}' and flow_type = 1 and statistics = 0 group by os_id,app_id,game_creator
         UNION ALL
         SELECT
         '{$dayid}' as  date_time,
@@ -176,8 +176,18 @@ class HomeCommond extends Command
         zplay_basic_report_daily
         WHERE
         date_time > DATE_SUB('{$dayid}',INTERVAL 60 DAY) AND date_time <= DATE_SUB('{$dayid}',INTERVAL 30 DAY) and flow_type = 1 and statistics = 0 group by os_id,app_id,game_creator
-
-      
+        UNION ALL
+        SELECT
+        '{$dayid}' as  date_time,
+        os_id,
+        app_id,
+        game_creator,
+        90 as date_type,
+        {$sql_str}
+        FROM
+        zplay_basic_report_daily
+        WHERE
+        date_time > DATE_SUB('{$dayid}',INTERVAL 90 DAY) AND date_time <= DATE_SUB('{$dayid}',INTERVAL 60 DAY) and flow_type = 1 and statistics = 0 group by os_id,app_id,game_creator  
         ";
         /* --  UNION ALL
         -- SELECT
@@ -295,7 +305,7 @@ class HomeCommond extends Command
         FROM
         zplay_divide_develop_cny
         WHERE
-        date > DATE_SUB('{$dayid}',INTERVAL 30 DAY)  AND date<= '{$dayid}'  group by os_id,app_id,game_creator
+        date >=date_add(curdate(), interval - day(curdate()) + 1 day)  AND date<= '{$dayid}'  group by os_id,app_id,game_creator
         UNION ALL
         SELECT
         '{$dayid}' as  date_time,
@@ -310,6 +320,20 @@ class HomeCommond extends Command
         zplay_divide_develop_cny
         WHERE
         date > DATE_SUB('{$dayid}',INTERVAL 60 DAY) AND date <= DATE_SUB('{$dayid}',INTERVAL 30 DAY)  group by os_id,app_id,game_creator
+        UNION ALL
+        SELECT
+        '{$dayid}' as  date_time,
+        os_id,
+        app_id,
+        game_creator,
+        90 as date_type,
+        round(sum(develop_cost_taxAfter),2) as develop_cost ,
+        round(sum(tg_cost) + (case when sum(develop_cost_taxAfter)<0  then 0 else sum(develop_cost_taxAfter) end),2)  as total_cost ,
+        round(sum(ff_income_taxAfter) + sum(ad_income_taxAfter) - (sum(tg_cost) + (case when sum(develop_cost_taxAfter)<0  then 0 else sum(develop_cost_taxAfter) end)),2)as total_profit
+        FROM
+        zplay_divide_develop_cny
+        WHERE
+        date > DATE_SUB('{$dayid}',INTERVAL 90 DAY) AND date <= DATE_SUB('{$dayid}',INTERVAL 60 DAY)  group by os_id,app_id,game_creator
 
 
         ";
@@ -414,6 +438,36 @@ class HomeCommond extends Command
                 }
             }
         }
+        $update_sql = "update s_basic_data_homepage a,(SELECT
+        app_id,
+        30 as date_type,
+		sum(active_user) as active_user
+        FROM
+        zplay_user_tj_report_month
+        WHERE
+        date_time >= date_add(curdate(), interval - day(curdate()) + 1 day)  AND date_time <= '{$dayid}' and platform_id ='ptj01'  group by app_id
+        UNION ALL
+        SELECT
+        app_id,
+        60 as date_type,
+		sum(active_user) as active_user
+        FROM
+        zplay_user_tj_report_month
+        WHERE
+        date_time > DATE_SUB('{$dayid}',INTERVAL 60 DAY) AND date_time <= DATE_SUB('{$dayid}',INTERVAL 30 DAY) and platform_id ='ptj01'  group by app_id
+        UNION ALL
+        SELECT
+        app_id,
+        game_creator,
+        90 as date_type,
+		sum(active_user) as active_user
+        FROM
+        zplay_user_tj_report_month
+        WHERE
+        date_time > DATE_SUB('{$dayid}',INTERVAL 90 DAY) AND date_time <= DATE_SUB('{$dayid}',INTERVAL 60 DAY)  and platform_id ='ptj01' group by app_id) as b 
+        set a.value= b.active_user
+        where a.date_type= b.date_type and a.app_id = b.app_id and a.date_type in (30,60,90) and a.dim_id = 10";
+        DB::UPDATE($update_sql);
         DB::commit();
 
         echo $currency_type .' 结束时间：'.date('Y-m-d H:i:s')."\r\n";
