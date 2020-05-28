@@ -53,7 +53,7 @@ class AppflurryTjMonthReportCommond extends Command
         define('AD_PLATFORM', 'Flurry');
         define('SOURCE_ID', 'ptj01'); // todo 这个需要根据平台信息表确定平台ID
         // 入口方法
-    	$stime = $this->argument('stime') ? $this->argument('stime') : date('Y-m-01',strtotime('-1 month'));
+    	$stime = $this->argument('stime') ? $this->argument('stime') : date('Y-m-01',time());
         $etime = $this->argument('etime') ? $this->argument('etime') : date("Y-m-01",strtotime('+1 month'));
         var_dump($stime,$etime);
         var_dump(date('Y-m-d H:i:s'));
