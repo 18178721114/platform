@@ -453,7 +453,7 @@ class HomeUsdCommond extends Command
                 }
             }
         }
-        $update_sql = "update s_basic_data_homepage a,(SELECT
+        $update_sql = "update $mysql_table a,(SELECT
         app_id,
         30 as date_type,
 		sum(active_user) as active_user
