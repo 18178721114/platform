@@ -445,7 +445,7 @@ class HomeCommond extends Command
         FROM
         zplay_user_tj_report_month
         WHERE
-        date_time >= date_add(curdate(), interval - day(curdate()) + 1 day)  AND date_time <= '{$dayid}' and platform_id ='ptj01'  group by app_id
+        date >= date_add(curdate(), interval - day(curdate()) + 1 day)  AND date <= '{$dayid}' and platform_id ='ptj01'  group by app_id
         UNION ALL
         SELECT
         app_id,
@@ -454,7 +454,7 @@ class HomeCommond extends Command
         FROM
         zplay_user_tj_report_month
         WHERE
-        date_time > DATE_SUB('{$dayid}',INTERVAL 60 DAY) AND date_time <= DATE_SUB('{$dayid}',INTERVAL 30 DAY) and platform_id ='ptj01'  group by app_id
+        date > DATE_SUB('{$dayid}',INTERVAL 60 DAY) AND date <= DATE_SUB('{$dayid}',INTERVAL 30 DAY) and platform_id ='ptj01'  group by app_id
         UNION ALL
         SELECT
         app_id,
@@ -464,7 +464,7 @@ class HomeCommond extends Command
         FROM
         zplay_user_tj_report_month
         WHERE
-        date_time > DATE_SUB('{$dayid}',INTERVAL 90 DAY) AND date_time <= DATE_SUB('{$dayid}',INTERVAL 60 DAY)  and platform_id ='ptj01' group by app_id) as b 
+        date > DATE_SUB('{$dayid}',INTERVAL 90 DAY) AND date <= DATE_SUB('{$dayid}',INTERVAL 60 DAY)  and platform_id ='ptj01' group by app_id) as b 
         set a.value= b.active_user
         where a.date_type= b.date_type and a.app_id = b.app_id and a.date_type in (30,60,90) and a.dim_id = 10";
         DB::UPDATE($update_sql);
