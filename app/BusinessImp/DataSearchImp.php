@@ -1243,7 +1243,8 @@ class DataSearchImp extends ApiBaseImp
             ['id'=>'1','value'=>'昨日'],
             ['id'=>'2','value'=>'前天'],
             ['id'=>'7','value'=>'近7日'],
-            ['id'=>'30','value'=>'近30日']
+            ['id'=>'30','value'=>'本月'],
+            ['id'=>'60','value'=>'上月']
             // ['id'=>'ALL','value'=>'累计']
         ];
         $showTimeInfo = DB::table('s_basic_data_homepage')->select("date_time")->distinct()->first();
