@@ -1479,6 +1479,8 @@ class DataSearchImp extends ApiBaseImp
      */
     public static function dataGeneralList($params){
 
+        $begintime_1 = time();
+
         $userid = $_SESSION['erm_data']['guid'];;
         if(!$userid){
             ApiResponseFactory::apiResponse([],[],741);
@@ -1792,6 +1794,18 @@ class DataSearchImp extends ApiBaseImp
             }
             $tableList[] = $new_arr;
         }
+
+        $endtime_1 = time();
+
+        $message = '数据概览开始时间'.date('Y-m-d',$begintime_1).',结束时间'.date('Y-m-d',$endtime_1).',时间差'.($endtime_1-$begintime_1);
+
+        $dir = './storage/country';
+        if (!is_dir($dir)) {
+            mkdir($dir,0777,true);
+        }
+        $logFilename = $dir.'/'.'country.log';
+        //生成日志
+        file_put_contents( $logFilename,$message . "\n\n",FILE_APPEND);
 
         ApiResponseFactory::apiResponse(['table_list' => $tableList],[]);
     }
@@ -2140,9 +2154,14 @@ class DataSearchImp extends ApiBaseImp
 
         $endtime_1 = time();
 
+        $message = '地域开始时间'.date('Y-m-d',$begintime_1).',结束时间'.date('Y-m-d',$endtime_1).',时间差'.($endtime_1-$begintime_1);
 
-        $message = '开始时间'.date('Y-m-d',$begintime_1).',结束时间'.date('Y-m-d',$endtime_1).',时间差'.($begintime_1-$endtime_1);
-        $logFilename = 'country.log';
+        $dir = './storage/country';
+        if (!is_dir($dir)) {
+            mkdir($dir,0777,true);
+        }
+        $logFilename = $dir.'/'.'country.log';
+        //生成日志
         file_put_contents( $logFilename,$message . "\n\n",FILE_APPEND);
 
         ApiResponseFactory::apiResponse($regionData,[]);
@@ -2154,6 +2173,7 @@ class DataSearchImp extends ApiBaseImp
      */
     public static function dataAppForm($params){
 
+        $begintime_1 = time();
         //游戏权限
         $userid = $_SESSION['erm_data']['guid'];;
         if(!$userid){
@@ -2182,6 +2202,19 @@ class DataSearchImp extends ApiBaseImp
                     "data" => []
                 ]
             ];
+
+            $endtime_1 = time();
+
+            $message = '构成分析开始时间'.date('Y-m-d',$begintime_1).',结束时间'.date('Y-m-d',$endtime_1).',时间差'.($endtime_1-$begintime_1);
+
+            $dir = './storage/country';
+            if (!is_dir($dir)) {
+                mkdir($dir,0777,true);
+            }
+            $logFilename = $dir.'/'.'country.log';
+
+            //生成日志
+            file_put_contents( $logFilename,$message . "\n\n",FILE_APPEND);
 
             ApiResponseFactory::apiResponse($form_data,[]);
         }
@@ -2372,8 +2405,35 @@ class DataSearchImp extends ApiBaseImp
                 $data['outData']['id'] = '';
                 $data['outData']['data'] = array();
             }
+
+            $endtime_1 = time();
+
+            $message = '构成分析开始时间'.date('Y-m-d',$begintime_1).',结束时间'.date('Y-m-d',$endtime_1).',时间差'.($endtime_1-$begintime_1);
+
+            $dir = './storage/country';
+            if (!is_dir($dir)) {
+                mkdir($dir,0777,true);
+            }
+            $logFilename = $dir.'/'.'country.log';
+
+            //生成日志
+            file_put_contents( $logFilename,$message . "\n\n",FILE_APPEND);
+
             ApiResponseFactory::apiResponse($data,[]);
         }else{
+
+            $endtime_1 = time();
+
+            $message = '构成分析开始时间'.date('Y-m-d',$begintime_1).',结束时间'.date('Y-m-d',$endtime_1).',时间差'.($endtime_1-$begintime_1);
+
+            $dir = './storage/country';
+            if (!is_dir($dir)) {
+                mkdir($dir,0777,true);
+            }
+            $logFilename = $dir.'/'.'country.log';
+            //生成日志
+            file_put_contents( $logFilename,$message . "\n\n",FILE_APPEND);
+
             ApiResponseFactory::apiResponse(['outData'=>array('data'=>array(),'id'=>''),'inData'=>array('data'=>array(),'id'=>'')],[]);
         }
 
