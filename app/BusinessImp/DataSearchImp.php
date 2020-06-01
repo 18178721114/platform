@@ -1556,7 +1556,7 @@ class DataSearchImp extends ApiBaseImp
 
         $searchSql = "select date_time,CASE s.dim_sumtype  WHEN 'sum' THEN 	sum(`value`) ELSE avg(`value`) END `value`,b.dim_id,s.dim_decimals,s.dim_name,date_type from {$basic_data_homepage} b left join c_app g on b.app_id = g.id left join s_cfg_select_dim s on b.dim_id = s.dim_id ".$where.$group_by." order by b.dim_id ";
 
-//        echo $searchSql;
+        echo $searchSql;die;
         $result_list = DB::select($searchSql);
         $result_list = Service::data($result_list);
 
@@ -1746,7 +1746,7 @@ class DataSearchImp extends ApiBaseImp
                     }
 
                     if (isset($customData[30]['value'])) {
-                        $new_arr['thirty'] = isset($customData[30]['value']) ? round($customData[30]['value'] / 30) : 0;
+                        $new_arr['thirty'] = isset($customData[30]['value']) ? round($customData[30]['value']) : 0;
                         $new_arr['thirtyRate'] = (isset($customData[60]['value']) && $customData[60]['value'] != '0.00' && $customData[60]['value']) ? round(((($customData[30]['value']) - ($customData[60]['value'])) / abs($customData[60]['value'])) * 100) . "%" : "0%";
 //                        if (abs(rtrim($new_arr['thirtyRate'], '%')) == '0') $new_arr['thirtyRate'] = '0%';
                         $new_arr['thirtyRate'] = "";
