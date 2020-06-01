@@ -2139,7 +2139,7 @@ class DataSearchImp extends ApiBaseImp
         }
 
         $endtime_1 = time();
-        $dir = './storage/ceshiaTime';
+        $dir = './storage/adDataLogs';
 
         if (!is_dir($dir)) {
             mkdir($dir,0777,true);
