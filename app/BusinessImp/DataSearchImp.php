@@ -1464,6 +1464,9 @@ class DataSearchImp extends ApiBaseImp
             }
 
         }
+        if($list){
+            $list = Service::mySort($list,'num');
+        }
         $app_list['list'] = $list;
         $app_list['total'] = $all_app_list ? count($all_app_list) : 0;
 
