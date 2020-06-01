@@ -114,7 +114,8 @@ class FlurryTjMonthHandleProcesses extends Command
         $error_detail_arr = [];
         foreach ($info as $k => $v) {
         	foreach ($app_list as $app_k => $app_v) {
-        		if(($v['app_name'] == $app_v['statistic_app_name']) && ($v['version'] == $app_v['statistic_version'])){
+//        		if(($v['app_name'] == $app_v['statistic_app_name']) && ($v['version'] == $app_v['statistic_version'])){
+        		if(($v['app_name'] == $app_v['statistic_app_name'])){
         			$array[$k]['app_id'] = $app_v['id'];
                     $array[$k]['ad_status'] = $app_v['ad_status'];
                     $array[$k]['channel_id'] =$app_v['channel_id'];
@@ -127,42 +128,42 @@ class FlurryTjMonthHandleProcesses extends Command
         		}
         	}
 
-        	if ($num) {
-                foreach ($app_list as $app_k => $app_v) {
-                    if ($v['app_name'] == $app_v['statistic_app_name']) {
-                        $array[$k]['app_id'] = $app_v['id'];
-                        $array[$k]['ad_status'] = $app_v['ad_status'];
-                        $array[$k]['channel_id'] = $app_v['channel_id'];
-                        $num = 0;
-                        break;
-                    } else {
-                        //广告位配置未配置
-                        $num++;
-
-                    }
-                }
-            }
+//        	if ($num) {
+//                foreach ($app_list as $app_k => $app_v) {
+//                    if ($v['app_name'] == $app_v['statistic_app_name']) {
+//                        $array[$k]['app_id'] = $app_v['id'];
+//                        $array[$k]['ad_status'] = $app_v['ad_status'];
+//                        $array[$k]['channel_id'] = $app_v['channel_id'];
+//                        $num = 0;
+//                        break;
+//                    } else {
+//                        //广告位配置未配置
+//                        $num++;
+//
+//                    }
+//                }
+//            }
 
             if ($num){
                 //var_dump($json_info['campaign_id']);
                 $error_log_arr['campaign_id'][] = $v['app_name'].'--'.$v['version'];
             }
 
-            // todo 匹配国家用
-            foreach ($country_info as $country_k => $country_v) {
-                   if( isset($v['country']) && (strtoupper($v['country']) == strtoupper($country_v['name']))){
-                       $array[$k]['country_id'] = $country_v['c_country_id'];
-                       $num_country = 0;
-                       break;
-                   }else{
-                       //国家配置失败
-                       $num_country++;
-                   }
-
-            }
-            if ($num_country){
-               $error_log_arr['country'][] = isset($v['country']) ? $v['country'] : 'Unknown Region';
-            }
+//            // todo 匹配国家用
+//            foreach ($country_info as $country_k => $country_v) {
+//                   if( isset($v['country']) && (strtoupper($v['country']) == strtoupper($country_v['name']))){
+//                       $array[$k]['country_id'] = $country_v['c_country_id'];
+//                       $num_country = 0;
+//                       break;
+//                   }else{
+//                       //国家配置失败
+//                       $num_country++;
+//                   }
+//
+//            }
+//            if ($num_country){
+//               $error_log_arr['country'][] = isset($v['country']) ? $v['country'] : 'Unknown Region';
+//            }
             if(($num+$num_country)>0){
 
                 $error_detail_arr[$k]['platform_id'] = $source_id;
