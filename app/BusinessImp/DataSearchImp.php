@@ -1451,6 +1451,11 @@ class DataSearchImp extends ApiBaseImp
                     $os_id = '未知系统-';
                 }
 
+                // 因TD游戏月活用户数据没有，所以以下游戏中，本月、上月时间段，活跃用户指标设置为0
+                if ($custom_sort == 10 && in_array($date_type,[30,60]) && in_array($all_app_info['real_app_id'],['ga007001','gi018010','ga019001','go015010','ga025004','gi007008','gi014004','ga014001','gi055002','ga028001','wo029004','gg007004','gi008022','gi016003','ga018002','go012003','ga035001','gg042002','gi007011','ga012001','gi021003','ga025001','go019010','gg008008','gi008021','gi015008','ga016001','go007012','wa032001','gg014002','gi007009','ga008002','gi019008','ga021001','go018012','ga042001','gi008020','gi015006','ga015001','gi033002','ga028002','ga135002','gg007005','gi008023'])){
+                    $all_app_info['value'] = 0;
+                }
+
                 $list[] = [
                     'id' => $all_app_info['app_id'],
                     'value' => $release_region_id.$os_id.$all_app_info['app_name'].'-'.$all_app_info['real_app_id'],
@@ -1554,7 +1559,7 @@ class DataSearchImp extends ApiBaseImp
             $basic_data_homepage = 's_basic_data_homepage_usd';
         }
 
-        $searchSql = "select date_time,CASE s.dim_sumtype  WHEN 'sum' THEN 	sum(`value`) ELSE avg(`value`) END `value`,b.dim_id,s.dim_decimals,s.dim_name,date_type from {$basic_data_homepage} b left join c_app g on b.app_id = g.id left join s_cfg_select_dim s on b.dim_id = s.dim_id ".$where.$group_by." order by b.dim_id ";
+        $searchSql = "select g.app_id,date_time,CASE s.dim_sumtype  WHEN 'sum' THEN 	sum(`value`) ELSE avg(`value`) END `value`,b.dim_id,s.dim_decimals,s.dim_name,date_type from {$basic_data_homepage} b left join c_app g on b.app_id = g.id left join s_cfg_select_dim s on b.dim_id = s.dim_id ".$where.$group_by." order by b.dim_id ";
 
 //        echo $searchSql;die;
         $result_list = DB::select($searchSql);
@@ -1564,7 +1569,7 @@ class DataSearchImp extends ApiBaseImp
 //        select date_time,sum(`value`) as`value`,b.dim_id,4 as dim_decimals, case when b.dim_id = 91 then '开发者分成成本' when b.dim_id = 92 then '总利润' when b.dim_id = 93 then '总成本' end  as dim_name,date_type from s_basic_data_homepage b left join c_app g on b.app_id = g.id where 1=1 and b.game_creator != 9  and b.dim_id in (91,92,93) group by b.dim_id,b.date_type order by b.dim_id ;
 
         if ($new_custom_app) {
-            $searchSql_new = "select date_time,sum(`value`) as `value`,b.dim_id,2 as `dim_decimals`,case when b.dim_id = 91 then '开发者分成成本' when b.dim_id = 92 then '总利润' when b.dim_id = 93 then '总成本' end  as dim_name,date_type from {$basic_data_homepage} b left join c_app g on b.app_id = g.id " . $where_new . $group_by . " order by b.dim_id ";
+            $searchSql_new = "select g.app_id,date_time,sum(`value`) as `value`,b.dim_id,2 as `dim_decimals`,case when b.dim_id = 91 then '开发者分成成本' when b.dim_id = 92 then '总利润' when b.dim_id = 93 then '总成本' end  as dim_name,date_type from {$basic_data_homepage} b left join c_app g on b.app_id = g.id " . $where_new . $group_by . " order by b.dim_id ";
 
             $result_list_new = DB::select($searchSql_new);
             $result_list_new = Service::data($result_list_new);
@@ -1745,20 +1750,34 @@ class DataSearchImp extends ApiBaseImp
                         $new_arr['sevenRate'] = "0%";
                     }
 
+                    // 因TD游戏月活用户数据没有，所以以下游戏中，本月、上月时间段，活跃用户指标设置为0
+
                     if (isset($customData[30]['value'])) {
-                        $new_arr['thirty'] = isset($customData[30]['value']) ? round($customData[30]['value']) : 0;
-                        $new_arr['thirtyRate'] = (isset($customData[60]['value']) && $customData[60]['value'] != '0.00' && $customData[60]['value']) ? round(((($customData[30]['value']) - ($customData[60]['value'])) / abs($customData[60]['value'])) * 100) . "%" : "0%";
+                        if (in_array($cData['app_id'],['ga007001','gi018010','ga019001','go015010','ga025004','gi007008','gi014004','ga014001','gi055002','ga028001','wo029004','gg007004','gi008022','gi016003','ga018002','go012003','ga035001','gg042002','gi007011','ga012001','gi021003','ga025001','go019010','gg008008','gi008021','gi015008','ga016001','go007012','wa032001','gg014002','gi007009','ga008002','gi019008','ga021001','go018012','ga042001','gi008020','gi015006','ga015001','gi033002','ga028002','ga135002','gg007005','gi008023'])){
+                            $new_arr['thirty'] = 0;
+                            $new_arr['thirtyRate'] = "";
+                        }else{
+                            $new_arr['thirty'] = isset($customData[30]['value']) ? round($customData[30]['value']) : 0;
+                            $new_arr['thirtyRate'] = (isset($customData[60]['value']) && $customData[60]['value'] != '0.00' && $customData[60]['value']) ? round(((($customData[30]['value']) - ($customData[60]['value'])) / abs($customData[60]['value'])) * 100) . "%" : "0%";
 //                        if (abs(rtrim($new_arr['thirtyRate'], '%')) == '0') $new_arr['thirtyRate'] = '0%';
-                        $new_arr['thirtyRate'] = "";
+                            $new_arr['thirtyRate'] = "";
+                        }
+
                     }else{
                         $new_arr['thirty'] = 0;
                         $new_arr['thirtyRate'] = "";
                     }
 
                     if (isset($customData[60]['value'])) {
-                        $new_arr['sixty'] = isset($customData[60]['value']) ? round($customData[60]['value']) : 0;
-                        $new_arr['sixtyRate'] = (isset($customData[90]['value']) && $customData[90]['value'] != '0.00' && $customData[90]['value']) ? round(((($customData[60]['value']) - ($customData[90]['value'])) / abs($customData[90]['value'])) * 100) . "%" : "0%";
-                        if (abs(rtrim($new_arr['sixtyRate'], '%')) == '0') $new_arr['sixtyRate'] = '0%';
+                        if (in_array($cData['app_id'],['ga007001','gi018010','ga019001','go015010','ga025004','gi007008','gi014004','ga014001','gi055002','ga028001','wo029004','gg007004','gi008022','gi016003','ga018002','go012003','ga035001','gg042002','gi007011','ga012001','gi021003','ga025001','go019010','gg008008','gi008021','gi015008','ga016001','go007012','wa032001','gg014002','gi007009','ga008002','gi019008','ga021001','go018012','ga042001','gi008020','gi015006','ga015001','gi033002','ga028002','ga135002','gg007005','gi008023'])){
+                            $new_arr['sixty'] = 0;
+                            $new_arr['sixtyRate'] = "0%";
+                        }else{
+                            $new_arr['sixty'] = isset($customData[60]['value']) ? round($customData[60]['value']) : 0;
+                            $new_arr['sixtyRate'] = (isset($customData[90]['value']) && $customData[90]['value'] != '0.00' && $customData[90]['value']) ? round(((($customData[60]['value']) - ($customData[90]['value'])) / abs($customData[90]['value'])) * 100) . "%" : "0%";
+                            if (abs(rtrim($new_arr['sixtyRate'], '%')) == '0') $new_arr['sixtyRate'] = '0%';
+                        }
+
                     }else{
                         $new_arr['sixty'] = 0;
                         $new_arr['sixtyRate'] = "0%";
