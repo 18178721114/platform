@@ -2139,14 +2139,10 @@ class DataSearchImp extends ApiBaseImp
         }
 
         $endtime_1 = time();
-        $dir = '/storage/adDataLogs';
 
-        if (!is_dir($dir)) {
-            mkdir($dir,0777,true);
-        }
 
         $message = '开始时间'.date('Y-m-d',$begintime_1).',结束时间'.date('Y-m-d',$endtime_1).',时间差'.($begintime_1-$endtime_1);
-        $logFilename = $dir.'/country.log';
+        $logFilename = 'country.log';
         file_put_contents( $logFilename,$message . "\n\n",FILE_APPEND);
 
         ApiResponseFactory::apiResponse($regionData,[]);
