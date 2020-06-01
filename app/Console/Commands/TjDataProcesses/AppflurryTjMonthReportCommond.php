@@ -83,7 +83,7 @@ class AppflurryTjMonthReportCommond extends Command
             if ($app_list){
                 foreach ($app_list as $app_info){
                     $api_key = $app_info['api_key'];
-                    $url = "https://api-metrics.flurry.com/public/v1/data/appUsage/month/app/appVersion/country?metrics=sessions,activeDevices,newDevices,timeSpent&dateTime={$stime}/{$etime}&filters=app|apiKey-in[$api_key]";
+                    $url = "https://api-metrics.flurry.com/public/v1/data/appUsage/month/app?metrics=sessions,activeDevices,newDevices,timeSpent&dateTime={$stime}/{$etime}&filters=app|apiKey-in[$api_key]";
                     $result = self::zplay_curl($url,'get',array(),$header,'https');
 
                     if(isset($result['rows'])){
