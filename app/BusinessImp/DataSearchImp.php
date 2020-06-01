@@ -2025,8 +2025,9 @@ class DataSearchImp extends ApiBaseImp
      * 地域分析
      */
     public static function dataAppCountry($params){
+        $begintime_1 = time();
 
-        $userid = $_SESSION['erm_data']['guid'];;
+        $userid = $_SESSION['erm_data']['guid'];
         if(!$userid){
             ApiResponseFactory::apiResponse([],[],741);
         }
@@ -2136,6 +2137,17 @@ class DataSearchImp extends ApiBaseImp
         }else{
             $regionData['data']= array();
         }
+
+        $endtime_1 = time();
+        $dir = './storage/ceshiaTime';
+
+        if (!is_dir($dir)) {
+            mkdir($dir,0777,true);
+        }
+
+        $message = '开始时间'.date('Y-m-d',$begintime_1).',结束时间'.date('Y-m-d',$endtime_1).',时间差'.($begintime_1-$endtime_1);
+        $logFilename = $dir.'/country.log';
+        file_put_contents( $logFilename,$message . "\n\n",FILE_APPEND);
 
         ApiResponseFactory::apiResponse($regionData,[]);
 
