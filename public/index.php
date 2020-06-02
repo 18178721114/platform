@@ -4,14 +4,14 @@ session_start();
 $userid = $_SESSION['erm_data']['guid'];;
 $begintime_1 = time();
 
-$message = 'ÓÃ»§ID£º'.$userid.'£¬Êı¾İ¸ÅÀÀ¿ªÊ¼Ê±¼ä£º'.$begintime_1;
+$message = 'ç”¨æˆ·IDï¼š'.$userid.'ï¼Œæ•°æ®è¯·æ±‚å¼€å§‹æ—¶é—´ï¼š'.$begintime_1;
 
 $dir = './storage/country';
 if (!is_dir($dir)) {
     mkdir($dir,0777,true);
 }
 $logFilename = $dir.'/'.'country.log';
-//Éú³ÉÈÕÖ¾
+//ç”Ÿæˆæ—¥å¿—
 file_put_contents( $logFilename,$message . "\n\n",FILE_APPEND);
 
 /**
