@@ -68,6 +68,7 @@ class HomeUsdCommond extends Command
     }
 
     public function insertBasicDataHomePage($dayid,$currency_type){
+        $month_begin = date('Y-m-01',strtotime($dayid));
         $mysql_table ='s_basic_data_homepage';
         if ($currency_type == 60){
             $mysql_table ='s_basic_data_homepage_usd';
@@ -175,7 +176,7 @@ class HomeUsdCommond extends Command
         FROM
         zplay_basic_report_daily
         WHERE
-        date_time >= date_add(curdate(), interval - day(curdate()) + 1 day)  AND date_time <= '{$dayid}' and flow_type = 1 and statistics = 0 group by os_id,app_id,game_creator
+        date_time >= '{$month_begin}'  AND date_time <= '{$dayid}' and flow_type = 1 and statistics = 0 group by os_id,app_id,game_creator
         UNION ALL
         SELECT
         '{$dayid}' as  date_time,
@@ -319,7 +320,7 @@ class HomeUsdCommond extends Command
         FROM
         zplay_divide_develop
         WHERE
-        date >= date_add(curdate(), interval - day(curdate()) + 1 day)  AND date <= '{$dayid}'  group by os_id,app_id,game_creator
+        date >= '{$month_begin}'  AND date <= '{$dayid}'  group by os_id,app_id,game_creator
         UNION ALL
         SELECT
         '{$dayid}' as  date_time,
@@ -460,7 +461,7 @@ class HomeUsdCommond extends Command
         FROM
         zplay_user_tj_report_month
         WHERE
-        date >= date_add(curdate(), interval - day(curdate()) + 1 day)  AND date <= '{$dayid}' and platform_id ='ptj01'  group by app_id
+        date >= '{$month_begin}'  AND date <= '{$dayid}' and platform_id ='ptj01'  group by app_id
         UNION ALL
         SELECT
         app_id,
