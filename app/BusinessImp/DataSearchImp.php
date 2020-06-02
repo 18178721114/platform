@@ -1154,7 +1154,7 @@ class DataSearchImp extends ApiBaseImp
         if(!$userid){
             ApiResponseFactory::apiResponse([],[],741);
         }
-
+        session_write_close();
         $company = isset($params['user_company_id']) ? $params['user_company_id'] : 1;
         $currency_type_id = isset($params['currency_type_id']) ? $params['currency_type_id'] : 60;
         //验证用户是否有权限登录
@@ -1292,6 +1292,7 @@ class DataSearchImp extends ApiBaseImp
         if(!$userid){
             ApiResponseFactory::apiResponse([],[],741);
         }
+        session_write_close();
         $company = isset($params['user_company_id']) ? $params['user_company_id'] : 1;
         $currency_type_id = isset($params['currency_type_id']) ? $params['currency_type_id'] : 60;
 
