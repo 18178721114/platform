@@ -564,6 +564,7 @@ class CommonImp extends ApiBaseImp
         if ($search){
             $map['like'] = ['developer_name','like', $search];
         }
+        session_write_close();
         $fields = ["id", "developer_id","developer_name"]; // 查询字段
         $developer_list = CommonLogic::getAllDeveloperList($map, $fields)->orderby('developer_name')->get();
         $developer_list = Service::data($developer_list);
