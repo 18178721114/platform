@@ -1797,7 +1797,7 @@ class DataSearchImp extends ApiBaseImp
 
         $endtime_1 = time();
 
-        $message = '数据概览开始时间'.date('Y-m-d',$begintime_1).',结束时间'.date('Y-m-d',$endtime_1).',时间差'.($endtime_1-$begintime_1);
+        $message = '用户ID'.$userid.'数据概览开始时间'.date('Y-m-d',$begintime_1).',结束时间'.date('Y-m-d',$endtime_1).',时间差'.($endtime_1-$begintime_1);
 
         $dir = './storage/country';
         if (!is_dir($dir)) {
@@ -2154,7 +2154,7 @@ class DataSearchImp extends ApiBaseImp
 
         $endtime_1 = time();
 
-        $message = '地域开始时间'.date('Y-m-d',$begintime_1).',结束时间'.date('Y-m-d',$endtime_1).',时间差'.($endtime_1-$begintime_1);
+        $message = '用户ID'.$userid.'地域开始时间'.date('Y-m-d',$begintime_1).',结束时间'.date('Y-m-d',$endtime_1).',时间差'.($endtime_1-$begintime_1);
 
         $dir = './storage/country';
         if (!is_dir($dir)) {
@@ -2205,7 +2205,7 @@ class DataSearchImp extends ApiBaseImp
 
             $endtime_1 = time();
 
-            $message = '构成分析开始时间'.date('Y-m-d',$begintime_1).',结束时间'.date('Y-m-d',$endtime_1).',时间差'.($endtime_1-$begintime_1);
+            $message = '用户ID'.$userid.'构成分析开始时间'.date('Y-m-d',$begintime_1).',结束时间'.date('Y-m-d',$endtime_1).',时间差'.($endtime_1-$begintime_1);
 
             $dir = './storage/country';
             if (!is_dir($dir)) {
@@ -2408,7 +2408,7 @@ class DataSearchImp extends ApiBaseImp
 
             $endtime_1 = time();
 
-            $message = '构成分析开始时间'.date('Y-m-d',$begintime_1).',结束时间'.date('Y-m-d',$endtime_1).',时间差'.($endtime_1-$begintime_1);
+            $message = '用户ID'.$userid.'构成分析开始时间'.date('Y-m-d',$begintime_1).',结束时间'.date('Y-m-d',$endtime_1).',时间差'.($endtime_1-$begintime_1);
 
             $dir = './storage/country';
             if (!is_dir($dir)) {
@@ -2424,7 +2424,7 @@ class DataSearchImp extends ApiBaseImp
 
             $endtime_1 = time();
 
-            $message = '构成分析开始时间'.date('Y-m-d',$begintime_1).',结束时间'.date('Y-m-d',$endtime_1).',时间差'.($endtime_1-$begintime_1);
+            $message = '用户ID'.$userid.'构成分析开始时间'.date('Y-m-d',$begintime_1).',结束时间'.date('Y-m-d',$endtime_1).',时间差'.($endtime_1-$begintime_1);
 
             $dir = './storage/country';
             if (!is_dir($dir)) {
