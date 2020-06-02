@@ -482,6 +482,12 @@ class HomeUsdCommond extends Command
         set a.value= b.active_user
         where a.date_type= b.date_type and a.app_id = b.app_id and a.date_type in (30,60,90) and a.dim_id = 10";
         DB::UPDATE($update_sql);
+
+        $update_sql = "update $mysql_table a,( select id,app_id from c_app where app_id in ('ga007001','gi018010','ga019001','go015010','ga025004','gi007008','gi014004','ga014001','gi055002','ga028001','wo029004','gg007004','gi008022','gi016003','ga018002','go012003','ga035001','gg042002','gi007011','ga012001','gi021003','ga025001','go019010','gg008008','gi008021','gi015008','ga016001','go007012','wa032001','gg014002','gi007009','ga008002','gi019008','ga021001','go018012','ga042001','gi008020','gi015006','ga015001','gi033002','ga028002','ga135002','gg007005','gi008023')) as b 
+        set a.value= 0
+        where a.app_id = b.id and a.date_type in (30,60,90) and a.dim_id = 10";
+        DB::UPDATE($update_sql);
+
         DB::commit();
         
         echo $currency_type .' 结束时间：'.date('Y-m-d H:i:s')."\r\n";
