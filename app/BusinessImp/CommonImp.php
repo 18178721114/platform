@@ -326,7 +326,7 @@ class CommonImp extends ApiBaseImp
         if(!$userid){
             ApiResponseFactory::apiResponse([],[],741);
         }
-
+        session_write_close();
         //验证用户是否有权限登录
         $map1 = [];
         $map1['id'] = $userid;
@@ -394,7 +394,7 @@ class CommonImp extends ApiBaseImp
         if(!$userid){
             ApiResponseFactory::apiResponse([],[],741);
         }
-
+        session_write_close();
         //验证用户是否有权限登录
         $map1 = [];
         $map1['id'] = $userid;
