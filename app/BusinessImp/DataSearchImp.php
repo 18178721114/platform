@@ -1485,6 +1485,7 @@ class DataSearchImp extends ApiBaseImp
         if(!$userid){
             ApiResponseFactory::apiResponse([],[],741);
         }
+        session_write_close();
         $currency_type_id = isset($params['currency_type_id']) ? $params['currency_type_id'] : 60;
         //验证用户是否有权限登录
         $map1 = [];
@@ -1820,7 +1821,7 @@ class DataSearchImp extends ApiBaseImp
         if(!$userid){
             ApiResponseFactory::apiResponse([],[],741);
         }
-
+        session_write_close();
         $currency_type_id = isset($params['currency_type_id']) ? $params['currency_type_id'] : 60;
         $get_game = isset($params['app_select']) ? $params['app_select'] : 'all';
         $company = isset($params['user_company_id']) ? $params['user_company_id'] : 1;
@@ -2045,6 +2046,7 @@ class DataSearchImp extends ApiBaseImp
         if(!$userid){
             ApiResponseFactory::apiResponse([],[],741);
         }
+        session_write_close();
         $currency_type_id = isset($params['currency_type_id']) ? $params['currency_type_id'] : 60;
         $get_game = isset($params['app_select']) ? $params['app_select'] : 'all';
         $company = isset($params['user_company_id']) ? $params['user_company_id'] : 1;
@@ -2179,6 +2181,7 @@ class DataSearchImp extends ApiBaseImp
         if(!$userid){
             ApiResponseFactory::apiResponse([],[],741);
         }
+        session_write_close();
         $currency_type_id = isset($params['currency_type_id']) ? $params['currency_type_id'] : 60;
         $get_game = isset($params['app_select']) ? $params['app_select'] : 'all';
         $company = isset($params['user_company_id']) ? $params['user_company_id'] : 1;
