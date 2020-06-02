@@ -6323,6 +6323,7 @@ SELECT platform_id from zplay_tg_handwork_daily WHERE DATE_FORMAT(create_time, '
         if(!$userid){
             ApiResponseFactory::apiResponse([],[],741);
         }
+        session_write_close();
         // 开始结束时间
         $stime = isset($params['start_time']) ? $params['start_time'] : '';
         $etime = isset($params['end_time']) ? $params['end_time'] : '';
@@ -6763,6 +6764,7 @@ SELECT platform_id from zplay_tg_handwork_daily WHERE DATE_FORMAT(create_time, '
         if(!$userid){
             ApiResponseFactory::apiResponse([],[],741);
         }
+        session_write_close();
         // 开始结束时间
         $stime = isset($params['start_time']) ? $params['start_time'] : '';
         $etime = isset($params['end_time']) ? $params['end_time'] : '';
