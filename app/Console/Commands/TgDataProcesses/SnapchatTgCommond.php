@@ -277,7 +277,7 @@ class SnapchatTgCommond extends Command
 //        }
 
         // todo 夏令时取数采用
-        if ($adaccount_id == 'dee65c97-c782-4a7f-8629-0a1c1c4a78ad' || $adaccount_id == '6dc6bb62-d47a-4b49-84ff-d85a4f824859' || $adaccount_id == 'dbf5808a-7342-49ac-890b-f834b4b003bc'){
+        if ($adaccount_id == 'dee65c97-c782-4a7f-8629-0a1c1c4a78ad' || $adaccount_id == '6dc6bb62-d47a-4b49-84ff-d85a4f824859' || $adaccount_id == 'dbf5808a-7342-49ac-890b-f834b4b003bc' || $adaccount_id == '64fe2210-5b97-4fd4-bcbc-76ac22ea129c'){
             if (strtotime($end_date) >= strtotime('2020-04-08') && strtotime($end_date) <= strtotime('2020-11-01')){
                 // todo 夏令时切换，特殊处理，取数采用
                 $start_date_z = $start_date . "T23:00:00Z";

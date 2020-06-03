@@ -56,7 +56,7 @@ class TiktokTgReportCommond extends Command
         define('SOURCE_ID', 'ptg76'); // todo 这个需要根据平台信息表确定平台ID
 
         $tiktok_conf_arr = [
-            'username' => 'promtion@zplay.com', 'pass' => 'Zpl@y1023', 'app_id' => 1648343684797446, 'secret' => '6c566e4b401d6fb14a0418e07eb30abd1681e202'
+            'username' => 'promtion@zplay.com', 'pass' => 'Zpl@y1119', 'app_id' => 1648343684797446, 'secret' => '6c566e4b401d6fb14a0418e07eb30abd1681e202'
         ];
 
         self::getAdvertiserList($tiktok_conf_arr,$dayid);
