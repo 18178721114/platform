@@ -303,7 +303,7 @@ class OauthImp
     public function getTiktokCode(){
         if(isset($_GET['auth_code']) && $_GET['auth_code']){
             $tiktok_conf_arr = [
-                'username' => 'promtion@zplay.com', 'pass' => 'Zpl@y1023', 'app_id' => 1648343684797446, 'secret' => '6c566e4b401d6fb14a0418e07eb30abd1681e202'
+                'username' => 'promtion@zplay.com', 'pass' => 'Zpl@y1119', 'app_id' => 1648343684797446, 'secret' => '6c566e4b401d6fb14a0418e07eb30abd1681e202'
             ];
 
             $code = $_GET['auth_code'];
