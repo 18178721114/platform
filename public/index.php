@@ -1,18 +1,18 @@
 <?php
 session_start();
 
-$userid = $_SESSION['erm_data']['guid'];;
-$begintime_1 = time();
-
-$message = '用户ID：'.$userid.'，数据请求开始时间：'.$begintime_1;
-
-$dir = './storage/country';
-if (!is_dir($dir)) {
-    mkdir($dir,0777,true);
-}
-$logFilename = $dir.'/'.'country.log';
-//生成日志
-file_put_contents( $logFilename,$message . "\n\n",FILE_APPEND);
+//$userid = $_SESSION['erm_data']['guid'];;
+//$begintime_1 = time();
+//
+//$message = '用户ID：'.$userid.'，数据请求开始时间：'.$begintime_1;
+//
+//$dir = './storage/country';
+//if (!is_dir($dir)) {
+//    mkdir($dir,0777,true);
+//}
+//$logFilename = $dir.'/'.'country.log';
+////生成日志
+//file_put_contents( $logFilename,$message . "\n\n",FILE_APPEND);
 
 /**
  * Laravel - A PHP Framework For Web Artisans
