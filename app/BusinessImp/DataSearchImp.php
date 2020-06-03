@@ -1797,17 +1797,17 @@ class DataSearchImp extends ApiBaseImp
             $tableList[] = $new_arr;
         }
 
-        $endtime_1 = time();
-
-        $message = '用户ID：'.$userid.'，数据概览开始时间：'.$begintime_1.',结束时间：'.$endtime_1.',时间差'.($endtime_1-$begintime_1);
-
-        $dir = './storage/country';
-        if (!is_dir($dir)) {
-            mkdir($dir,0777,true);
-        }
-        $logFilename = $dir.'/'.'country.log';
-        //生成日志
-        file_put_contents( $logFilename,$message . "\n\n",FILE_APPEND);
+//        $endtime_1 = time();
+//
+//        $message = '用户ID：'.$userid.'，数据概览开始时间：'.$begintime_1.',结束时间：'.$endtime_1.',时间差'.($endtime_1-$begintime_1);
+//
+//        $dir = './storage/country';
+//        if (!is_dir($dir)) {
+//            mkdir($dir,0777,true);
+//        }
+//        $logFilename = $dir.'/'.'country.log';
+//        //生成日志
+//        file_put_contents( $logFilename,$message . "\n\n",FILE_APPEND);
 
         ApiResponseFactory::apiResponse(['table_list' => $tableList],[]);
     }
@@ -2155,17 +2155,17 @@ class DataSearchImp extends ApiBaseImp
             $regionData['data']= array();
         }
 
-        $endtime_1 = time();
-
-        $message = '用户ID：'.$userid.'，地域开始时间：'.$begintime_1.',结束时间：'.$endtime_1.',时间差'.($endtime_1-$begintime_1);
-
-        $dir = './storage/country';
-        if (!is_dir($dir)) {
-            mkdir($dir,0777,true);
-        }
-        $logFilename = $dir.'/'.'country.log';
-        //生成日志
-        file_put_contents( $logFilename,$message . "\n\n",FILE_APPEND);
+//        $endtime_1 = time();
+//
+//        $message = '用户ID：'.$userid.'，地域开始时间：'.$begintime_1.',结束时间：'.$endtime_1.',时间差'.($endtime_1-$begintime_1);
+//
+//        $dir = './storage/country';
+//        if (!is_dir($dir)) {
+//            mkdir($dir,0777,true);
+//        }
+//        $logFilename = $dir.'/'.'country.log';
+//        //生成日志
+//        file_put_contents( $logFilename,$message . "\n\n",FILE_APPEND);
 
         ApiResponseFactory::apiResponse($regionData,[]);
 
@@ -2207,18 +2207,18 @@ class DataSearchImp extends ApiBaseImp
                 ]
             ];
 
-            $endtime_1 = time();
-
-            $message = '用户ID：'.$userid.'，构成分析开始时间：'.$begintime_1.',结束时间：'.$endtime_1.',时间差'.($endtime_1-$begintime_1);
-
-            $dir = './storage/country';
-            if (!is_dir($dir)) {
-                mkdir($dir,0777,true);
-            }
-            $logFilename = $dir.'/'.'country.log';
-
-            //生成日志
-            file_put_contents( $logFilename,$message . "\n\n",FILE_APPEND);
+//            $endtime_1 = time();
+//
+//            $message = '用户ID：'.$userid.'，构成分析开始时间：'.$begintime_1.',结束时间：'.$endtime_1.',时间差'.($endtime_1-$begintime_1);
+//
+//            $dir = './storage/country';
+//            if (!is_dir($dir)) {
+//                mkdir($dir,0777,true);
+//            }
+//            $logFilename = $dir.'/'.'country.log';
+//
+//            //生成日志
+//            file_put_contents( $logFilename,$message . "\n\n",FILE_APPEND);
 
             ApiResponseFactory::apiResponse($form_data,[]);
         }
@@ -2410,33 +2410,33 @@ class DataSearchImp extends ApiBaseImp
                 $data['outData']['data'] = array();
             }
 
-            $endtime_1 = time();
-
-            $message = '用户ID：'.$userid.'，构成分析开始时间：'.$begintime_1.',结束时间：'.$endtime_1.',时间差'.($endtime_1-$begintime_1);
-
-            $dir = './storage/country';
-            if (!is_dir($dir)) {
-                mkdir($dir,0777,true);
-            }
-            $logFilename = $dir.'/'.'country.log';
-
-            //生成日志
-            file_put_contents( $logFilename,$message . "\n\n",FILE_APPEND);
+//            $endtime_1 = time();
+//
+//            $message = '用户ID：'.$userid.'，构成分析开始时间：'.$begintime_1.',结束时间：'.$endtime_1.',时间差'.($endtime_1-$begintime_1);
+//
+//            $dir = './storage/country';
+//            if (!is_dir($dir)) {
+//                mkdir($dir,0777,true);
+//            }
+//            $logFilename = $dir.'/'.'country.log';
+//
+//            //生成日志
+//            file_put_contents( $logFilename,$message . "\n\n",FILE_APPEND);
 
             ApiResponseFactory::apiResponse($data,[]);
         }else{
 
-            $endtime_1 = time();
-
-            $message = '用户ID：'.$userid.'，构成分析开始时间：'.$begintime_1.',结束时间：'.$endtime_1.',时间差'.($endtime_1-$begintime_1);
-
-            $dir = './storage/country';
-            if (!is_dir($dir)) {
-                mkdir($dir,0777,true);
-            }
-            $logFilename = $dir.'/'.'country.log';
-            //生成日志
-            file_put_contents( $logFilename,$message . "\n\n",FILE_APPEND);
+//            $endtime_1 = time();
+//
+//            $message = '用户ID：'.$userid.'，构成分析开始时间：'.$begintime_1.',结束时间：'.$endtime_1.',时间差'.($endtime_1-$begintime_1);
+//
+//            $dir = './storage/country';
+//            if (!is_dir($dir)) {
+//                mkdir($dir,0777,true);
+//            }
+//            $logFilename = $dir.'/'.'country.log';
+//            //生成日志
+//            file_put_contents( $logFilename,$message . "\n\n",FILE_APPEND);
 
             ApiResponseFactory::apiResponse(['outData'=>array('data'=>array(),'id'=>''),'inData'=>array('data'=>array(),'id'=>'')],[]);
         }
