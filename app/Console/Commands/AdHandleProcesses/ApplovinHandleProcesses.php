@@ -68,7 +68,7 @@ class ApplovinHandleProcesses extends Command
         $map['type'] = 2;
         $map['source_id'] = $source_id;
         $map[] =['income','<>',0] ;
-        $map['like'][] = ["json_data->bidding_integration",'like','None'];
+        //$map['like'][] = ["json_data->bidding_integration",'like','None'];
         $info = DataImportLogic::getChannelData('ad_data','erm_data',$map)->get();
         $info = Service::data($info);
         
@@ -170,6 +170,9 @@ class ApplovinHandleProcesses extends Command
         foreach ($info as $k => $v) {
 
         	$json_info = json_decode($v['json_data'],true);
+        	if(isset($json_info['bidding_integration']) && $json_info['bidding_integration'] !='None' ){
+                    continue ;
+            }
         	foreach ($app_list as $app_k => $app_v) {
                 if($app_v['os_id'] ==1){
                     $os = 'ios';
