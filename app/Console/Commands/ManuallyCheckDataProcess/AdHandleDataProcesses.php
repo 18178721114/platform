@@ -820,7 +820,7 @@ class AdHandleDataProcesses extends Command
             foreach ($plat_config as $k => $v) {
 
                 if (isset($p_v['App ID']) && !empty($p_v['App ID'])) {
-                    if (trim(trim(trim($p_v['App ID'],'='), '"'))== $v['platform_app_id'] && $os == $v['git ']  ) {
+                    if (trim(trim(trim($p_v['App ID'],'='), '"'))== $v['platform_app_id'] && $os == $v['os_id']  ) {
                         $app_id = $v['app_id'];
                         $os_id = $v['os_id'];
                         $num = 1;
