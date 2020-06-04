@@ -24,7 +24,7 @@ class FacebookAdBiddingCommond extends Command
      *
      * @var string
      */
-    protected $signature = 'FacebookAdBiddingCommond {dayid?} {account?}';
+    protected $signature = 'FacebookAdBiddingCommond {dayid?} {app_id?}';
 
     /**
      * The console command description.
@@ -67,7 +67,7 @@ class FacebookAdBiddingCommond extends Command
         define('SOURCE_ID', 'pad23'); // todo 这个需要根据平台信息表确定平台ID
 
         $dayid = $dayid = $this->argument('dayid') ? $this->argument('dayid') : date('Y-m-d',strtotime('-1 day'));
-        $account = $this->argument('account');
+        $fb_app_id = $this->argument('app_id') ? $this->argument('app_id') : '';
         $date = ParseDayid::get_dayid($dayid);
 
         if (empty($date)) {
@@ -83,12 +83,17 @@ class FacebookAdBiddingCommond extends Command
         // todo  数据库配置
 //        $PlatInfo = DataImportLogic::getConf(SOURCE_ID_CONF);
 //        $PlatInfo = Service::data($PlatInfo);
+        $where = '';
+        if ($fb_app_id){
+            $where .= "  and b.platform_app_id = '{$fb_app_id}' ";
+        }
         $sql = "SELECT distinct a.platform_id,
         a.data_account AS company_account,
         b.platform_app_id AS application_id,
         a.account_api_key AS appkey  from c_app_ad_platform b LEFT JOIN  c_platform_account_mapping a  ON b.platform_id = a.platform_id
         WHERE
-        a.platform_id = 'pad23' and a.account_api_key != '' ";
+        a.platform_id = 'pad23' and a.account_api_key != '' $where ;";
+
         $PlatInfo = DB::select($sql);
         $PlatInfo = Service::data($PlatInfo);
 
@@ -115,6 +120,17 @@ class FacebookAdBiddingCommond extends Command
                 $url = "http://47.88.186.190/reportingApi/api/facebook_bidding_api.php?stime=".urlencode($date)."&appinfo=".urlencode($appinfo);
                 $result = CurlRequest::get_response($url);
                 $re = json_decode($result,true);
+
+//                // 数据获取重试
+//                $api_data_i=1;
+//                while(!$re){
+//                    $result = CurlRequest::get_response($url);
+//                    $re = json_decode($result,true);
+//                    $api_data_i++;
+//                    if($api_data_i>3)
+//                        break;
+//                }
+
                 // pgsql 逻辑
                 if($re){
                     $message = $date . ", 获取到当前账号：" . $account . "的数据条数为：" . count($re);
