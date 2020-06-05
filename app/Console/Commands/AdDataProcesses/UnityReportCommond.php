@@ -66,19 +66,23 @@ class UnityReportCommond extends Command
 //        $info[2]['company_account'] ='noodlecake';
 //        $info[2]['SecretKey'] ='006c90593aea438ef12e1023c6544666e87da1e919a76d647ce7b3267e5aca12';
 
-        $sql = " SELECT  data_account as company_account,account_token  as SecretKey from c_platform_account_mapping WHERE platform_id ='pad24' ";
+        $sql = " SELECT  data_account as company_account,account_token  as SecretKey,account_user_id as organizationId from c_platform_account_mapping WHERE platform_id ='pad24' and account_user_id is not null ";
         $info = DB::select($sql);
         $info = Service::data($info);
+//        var_dump($info);
         if ($info){
             foreach ($info as $key => $value) {
                 if ($value['company_account'] == 'kimmihua@togethergames.com') continue;
-                $url = str_replace('_APIKEY_',$value['SecretKey'],env('UNITY_URL'));
-                $url  = str_replace(array('_BEGINDATE_','_ENDDATE_'),$dayid, $url);
+                $apikey = $value['SecretKey'];
+                $organizationId = $value['organizationId'];
 
-                $data =self::getContent ( $url );
-                //var_dump($url);die;
+                $url = "https://monetization.api.unity.com/stats/v1/operate/organizations/{$organizationId}?groupBy=country,placement,game&fields=adrequest_count,available_sum,revenue_sum,start_count,view_count&scale=day&start={$dayid}T00:00:00Z&end={$dayid}T23:59:59Z&apikey={$apikey}";
 
-                if (! $data) {
+//                var_dump($url);
+                $data =self::getContent($url);
+//                var_dump(count($data));
+
+                if (!$data) {
                     $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:账号、SecretKey有误';
                     DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
 
@@ -111,9 +115,9 @@ class UnityReportCommond extends Command
                         $insert_data[$index]['create_time'] = date("Y-m-d H:i:s");
                         $insert_data[$index]['year'] = date("Y",strtotime($dayid));
                         $insert_data[$index]['month'] = date("m",strtotime($dayid));
-                        $insert_data[$index]['app_id'] =$v1['source_game_id'];
-                        $insert_data[$index]['app_name'] =$v1['source_game_name'];
-                        $insert_data[$index]['income'] =$v1['revenue'];
+                        $insert_data[$index]['app_id'] = isset($v1['source_game_id']) ? $v1['source_game_id'] : '';
+                        $insert_data[$index]['app_name'] = isset($v1['source_name']) ? $v1['source_name'] : '';
+                        $insert_data[$index]['income'] = isset($v1['revenue_sum']) ? $v1['revenue_sum'] : 0;
                         $index++;
                     }
                     //批量插入
@@ -144,6 +148,16 @@ class UnityReportCommond extends Command
 
     public static function getContent($url) {
         $content = self::get_response ( $url );
+
+        // 数据获取重试
+        $api_data_i=1;
+        while(!$content){
+            $content = self::get_response ( $url );
+            $api_data_i++;
+            if($api_data_i>3)
+                break;
+        }
+
         if (! $content) {
             return false;
         }else{

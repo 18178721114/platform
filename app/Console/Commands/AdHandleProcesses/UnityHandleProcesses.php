@@ -180,10 +180,10 @@ class UnityHandleProcesses extends Command
 
             if($num){
                 //var_dump('---'.$json_info['source_game_id'].'---'.$json_info['source_game_name']);
-                $error_log_arr['app_id'][] = $json_info['source_game_id'].'('.addslashes(str_replace('\'\'','\'',$json_info['source_game_name'])).')';
+                $error_log_arr['app_id'][] = $json_info['source_game_id'].'('.addslashes(str_replace('\'\'','\'',$json_info['source_name'])).')';
             }
         	foreach ($country_info as $country_k => $country_v) {
-        		if($json_info['country_code'] == $country_v['name'] || $json_info['country_tier'] == $country_v['name'] ){
+        		if($json_info['country'] == $country_v['name']){
         			$array[$k]['country_id'] = $country_v['c_country_id'];
         			$num_country = 0;
         			break;
@@ -194,16 +194,16 @@ class UnityHandleProcesses extends Command
         		}
         	}
             if($num_country){
-                $error_log_arr['country'][] = isset($json_info['country_code']) ? $json_info['country_code'] : 'Unknown Region' ;
+                $error_log_arr['country'][] = isset($json_info['country']) ? $json_info['country'] : 'Unknown Region' ;
             }
             foreach ($AdType_info as $AdType_k => $AdType_v) {
 
-                if($json_info['source_zone'] ==''){
+                if($json_info['placement'] == ''){
                     $array[$k]['ad_type'] = 9;
                     $num_adtype = 0;
                     break;
                 }
-                if($json_info['source_zone'] == $AdType_v['name']  ){
+                if($json_info['placement'] == $AdType_v['name']  ){
                     $array[$k]['ad_type'] = $AdType_v['ad_type_id'];
                     $num_adtype = 0;
                     break;
@@ -214,18 +214,18 @@ class UnityHandleProcesses extends Command
                 }
             }
             if($num_adtype){
-                $error_log_arr['ad_type'][] = $json_info['source_zone'];
+                $error_log_arr['ad_type'][] = $json_info['placement'];
             }
         	if(($num+$num_country+$num_adtype)>0){
                 $error_detail_arr[$k]['platform_id'] = $source_id;
                 $error_detail_arr[$k]['platform_name'] = $source_name;
                 $error_detail_arr[$k]['platform_type'] =2;
                 $error_detail_arr[$k]['err_date'] = $dayid;
-                $error_detail_arr[$k]['first_level_id'] = $json_info['source_game_id'];
-                $error_detail_arr[$k]['first_level_name'] = addslashes(str_replace('\'\'','\'',$json_info['source_game_name']));
+                $error_detail_arr[$k]['first_level_id'] = isset($json_info['source_game_id']) ? $json_info['source_game_id'] : '';
+                $error_detail_arr[$k]['first_level_name'] = isset($json_info['source_name'])? addslashes(str_replace('\'\'','\'',$json_info['source_name'])) : '';
                 $error_detail_arr[$k]['second_level_id'] = '';
                 $error_detail_arr[$k]['second_level_name'] = '';
-                $error_detail_arr[$k]['money'] = $json_info['revenue'];
+                $error_detail_arr[$k]['money'] = isset($json_info['revenue_sum']) ? $json_info['revenue_sum'] : 0;
                 $error_detail_arr[$k]['account'] = $v['account'];
                 $error_detail_arr[$k]['create_time'] = date('Y-m-d H:i:s');
         		unset($array[$k]);
@@ -236,12 +236,12 @@ class UnityHandleProcesses extends Command
 
         	$array[$k]['date'] = $dayid;
         	$array[$k]['data_account'] = $v['account'];
-        	$array[$k]['platform_app_id'] = addslashes($json_info['source_game_id']);
-        	$array[$k]['platform_app_name'] = addslashes(str_replace('\'\'','\'',$json_info['source_game_name']));
-        	$array[$k]['impression'] = $json_info['started'];
-        	$array[$k]['success_requests'] = $json_info['available'];
-        	$array[$k]['all_request'] = $json_info['adrequests'];
-        	$array[$k]['earning'] = $json_info['revenue'];
+        	$array[$k]['platform_app_id'] = isset($json_info['source_game_id']) ? addslashes($json_info['source_game_id']) : '';
+        	$array[$k]['platform_app_name'] = isset($json_info['source_name']) ? addslashes(str_replace('\'\'','\'',$json_info['source_name'])) : '';
+        	$array[$k]['impression'] = $json_info['view_count'];
+        	$array[$k]['success_requests'] = $json_info['available_sum'];
+        	$array[$k]['all_request'] = $json_info['adrequest_count'];
+        	$array[$k]['earning'] = isset($json_info['revenue_sum']) ? $json_info['revenue_sum'] : '';
             if($app_list[0]['divide_ad']){
                 $divide_ad = 1-$app_list[0]['divide_ad']/100;
             }else{
@@ -258,9 +258,9 @@ class UnityHandleProcesses extends Command
                 }
             }
 
-        	$array[$k]['earning_exc'] = $json_info['revenue']*$divide_ad;
-            $array[$k]['earning_flowing'] =isset($json_info['revenue']) ? $json_info['revenue']* $currency_ex: 0;
-        	$array[$k]['earning_fix'] = $json_info['revenue']*$currency_ex*$divide_ad;
+        	$array[$k]['earning_exc'] = $json_info['revenue_sum']*$divide_ad;
+            $array[$k]['earning_flowing'] =isset($json_info['revenue_sum']) ? $json_info['revenue_sum']* $currency_ex: 0;
+        	$array[$k]['earning_fix'] = $json_info['revenue_sum']*$currency_ex*$divide_ad;
 
             // 流水美元
             if (($array[$k]['earning'] == $array[$k]['earning_flowing']) && $usd_currency_ex){
