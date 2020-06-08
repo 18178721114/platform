@@ -196,7 +196,7 @@ class VivoHandworkHandleProcesses extends Command
             		continue;
             	}
             	$array[$k]['date'] = $v['dayid'];
-                $array[$k]['data_account'] = 'weibo@zplay.cn';
+                $array[$k]['data_account'] = 'zplay';
             	$array[$k]['ad_unit_id'] = addslashes($json_info['广告位ID']);
             	$array[$k]['ad_unit_name'] = addslashes(str_replace('\'\'','\'',$json_info['广告位']));
             	$array[$k]['impression'] = $json_info['展现量'];
