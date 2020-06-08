@@ -114,7 +114,7 @@ class CtccMonthHandleProcesses extends Command
 			a.EARNING_DIVIDE_PLAT_Z as earning_divide_publisher,
 			a.EARNING_DIVIDE_CP as earning_divide_channel,
 			a.INCOME_PLAT as income_plat,
-			a.INCOME_PLAT as income_publisher,
+			a.INCOME_FIX as income_publisher,
 			a.INCOME_CHANNEL as income_channel,
 			a.INCOME_FIX as income_fix,
 			0 as tongji_type,
