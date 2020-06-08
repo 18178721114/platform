@@ -72,7 +72,7 @@ class UnityReportCommond extends Command
 //        var_dump($info);
         if ($info){
             foreach ($info as $key => $value) {
-                if ($value['company_account'] == 'kimmihua@togethergames.com') continue;
+//                if ($value['company_account'] == 'kimmihua@togethergames.com') continue;
                 $apikey = $value['SecretKey'];
                 $organizationId = $value['organizationId'];
 
