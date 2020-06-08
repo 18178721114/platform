@@ -220,7 +220,7 @@ class ZhifubaoFfHandleProcesses extends Command
                 $bad_account_rate =1;
                 //汇率 默认为1
                 $ex_info['currency_ex'] =1;
-                $array[$k]['platform_account'] = 'zplay';
+                $array[$k]['platform_account'] = '掌游';
                 $array[$k]['pay_user'] = $json_info['quantity'];
                 $array[$k]['pay_time'] = $json_info['quantity'];
                 $array[$k]['pay_user_all'] = $json_info['quantity'];

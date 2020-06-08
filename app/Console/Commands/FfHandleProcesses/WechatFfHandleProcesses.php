@@ -199,7 +199,6 @@ class WechatFfHandleProcesses extends Command
 
 
             	$array[$k]['date'] = $dayid;
-                $array[$k]['platform_account'] = 'zplay';
                 $array[$k]['platform_id'] = $source_id;
                 $array[$k]['platform_account'] = '掌游';
                 $array[$k]['publisher_id'] = 5;
