@@ -38,3 +38,9 @@ Route::match(['post','get'], 'api/get/developer/data', 'DataSearchController@get
 
 // 开发者数据 折线图
 Route::match(['post','get'], 'api/developer/line/data', 'DataSearchController@getDeveloperLine');
+
+// 累计页面 左侧列表接口
+Route::match(['post','get'], 'api/app/total/list', 'DataSearchController@getAppTotalList');
+
+// 累计页面 右侧列表接口
+Route::match(['post','get'], 'api/app/total/data', 'DataSearchController@getAppTotalData');
