@@ -7,6 +7,7 @@
  */
 namespace App\Http\Controllers\DataPlatform;
 use App\BusinessImp\CommonImp;
+use App\BusinessImp\DataAppTotalImp;
 use App\BusinessImp\DataImportImp;
 use App\BusinessImp\DataSearchImp;
 use App\BusinessImp\SysInItImp;
@@ -296,6 +297,23 @@ class DataSearchController extends Controller
         DataSearchImp::getDeveloperLine($this->params);
     }
 
+    /**
+     * 累计页面 左侧列表接口
+     * @param $params array 请求数据
+     */
+    public function getAppTotalList()
+    {
+        DataAppTotalImp::getAppTotalList($this->params);
+    }
+
+    /**
+     * 累计页面 右侧列表接口
+     * @param $params array 请求数据
+     */
+    public function getAppTotalData()
+    {
+        DataAppTotalImp::getAppTotalData($this->params);
+    }
 
 
 }
