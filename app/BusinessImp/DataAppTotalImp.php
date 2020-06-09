@@ -193,8 +193,6 @@ class DataAppTotalImp extends ApiBaseImp
         $app_type_id = isset($params['app_type_id']) ? $params['app_type_id'] : 1;
         // 公司
         $company = isset($params['user_company_id']) ? $params['user_company_id'] : 1;
-        // 是否分应用展示
-        $is_show_app = isset($params['is_show_app']) ? $params['is_show_app'] : 1; // 是否分应用展示（1否2是）
         // 应用ID
         $app_id = isset($params['app_id']) ? $params['app_id'] : '';
         // 开始时间
@@ -206,9 +204,6 @@ class DataAppTotalImp extends ApiBaseImp
         //判断参数是否正确
         if (!in_array($app_type_id,[1,2])){
             ApiResponseFactory::apiResponse([],[],1020);
-        }
-        if (!in_array($is_show_app,[1,2])){
-            ApiResponseFactory::apiResponse([],[],1024);
         }
         if ($company){
             $company_info = DB::select(" select * from c_zplay_company where id = {$company}");
@@ -255,13 +250,8 @@ class DataAppTotalImp extends ApiBaseImp
         if ($app_id){
             $where .= " and app_id in ($app_id) ";
             if ($app_type_id == 1){
-                if ($is_show_app == 1) {
-                    $select .= ' ,app_full_name as data_name ';
-                    $group_by .= ' ,app_full_name ';
-                }elseif($is_show_app == 2){
-                    $select .= ' ,app_name as data_name ';
-                    $group_by .= ' ,app_name ';
-                }
+                $select .= ' ,app_full_name as data_name ';
+                $group_by .= ' ,app_full_name ';
             }elseif($app_type_id == 2){
                 $select .= ' ,app_name as data_name ';
                 $group_by .= ' ,app_name ';
@@ -289,7 +279,7 @@ class DataAppTotalImp extends ApiBaseImp
 
         $app_list = [];
         if ($data_list){
-            if ($app_type_id == 1 && $app_id && $is_show_app == 1){
+            if ($app_type_id == 1 && $app_id){
                 foreach ($data_list as $data_key => $data_info){
                     $app_full_name = $data_info['data_name'];
                     $app_name_arr = [];
@@ -348,7 +338,7 @@ class DataAppTotalImp extends ApiBaseImp
                 }
                 $chartList['total']['table_list'] = array_values($total_data);
                 ApiResponseFactory::apiResponse(['table_list' => $chartList],[]);
-            }elseif ($app_type_id == 1 && $app_id && $is_show_app == 1){
+            }elseif ($app_type_id == 1 && $app_id){
                 // 不分应用
                 $chartList = [];
                 $chartList_old = [];
