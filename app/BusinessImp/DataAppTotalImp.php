@@ -216,7 +216,10 @@ class DataAppTotalImp extends ApiBaseImp
         // 拼接查询条件
         $where = '';
         $app_where = '';
+        $total_where = '';
         $group_by = '';
+        $total_group_by = '';
+        $total_select = '';
         $select = '';
         $order_by = '';
         $limit = '';
@@ -224,14 +227,16 @@ class DataAppTotalImp extends ApiBaseImp
         if($company == 9){
             $where .= ' where company_id = 9 ' ;
             $app_where .= ' where company_id = 9 ' ;
+            $total_where .= ' where company_id = 9 ' ;
         }elseif($company != 9 ){
             $where .= ' where company_id <> 9 ' ;
             $app_where .= ' where company_id <> 9 ' ;
+            $total_where .= ' where company_id <> 9 ' ;
         }
 
         // 时间范围
         $where .= " and date_time >= '{$start_date}' and date_time <= '{$end_date}' ";
-        $app_where .= " and date_time >= '{$start_date}' and date_time <= '{$end_date}' ";
+//        $app_where .= " and date_time >= '{$start_date}' and date_time <= '{$end_date}' ";
 
         //验证用户是否有权限登录
         $map1 = [];
@@ -245,33 +250,45 @@ class DataAppTotalImp extends ApiBaseImp
             $app_permission = $user_info[0]['app_permission'];
         }
 
-        $select .= ' date_time ';
+        $select .= ' date_time, ';
         $group_by .= ' group by date_time ';
         if ($app_id){
             $where .= " and app_id in ($app_id) ";
             if ($app_type_id == 1){
-                $select .= ' ,app_full_name as data_name ';
+                $select .= ' app_full_name as data_name, ';
+                $total_select .= ' app_full_name as data_name, ';
                 $group_by .= ' ,app_full_name ';
+                $total_group_by .= ' group by app_full_name ';
             }elseif($app_type_id == 2){
-                $select .= ' ,app_name as data_name ';
+                $select .= ' app_name as data_name, ';
+                $total_select .= ' app_name as data_name, ';
                 $group_by .= ' ,app_name ';
+                $total_group_by .= ' group by app_name ';
             }
             $app_where .= " and app_id in ($app_id) ";
+            $total_where .= " and app_id in ($app_id) ";
         }elseif($app_permission) {
             $where .= " and app_id in ($app_permission) ";
             $app_where .= " and app_id in ($app_permission) ";
+            $total_where .= " and app_id in ($app_permission) ";
         }
 
         $order_by = " order by date_time ";
 
         // 1、新增用户；2、活跃用户；3、付费收入；4、广告收入；5、总收入；6、推广成本；7、毛利润；8、开发者分成；9、总利润
-        $select .= ' ,sum(new_user) as new_user ,sum(active_user) as active_user,sum(ff_income)  as ff_income ,sum(ad_income) as ad_income ,sum(total_income) as total_income,sum(tg_cost) as tg_cost,sum(gross_profit) as gross_profit ,sum(developer_divide) as developer_divide ,sum(total_profit) as total_profit ';
+        $select .= ' sum(new_user) as new_user ,sum(active_user) as active_user,sum(ff_income)  as ff_income ,sum(ad_income) as ad_income ,sum(total_income) as total_income,sum(tg_cost) as tg_cost,sum(gross_profit) as gross_profit ,sum(developer_divide) as developer_divide ,sum(total_profit) as total_profit ';
+        $total_select .= ' sum(new_user) as new_user ,sum(active_user) as active_user,sum(ff_income)  as ff_income ,sum(ad_income) as ad_income ,sum(total_income) as total_income,sum(tg_cost) as tg_cost,sum(gross_profit) as gross_profit ,sum(developer_divide) as developer_divide ,sum(total_profit) as total_profit ';
 
         $table_name = 'zplay_app_total_report';
 
         $sql = " select {$select} from $table_name $where $group_by $order_by ;";
         $data_list = DB::select($sql);
         $data_list = Service::data($data_list);
+
+        $total_sql = " select {$total_select} from $table_name $total_where $total_group_by ;";
+        $total_data_list = DB::select($total_sql);
+        $total_data_list = Service::data($total_data_list);
+//        var_dump($total_sql);var_dump($total_data_list);die;
 
         $app_sql = " select app_full_name,app_name from $table_name $app_where group by app_full_name,app_name";
         $app_ids = DB::select($app_sql);
@@ -307,23 +324,6 @@ class DataAppTotalImp extends ApiBaseImp
             if(!$app_id){
                 // 日期 总
                 $chartList = [];
-                $fields = ['new_user','active_user','ff_income','ad_income','total_income','tg_cost','gross_profit','developer_divide','total_profit'];
-                $total_data = [];
-                foreach ($fields as $field){
-                    $total_data[$field] = 0;
-                }
-
-                foreach ($data_list as $data_list_kkk => $data_list_vvv){
-                    $total_data['new_user'] += $data_list_vvv['new_user'];
-                    $total_data['active_user'] += $data_list_vvv['active_user'];
-                    $total_data['ff_income'] += $data_list_vvv['ff_income'];
-                    $total_data['ad_income'] += $data_list_vvv['ad_income'];
-                    $total_data['total_income'] += $data_list_vvv['total_income'];
-                    $total_data['tg_cost'] += $data_list_vvv['tg_cost'];
-                    $total_data['gross_profit'] += $data_list_vvv['gross_profit'];
-                    $total_data['developer_divide'] += $data_list_vvv['developer_divide'];
-                    $total_data['total_profit'] += $data_list_vvv['total_profit'];
-                }
                 foreach ($all_month as $dtak => $dtav){
                     foreach($data_list as $chart_data){
                         if ($dtav == $chart_data['date_time']) {
@@ -333,10 +333,33 @@ class DataAppTotalImp extends ApiBaseImp
                         }
                     }
                 }
-                foreach ($total_data as $total_data_key => $total_data_value){
-                    $total_data[$total_data_key] = round($total_data_value,2);
+                if ($total_data_list){
+                    $chartList['total']['table_list'] = array_values($total_data_list[0]);
+                }else{
+                    $fields = ['new_user','active_user','ff_income','ad_income','total_income','tg_cost','gross_profit','developer_divide','total_profit'];
+                    $total_data = [];
+                    foreach ($fields as $field){
+                        $total_data[$field] = 0;
+                    }
+
+                    foreach ($data_list as $data_list_kkk => $data_list_vvv){
+                        $total_data['new_user'] += $data_list_vvv['new_user'];
+                        $total_data['active_user'] += $data_list_vvv['active_user'];
+                        $total_data['ff_income'] += $data_list_vvv['ff_income'];
+                        $total_data['ad_income'] += $data_list_vvv['ad_income'];
+                        $total_data['total_income'] += $data_list_vvv['total_income'];
+                        $total_data['tg_cost'] += $data_list_vvv['tg_cost'];
+                        $total_data['gross_profit'] += $data_list_vvv['gross_profit'];
+                        $total_data['developer_divide'] += $data_list_vvv['developer_divide'];
+                        $total_data['total_profit'] += $data_list_vvv['total_profit'];
+                    }
+
+                    foreach ($total_data as $total_data_key => $total_data_value){
+                        $total_data[$total_data_key] = round($total_data_value,2);
+                    }
+                    $chartList['total']['table_list'] = array_values($total_data);
                 }
-                $chartList['total']['table_list'] = array_values($total_data);
+
                 ApiResponseFactory::apiResponse(['table_list' => $chartList],[]);
             }elseif ($app_type_id == 1 && $app_id){
                 // 不分应用
@@ -366,47 +389,73 @@ class DataAppTotalImp extends ApiBaseImp
                         }
                     }
 
-                    foreach ($chartList_new as $chartList_new_kk => $chartList_info){
-                        $new_table_list = $chartList_info['table_list'];
-                        $table_new_list = [];
-                        if ($new_table_list){
-                            foreach ($all_month as $dtak => $dtav){
-                                foreach($new_table_list as $new_table_v){
-                                    if ($dtav == $new_table_v['date_time']) {
-                                        unset($new_table_v['date_time']);
-                                        $table_new_list[$dtav]['table_list'] = $new_table_v;
-                                        break;
+                    if ($total_data_list){
+                        foreach ($chartList_new as $chartList_new_kk => $chartList_info) {
+                            $new_table_list = $chartList_info['table_list'];
+                            $table_new_list = [];
+                            if ($new_table_list) {
+                                foreach ($all_month as $dtak => $dtav) {
+                                    foreach ($new_table_list as $new_table_v) {
+                                        if ($dtav == $new_table_v['date_time']) {
+                                            unset($new_table_v['date_time']);
+                                            $table_new_list[$dtav]['table_list'] = array_values($new_table_v);
+                                            break;
+                                        }
                                     }
                                 }
                             }
-                        }
-                        $fields = ['new_user','active_user','ff_income','ad_income','total_income','tg_cost','gross_profit','developer_divide','total_profit'];
-                        $total_data = [];
-                        foreach ($fields as $field){
-                            $total_data[$field] = 0;
-                        }
-                        if ($table_new_list){
-                            foreach ($table_new_list as $table_new_kkk => $table_new_vvv){
-                                $total_data['new_user'] += $table_new_vvv['table_list']['new_user'];
-                                $total_data['active_user'] += $table_new_vvv['table_list']['active_user'];
-                                $total_data['ff_income'] += $table_new_vvv['table_list']['ff_income'];
-                                $total_data['ad_income'] += $table_new_vvv['table_list']['ad_income'];
-                                $total_data['total_income'] += $table_new_vvv['table_list']['total_income'];
-                                $total_data['tg_cost'] += $table_new_vvv['table_list']['tg_cost'];
-                                $total_data['gross_profit'] += $table_new_vvv['table_list']['gross_profit'];
-                                $total_data['developer_divide'] += $table_new_vvv['table_list']['developer_divide'];
-                                $total_data['total_profit'] += $table_new_vvv['table_list']['total_profit'];
+                            foreach ($total_data_list as $total_data_list_k => $total_data_list_v){
+                                if ($chartList_info['data_name'] == $total_data_list_v['data_name']){
+                                    unset($total_data_list_v['data_name']);
+                                    $table_new_list['total']['table_list'] = array_values($total_data_list_v);
+                                    break;
+                                }
                             }
+                            $chartList_new[$chartList_new_kk]['table_list'] = $table_new_list;
                         }
-                        foreach ($total_data as $total_data_key => $total_data_value){
-                            $total_data[$total_data_key] = round($total_data_value,2);
+                    }else {
+                        foreach ($chartList_new as $chartList_new_kk => $chartList_info) {
+                            $new_table_list = $chartList_info['table_list'];
+                            $table_new_list = [];
+                            if ($new_table_list) {
+                                foreach ($all_month as $dtak => $dtav) {
+                                    foreach ($new_table_list as $new_table_v) {
+                                        if ($dtav == $new_table_v['date_time']) {
+                                            unset($new_table_v['date_time']);
+                                            $table_new_list[$dtav]['table_list'] = $new_table_v;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            $fields = ['new_user', 'active_user', 'ff_income', 'ad_income', 'total_income', 'tg_cost', 'gross_profit', 'developer_divide', 'total_profit'];
+                            $total_data = [];
+                            foreach ($fields as $field) {
+                                $total_data[$field] = 0;
+                            }
+                            if ($table_new_list) {
+                                foreach ($table_new_list as $table_new_kkk => $table_new_vvv) {
+                                    $total_data['new_user'] += $table_new_vvv['table_list']['new_user'];
+                                    $total_data['active_user'] += $table_new_vvv['table_list']['active_user'];
+                                    $total_data['ff_income'] += $table_new_vvv['table_list']['ff_income'];
+                                    $total_data['ad_income'] += $table_new_vvv['table_list']['ad_income'];
+                                    $total_data['total_income'] += $table_new_vvv['table_list']['total_income'];
+                                    $total_data['tg_cost'] += $table_new_vvv['table_list']['tg_cost'];
+                                    $total_data['gross_profit'] += $table_new_vvv['table_list']['gross_profit'];
+                                    $total_data['developer_divide'] += $table_new_vvv['table_list']['developer_divide'];
+                                    $total_data['total_profit'] += $table_new_vvv['table_list']['total_profit'];
+                                }
+                            }
+                            foreach ($total_data as $total_data_key => $total_data_value) {
+                                $total_data[$total_data_key] = round($total_data_value, 2);
+                            }
+                            $table_new_list['total']['table_list'] = $total_data;
+                            $table_new_list_arr = [];
+                            foreach ($table_new_list as $table_new_kkkk => $table_new_vvvv) {
+                                $table_new_list_arr[$table_new_kkkk]['table_list'] = array_values($table_new_vvvv['table_list']);
+                            }
+                            $chartList_new[$chartList_new_kk]['table_list'] = $table_new_list_arr;
                         }
-                        $table_new_list['total']['table_list'] = $total_data;
-                        $table_new_list_arr = [];
-                        foreach ($table_new_list as $table_new_kkkk => $table_new_vvvv){
-                            $table_new_list_arr[$table_new_kkkk]['table_list'] = array_values($table_new_vvvv['table_list']);
-                        }
-                        $chartList_new[$chartList_new_kk]['table_list'] = $table_new_list_arr;
                     }
                 }
 
@@ -437,48 +486,76 @@ class DataAppTotalImp extends ApiBaseImp
                         }
                     }
 
-                    foreach ($chartList_new as $chartList_new_kk => $chartList_info){
-                        $new_table_list = $chartList_info['table_list'];
-                        $table_new_list = [];
-                        if ($new_table_list){
-                            foreach ($all_month as $dtak => $dtav){
-                                foreach($new_table_list as $new_table_v){
-                                    if ($dtav == $new_table_v['date_time']) {
-                                        unset($new_table_v['date_time']);
-                                        $table_new_list[$dtav]['table_list'] = $new_table_v;
-                                        break;
+                    if ($total_data_list){
+                        foreach ($chartList_new as $chartList_new_kk => $chartList_info) {
+                            $new_table_list = $chartList_info['table_list'];
+                            $table_new_list = [];
+                            if ($new_table_list) {
+                                foreach ($all_month as $dtak => $dtav) {
+                                    foreach ($new_table_list as $new_table_v) {
+                                        if ($dtav == $new_table_v['date_time']) {
+                                            unset($new_table_v['date_time']);
+                                            $table_new_list[$dtav]['table_list'] = array_values($new_table_v);
+                                            break;
+                                        }
                                     }
                                 }
                             }
-                        }
-                        $fields = ['new_user','active_user','ff_income','ad_income','total_income','tg_cost','gross_profit','developer_divide','total_profit'];
-                        $total_data = [];
-                        foreach ($fields as $field){
-                            $total_data[$field] = 0;
-                        }
-                        if ($table_new_list){
-                            foreach ($table_new_list as $table_new_kkk => $table_new_vvv){
-                                $total_data['new_user'] += $table_new_vvv['table_list']['new_user'];
-                                $total_data['active_user'] += $table_new_vvv['table_list']['active_user'];
-                                $total_data['ff_income'] += $table_new_vvv['table_list']['ff_income'];
-                                $total_data['ad_income'] += $table_new_vvv['table_list']['ad_income'];
-                                $total_data['total_income'] += $table_new_vvv['table_list']['total_income'];
-                                $total_data['tg_cost'] += $table_new_vvv['table_list']['tg_cost'];
-                                $total_data['gross_profit'] += $table_new_vvv['table_list']['gross_profit'];
-                                $total_data['developer_divide'] += $table_new_vvv['table_list']['developer_divide'];
-                                $total_data['total_profit'] += $table_new_vvv['table_list']['total_profit'];
+                            foreach ($total_data_list as $total_data_list_k => $total_data_list_v){
+                                if ($chartList_info['data_name'] == $total_data_list_v['data_name']){
+                                    unset($total_data_list_v['data_name']);
+                                    $table_new_list['total']['table_list'] = array_values($total_data_list_v);
+                                    break;
+                                }
                             }
+
+                            $chartList_new[$chartList_new_kk]['app_list'] = [];
+                            $chartList_new[$chartList_new_kk]['table_list'] = $table_new_list;
                         }
-                        foreach ($total_data as $total_data_key => $total_data_value){
-                            $total_data[$total_data_key] = round($total_data_value,2);
+                    }else{
+                        foreach ($chartList_new as $chartList_new_kk => $chartList_info){
+                            $new_table_list = $chartList_info['table_list'];
+                            $table_new_list = [];
+                            if ($new_table_list){
+                                foreach ($all_month as $dtak => $dtav){
+                                    foreach($new_table_list as $new_table_v){
+                                        if ($dtav == $new_table_v['date_time']) {
+                                            unset($new_table_v['date_time']);
+                                            $table_new_list[$dtav]['table_list'] = $new_table_v;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            $fields = ['new_user','active_user','ff_income','ad_income','total_income','tg_cost','gross_profit','developer_divide','total_profit'];
+                            $total_data = [];
+                            foreach ($fields as $field){
+                                $total_data[$field] = 0;
+                            }
+                            if ($table_new_list){
+                                foreach ($table_new_list as $table_new_kkk => $table_new_vvv){
+                                    $total_data['new_user'] += $table_new_vvv['table_list']['new_user'];
+                                    $total_data['active_user'] += $table_new_vvv['table_list']['active_user'];
+                                    $total_data['ff_income'] += $table_new_vvv['table_list']['ff_income'];
+                                    $total_data['ad_income'] += $table_new_vvv['table_list']['ad_income'];
+                                    $total_data['total_income'] += $table_new_vvv['table_list']['total_income'];
+                                    $total_data['tg_cost'] += $table_new_vvv['table_list']['tg_cost'];
+                                    $total_data['gross_profit'] += $table_new_vvv['table_list']['gross_profit'];
+                                    $total_data['developer_divide'] += $table_new_vvv['table_list']['developer_divide'];
+                                    $total_data['total_profit'] += $table_new_vvv['table_list']['total_profit'];
+                                }
+                            }
+                            foreach ($total_data as $total_data_key => $total_data_value){
+                                $total_data[$total_data_key] = round($total_data_value,2);
+                            }
+                            $table_new_list['total']['table_list'] = $total_data;
+                            $table_new_list_arr = [];
+                            foreach ($table_new_list as $table_new_kkkk => $table_new_vvvv){
+                                $table_new_list_arr[$table_new_kkkk]['table_list'] = array_values($table_new_vvvv['table_list']);
+                            }
+                            $chartList_new[$chartList_new_kk]['app_list'] = [];
+                            $chartList_new[$chartList_new_kk]['table_list'] = $table_new_list_arr;
                         }
-                        $table_new_list['total']['table_list'] = $total_data;
-                        $table_new_list_arr = [];
-                        foreach ($table_new_list as $table_new_kkkk => $table_new_vvvv){
-                            $table_new_list_arr[$table_new_kkkk]['table_list'] = array_values($table_new_vvvv['table_list']);
-                        }
-                        $chartList_new[$chartList_new_kk]['app_list'] = [];
-                        $chartList_new[$chartList_new_kk]['table_list'] = $table_new_list_arr;
                     }
                 }
 
