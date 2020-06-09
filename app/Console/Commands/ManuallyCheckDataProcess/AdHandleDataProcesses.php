@@ -811,11 +811,16 @@ class AdHandleDataProcesses extends Command
             if ($p_v['Revenue'] == 0 && $p_v['Revenue'] == 0) {
                 continue;
             }
+            if(trim(trim(trim($p_v['Platform'],'='), '"'))=='android'){
+                $os = 2;
+            }elseif(trim(trim(trim($p_v['Platform'],'='), '"'))=='ios'){
+                $os = 1;
+            }
             $num = 0;
             foreach ($plat_config as $k => $v) {
 
                 if (isset($p_v['App ID']) && !empty($p_v['App ID'])) {
-                    if (trim(trim(trim($p_v['App ID'],'='), '"'))== $v['platform_app_id']) {
+                    if (trim(trim(trim($p_v['App ID'],'='), '"'))== $v['platform_app_id'] && $os == $v['os_id']  ) {
                         $app_id = $v['app_id'];
                         $os_id = $v['os_id'];
                         $num = 1;

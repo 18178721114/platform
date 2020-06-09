@@ -68,6 +68,9 @@ class HomeUsdCommond extends Command
     }
 
     public function insertBasicDataHomePage($dayid,$currency_type){
+        $month_begin = date('Y-m-01',strtotime($dayid));
+        $month_end = date('Y-m-d', strtotime("$month_begin 0 month -1 day"));
+        $month_end1 = date('Y-m-d', strtotime("$month_begin -1 month -1 day"));
         $mysql_table ='s_basic_data_homepage';
         if ($currency_type == 60){
             $mysql_table ='s_basic_data_homepage_usd';
@@ -175,7 +178,7 @@ class HomeUsdCommond extends Command
         FROM
         zplay_basic_report_daily
         WHERE
-        date_time >= date_add(curdate(), interval - day(curdate()) + 1 day)  AND date_time <= '{$dayid}' and flow_type = 1 and statistics = 0 group by os_id,app_id,game_creator
+        date_time >= '{$month_begin}'  AND date_time <= '{$dayid}' and flow_type = 1 and statistics = 0 group by os_id,app_id,game_creator
         UNION ALL
         SELECT
         '{$dayid}' as  date_time,
@@ -187,7 +190,7 @@ class HomeUsdCommond extends Command
         FROM
         zplay_basic_report_daily
         WHERE
-        date_time > DATE_SUB('{$dayid}',INTERVAL 60 DAY) AND date_time <= DATE_SUB('{$dayid}',INTERVAL 30 DAY) and flow_type = 1 and statistics = 0 group by os_id,app_id,game_creator
+        date_time >= DATE_SUB('{$month_begin}',INTERVAL 1 month) AND date_time <= '{$month_end}' and flow_type = 1 and statistics = 0 group by os_id,app_id,game_creator
         UNION ALL
         SELECT
         '{$dayid}' as  date_time,
@@ -199,7 +202,7 @@ class HomeUsdCommond extends Command
         FROM
         zplay_basic_report_daily
         WHERE
-        date_time > DATE_SUB('{$dayid}',INTERVAL 90 DAY) AND date_time <= DATE_SUB('{$dayid}',INTERVAL 60 DAY) and flow_type = 1 and statistics = 0 group by os_id,app_id,game_creator
+        date_time >= DATE_SUB('{$month_begin}',INTERVAL  2 month) AND date_time <= '$month_end1' and flow_type = 1 and statistics = 0 group by os_id,app_id,game_creator
 
         
         ";
@@ -319,7 +322,7 @@ class HomeUsdCommond extends Command
         FROM
         zplay_divide_develop
         WHERE
-        date >= date_add(curdate(), interval - day(curdate()) + 1 day)  AND date <= '{$dayid}'  group by os_id,app_id,game_creator
+        date >= '{$month_begin}'  AND date <= '{$dayid}'  group by os_id,app_id,game_creator
         UNION ALL
         SELECT
         '{$dayid}' as  date_time,
@@ -333,7 +336,7 @@ class HomeUsdCommond extends Command
         FROM
         zplay_divide_develop
         WHERE
-        date > DATE_SUB('{$dayid}',INTERVAL 60 DAY) AND date <= DATE_SUB('{$dayid}',INTERVAL 30 DAY)  group by os_id,app_id,game_creator
+        date >= DATE_SUB('{$month_begin}',INTERVAL 1 month) AND date <= '{$month_end}'  group by os_id,app_id,game_creator
         UNION ALL
         SELECT
         '{$dayid}' as  date_time,
@@ -347,7 +350,7 @@ class HomeUsdCommond extends Command
         FROM
         zplay_divide_develop_cny
         WHERE
-        date > DATE_SUB('{$dayid}',INTERVAL 90 DAY) AND date <= DATE_SUB('{$dayid}',INTERVAL 60 DAY)  group by os_id,app_id,game_creator
+        date >= DATE_SUB('{$month_begin}',INTERVAL 2 month) AND date <= '{$month_end1}'  group by os_id,app_id,game_creator
 
 
         ";
@@ -460,7 +463,7 @@ class HomeUsdCommond extends Command
         FROM
         zplay_user_tj_report_month
         WHERE
-        date >= date_add(curdate(), interval - day(curdate()) + 1 day)  AND date <= '{$dayid}' and platform_id ='ptj01'  group by app_id
+        date = '{$month_begin}' and platform_id ='ptj01'  group by app_id
         UNION ALL
         SELECT
         app_id,
@@ -469,7 +472,7 @@ class HomeUsdCommond extends Command
         FROM
         zplay_user_tj_report_month
         WHERE
-        date > DATE_SUB('{$dayid}',INTERVAL 60 DAY) AND date <= DATE_SUB('{$dayid}',INTERVAL 30 DAY) and platform_id ='ptj01'  group by app_id
+        date = DATE_SUB('{$month_begin}',INTERVAL 1 month) and platform_id ='ptj01'  group by app_id
         UNION ALL
         SELECT
         app_id,
@@ -478,7 +481,7 @@ class HomeUsdCommond extends Command
         FROM
         zplay_user_tj_report_month
         WHERE
-        date > DATE_SUB('{$dayid}',INTERVAL 90 DAY) AND date <= DATE_SUB('{$dayid}',INTERVAL 60 DAY)  and platform_id ='ptj01' group by app_id) as b 
+        date = DATE_SUB('{$month_begin}',INTERVAL 2 month) and platform_id ='ptj01' group by app_id) as b 
         set a.value= b.active_user
         where a.date_type= b.date_type and a.app_id = b.app_id and a.date_type in (30,60,90) and a.dim_id = 10";
         DB::UPDATE($update_sql);

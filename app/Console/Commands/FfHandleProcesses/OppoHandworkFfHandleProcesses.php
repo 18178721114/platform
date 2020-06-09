@@ -175,7 +175,6 @@ class OppoHandworkFfHandleProcesses extends Command
                 $array[$k]['platform_account'] = '掌游';
             	$array[$k]['channel_id'] = $channel_list['channel_id'];
                 $array[$k]['platform_id'] = $source_id;
-                $array[$k]['platform_account'] = null;
                 $array[$k]['publisher_id'] = 5;
                 
                 if($app_list[0]['divide_billing']){
