@@ -47,7 +47,7 @@ class HomeUsdCommond extends Command
      * @return mixed
      */
     public function handle()
-    {  
+    {
         set_time_limit(0);
 
 //        $tg_info = env('REDIS_TG_KEYS');
@@ -58,8 +58,8 @@ class HomeUsdCommond extends Command
 //        }
 
         // 入口方法
-    	$dayid = $this->argument('dayid')?$this->argument('dayid'):date('Y-m-d',strtotime('-2 day'));
-    	var_dump($dayid);
+        $dayid = $this->argument('dayid')?$this->argument('dayid'):date('Y-m-d',strtotime('-2 day'));
+        var_dump($dayid);
 
         $currency_type = 60;
         echo $currency_type .' 开始时间：'.date('Y-m-d H:i:s')."\r\n";
@@ -69,6 +69,8 @@ class HomeUsdCommond extends Command
 
     public function insertBasicDataHomePage($dayid,$currency_type){
         $month_begin = date('Y-m-01',strtotime($dayid));
+        $month_end = date('Y-m-d', strtotime("$month_begin 0 month -1 day"));
+        $month_end1 = date('Y-m-d', strtotime("$month_begin -1 month -1 day"));
         $mysql_table ='s_basic_data_homepage';
         if ($currency_type == 60){
             $mysql_table ='s_basic_data_homepage_usd';
@@ -188,7 +190,7 @@ class HomeUsdCommond extends Command
         FROM
         zplay_basic_report_daily
         WHERE
-        date_time > DATE_SUB('{$dayid}',INTERVAL 60 DAY) AND date_time <= DATE_SUB('{$dayid}',INTERVAL 30 DAY) and flow_type = 1 and statistics = 0 group by os_id,app_id,game_creator
+        date_time >= DATE_SUB('{$month_begin}',INTERVAL 1 month) AND date_time <= '{$month_end}' and flow_type = 1 and statistics = 0 group by os_id,app_id,game_creator
         UNION ALL
         SELECT
         '{$dayid}' as  date_time,
@@ -200,22 +202,22 @@ class HomeUsdCommond extends Command
         FROM
         zplay_basic_report_daily
         WHERE
-        date_time > DATE_SUB('{$dayid}',INTERVAL 90 DAY) AND date_time <= DATE_SUB('{$dayid}',INTERVAL 60 DAY) and flow_type = 1 and statistics = 0 group by os_id,app_id,game_creator
+        date_time >= DATE_SUB('{$month_begin}',INTERVAL  2 month) AND date_time <= '$month_end1' and flow_type = 1 and statistics = 0 group by os_id,app_id,game_creator
 
         
         ";
-       /* -- UNION ALL
-        --SELECT
-        --'{$dayid}' as  date_time,
-        --os_id,
-        --app_id,
-        --game_creator,
-        --'-5' as date_type,
-         {$sql_str}
-        --FROM
-        --zplay_basic_report_daily
-        -- where date_time <= '$dayid' and flow_type = 1 and statistics = 0
-        group by os_id,app_id,game_creator*/
+        /* -- UNION ALL
+         --SELECT
+         --'{$dayid}' as  date_time,
+         --os_id,
+         --app_id,
+         --game_creator,
+         --'-5' as date_type,
+          {$sql_str}
+         --FROM
+         --zplay_basic_report_daily
+         -- where date_time <= '$dayid' and flow_type = 1 and statistics = 0
+         group by os_id,app_id,game_creator*/
         $info = DB::select($sql);
         $info = Service::data($info);
         // 数据补丁  91  开发者分成成本。    93 总成本    92总利润
@@ -334,7 +336,7 @@ class HomeUsdCommond extends Command
         FROM
         zplay_divide_develop
         WHERE
-        date > DATE_SUB('{$dayid}',INTERVAL 60 DAY) AND date <= DATE_SUB('{$dayid}',INTERVAL 30 DAY)  group by os_id,app_id,game_creator
+        date >= DATE_SUB('{$month_begin}',INTERVAL 1 month) AND date <= '{$month_end}'  group by os_id,app_id,game_creator
         UNION ALL
         SELECT
         '{$dayid}' as  date_time,
@@ -348,7 +350,7 @@ class HomeUsdCommond extends Command
         FROM
         zplay_divide_develop_cny
         WHERE
-        date > DATE_SUB('{$dayid}',INTERVAL 90 DAY) AND date <= DATE_SUB('{$dayid}',INTERVAL 60 DAY)  group by os_id,app_id,game_creator
+        date >= DATE_SUB('{$month_begin}',INTERVAL 2 month) AND date <= '{$month_end1}'  group by os_id,app_id,game_creator
 
 
         ";
@@ -393,38 +395,38 @@ class HomeUsdCommond extends Command
         }
         foreach($developer_info as $k1 => $v1) {
             // 数据补丁  91  开发者分成成本。
-                $array['date_type'] =$v1['date_type'];
-                $array['dim_id'] = 91;
-                $array['value'] =$v1['develop_cost'];
-                $array['date_time'] =$v1['date_time'];
-                $array['os_id'] =$v1['os_id'];
-                $array['app_id'] =$v1['app_id'];
-                $array['game_creator'] =$v1['game_creator'];
-                $array['remark'] ="NULL";
-                $array['create_time'] =date('Y-m-d',time());
-                array_push($array_append,$array);
-               //93 总成本
-                $array['date_type'] =$v1['date_type'];
-                $array['dim_id'] = 93;
-                $array['value'] =$v1['total_cost'];
-                $array['date_time'] =$v1['date_time'];
-                $array['os_id'] =$v1['os_id'];
-                $array['app_id'] =$v1['app_id'];
-                $array['game_creator'] =$v1['game_creator'];
-                $array['remark'] ="NULL";
-                $array['create_time'] =date('Y-m-d',time());
-                array_push($array_append,$array);
-                //92总利润
-                $array['date_type'] =$v1['date_type'];
-                $array['dim_id'] = 92;
-                $array['value'] =$v1['total_profit'];
-                $array['date_time'] =$v1['date_time'];
-                $array['os_id'] =$v1['os_id'];
-                $array['app_id'] =$v1['app_id'];
-                $array['game_creator'] =$v1['game_creator'];
-                $array['remark'] ="NULL";
-                $array['create_time'] =date('Y-m-d',time());
-                array_push($array_append,$array);
+            $array['date_type'] =$v1['date_type'];
+            $array['dim_id'] = 91;
+            $array['value'] =$v1['develop_cost'];
+            $array['date_time'] =$v1['date_time'];
+            $array['os_id'] =$v1['os_id'];
+            $array['app_id'] =$v1['app_id'];
+            $array['game_creator'] =$v1['game_creator'];
+            $array['remark'] ="NULL";
+            $array['create_time'] =date('Y-m-d',time());
+            array_push($array_append,$array);
+            //93 总成本
+            $array['date_type'] =$v1['date_type'];
+            $array['dim_id'] = 93;
+            $array['value'] =$v1['total_cost'];
+            $array['date_time'] =$v1['date_time'];
+            $array['os_id'] =$v1['os_id'];
+            $array['app_id'] =$v1['app_id'];
+            $array['game_creator'] =$v1['game_creator'];
+            $array['remark'] ="NULL";
+            $array['create_time'] =date('Y-m-d',time());
+            array_push($array_append,$array);
+            //92总利润
+            $array['date_type'] =$v1['date_type'];
+            $array['dim_id'] = 92;
+            $array['value'] =$v1['total_profit'];
+            $array['date_time'] =$v1['date_time'];
+            $array['os_id'] =$v1['os_id'];
+            $array['app_id'] =$v1['app_id'];
+            $array['game_creator'] =$v1['game_creator'];
+            $array['remark'] ="NULL";
+            $array['create_time'] =date('Y-m-d',time());
+            array_push($array_append,$array);
             # code...
         }
 
@@ -490,14 +492,14 @@ class HomeUsdCommond extends Command
         DB::UPDATE($update_sql);
 
         DB::commit();
-        
+
         echo $currency_type .' 结束时间：'.date('Y-m-d H:i:s')."\r\n";
 
- }
+    }
 
 
 
-     public function getDimId($tb_name,$field,$value,$currency_type){
+    public function getDimId($tb_name,$field,$value,$currency_type){
         $sql = "select dim_id,dim_table_id,dim_value from {$tb_name} where {$field}='{$value}' and currency_type = {$currency_type}";
         echo "getDimId:".$sql;
         $info = DB::select($sql);
@@ -505,11 +507,11 @@ class HomeUsdCommond extends Command
 
         $dim_id = [];
         foreach ($info as $key => $value) {
-           $dim_id[$value['dim_table_id']] = $value;
+            $dim_id[$value['dim_table_id']] = $value;
         }
 
 
         return $dim_id;
-    }   
+    }
 
 }
