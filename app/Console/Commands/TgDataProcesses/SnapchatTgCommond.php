@@ -69,7 +69,7 @@ class SnapchatTgCommond extends Command
 
         $start_date = date('Y-m-d',strtotime($date) - 86400);
         $end_date= $date;
-
+        var_dump($start_date,$end_date);
         // 获取Sino代理token
         $sino_api_url = 'https://adsapi.snapchat.com/v1';
         self::getSinoSnapchatToken($sino_api_url,$start_date, $end_date);
@@ -83,6 +83,7 @@ class SnapchatTgCommond extends Command
     public static function getSinoSnapchatToken($sino_api_url,$start_date, $end_date){
         $access_json = Redis::get('snapchat_sino_access_token');
         $sino_access_token = '';
+        var_dump("access_json:".$access_json);
         if ($access_json) {
             $content_arr = json_decode($access_json, true);
             // todo 此处为生成access_token代码
@@ -95,6 +96,7 @@ class SnapchatTgCommond extends Command
             $get_access_token_url = "https://accounts.snapchat.com/login/oauth2/access_token";
             $get_access_token_result = CurlRequest::curl_header_Post($get_access_token_url, $get_access_token_data,[]);
             $get_access_token_result = json_decode($get_access_token_result,true);
+            var_dump($get_access_token_result);
             $token_res_i=1;
             while(!$get_access_token_result || !isset($get_access_token_result['access_token'])){
                 $get_access_token_result = CurlRequest::curl_header_Post($get_access_token_url, $get_access_token_data,[]);
@@ -112,7 +114,7 @@ class SnapchatTgCommond extends Command
                 DataImportImp::saveDataErrorLog(1,'ptg75','Snapchat',4,$error_msg);
             }
         }
-//        var_dump($sino_access_token);
+        var_dump("sino_access_token:".$sino_access_token);
         if ($sino_access_token){
             $organization_ids = ['16412453-e008-4353-a8da-881ed5170e9c','fbbf7671-924a-4abf-adaa-a8c67f44fae9'] ;
             foreach ($organization_ids as $organization_id){
