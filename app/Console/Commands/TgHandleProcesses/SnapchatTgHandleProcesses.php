@@ -55,7 +55,7 @@ class SnapchatTgHandleProcesses extends Command
     public function handle()
     {
         set_time_limit(0);
-        
+
         $source_id = 'ptg75';
         $source_name = 'Snapchat';
 //        define('MYSQL_TABLE_NAME','zplay_tg_report_daily');
@@ -110,14 +110,14 @@ class SnapchatTgHandleProcesses extends Command
         }
 
         //获取对照表国家信息
-         $country_map =[];
-         $country_info = CommonLogic::getCountryList($country_map)->get();
-         $country_info = Service::data($country_info);
-         if(!$country_info){
-             $error_msg = '国家信息数据查询为空';
-             DataImportImp::saveDataErrorLog(2,$source_id,$source_name,4,$error_msg);
-             exit;
-         }
+        $country_map =[];
+        $country_info = CommonLogic::getCountryList($country_map)->get();
+        $country_info = Service::data($country_info);
+        if(!$country_info){
+            $error_msg = '国家信息数据查询为空';
+            DataImportImp::saveDataErrorLog(2,$source_id,$source_name,4,$error_msg);
+            exit;
+        }
 
         // //获取对照表广告类型
         // $AdType_map['platform_id'] = $source_id;
@@ -235,20 +235,8 @@ class SnapchatTgHandleProcesses extends Command
             }
 
             // 匹配国家用
-//            $country_info_str = explode('_',$json_info['campaign_name']);
-//            $country_info_list = array_map('strtolower',$country_info_str);
-            $country_adsquads_name_str = explode('_',$json_info['adsquads_name']);
-            $country_adsquads_name_list = array_map('strtolower',$country_adsquads_name_str);
-
-//            $country_info_old_str = explode('-',$json_info['campaign_name']);
-//            $country_info_old_list = array_map('strtolower',$country_info_old_str);
-            $country_adsquads_old_name_str = explode('-',$json_info['adsquads_name']);
-            $country_adsquads_old_name_list = array_map('strtolower',$country_adsquads_old_name_str);
-
             foreach ($country_info as $country_k => $country_v) {
-                if ($country_v['name'] == 'KI') continue;
-//                if(in_array(strtolower($country_v['name']),$country_info_list) || in_array(strtolower($country_v['name']),$country_adsquads_name_list) || in_array(strtolower($country_v['name']),$country_info_old_list) || in_array(strtolower($country_v['name']),$country_adsquads_old_name_list)){
-                if(in_array(strtolower($country_v['name']),$country_adsquads_name_list) || in_array(strtolower($country_v['name']),$country_adsquads_old_name_list)){
+                if(isset($json_info['country']) && (strtoupper($json_info['country']) == strtoupper($country_v['name']))){
                     $array[$k]['country_id'] = $country_v['c_country_id'];
                     $num_country = 0;
                     break;
@@ -259,27 +247,11 @@ class SnapchatTgHandleProcesses extends Command
 
             }
 
+
             if ($num_country){
-                $array[$k]['country_id'] = 16;
-                $num_country = 0;
-//               $error_log_arr['country'][] = $json_info['campaign_id'].'('.$json_info['adsquads_name'].')';
+                $error_log_arr['country'][] = isset($json_info['country']) ? $json_info['country'] : 'Unknown Region';
             }
 
-
-            // foreach ($AdType_info as $AdType_k => $AdType_v) {
-            //  if(($json_info['size'].'-'.$json_info['ad_type']) == $AdType_v['name'] ){
-            //         $array[$k]['ad_type'] = $AdType_v['ad_type_id'];
-            //         $num_adtype = 0;
-            //         break;
-            //   }else{
-            //       //广告类型失败
-            //       $num_adtype++;
-
-            //   }
-            //  }
-            //  if ($num_adtype){
-            //     $error_log_arr['ad_type'][] = $json_info['size'].'-'.$json_info['ad_type'];
-            // }
 
             if(($num+$num_country+$num_adtype)>0){
 
@@ -384,10 +356,10 @@ class SnapchatTgHandleProcesses extends Command
                 $error_msg_array[] = 'campaign_id匹配失败,ID为:'.$campaign_id;
                 $error_msg_mail[] = 'campaign_id匹配失败，ID为：'.$campaign_id;
             }
-             if (isset($error_log_arr['country'])){
-                 $country = implode(',',array_unique($error_log_arr['country']));
-                 $error_msg_array[] = '国家匹配失败,名称为:'.$country;
-             }
+            if (isset($error_log_arr['country'])){
+                $country = implode(',',array_unique($error_log_arr['country']));
+                $error_msg_array[] = '国家匹配失败,名称为:'.$country;
+            }
             // if (isset($error_log_arr['ad_type'])){
             //     $ad_type = implode(',',array_unique($error_log_arr['ad_type']));
             //     $error_msg_array[] = '广告类型匹配失败，ID为：<font color="red">'.$ad_type."</font>";
@@ -402,8 +374,8 @@ class SnapchatTgHandleProcesses extends Command
         if ($array) {
 
             $plat_str =$source_id.'lishuyang@lishuyang'.$dayid;
-            Redis::rpush(env('REDIS_TG_KEYS'), $plat_str); 
-                        //拆分批次
+            Redis::rpush(env('REDIS_TG_KEYS'), $plat_str);
+            //拆分批次
             $step = array();
             $i = 0;
             foreach ($array as $kkkk => $insert_data_info) {
@@ -417,44 +389,44 @@ class SnapchatTgHandleProcesses extends Command
 
             $time = date('Y-m-d H:i:s');
 
-             if ($step) {
+            if ($step) {
                 foreach ($step as $k => $v_info) {
                     $sql_str ='';
                     foreach ($v_info as $k_sql => $v) {
                         # code...
                         $sql_str.= "('".$v['date']."'," // date
-                        ."'".$v['app_id']."',"  //app_id
-                        ."'',"//channel_id
-                        ."'".$v['country_id']."',"//country_id
-                        ."'".$v['platform_id']."',"//platform_id
-                        ."'".$v['agency_platform_id']."',"//agency_platform_id
-                        ."'',"//data_platform_id
-                        ."'1',"//type
-                        ."'".$v['platform_account']."',"//platform_account
-                        ."'".$v['data_account']."',"//data_account
-                        ."'1',"//cost_type
-                        ."'".$v['platform_app_id']."',"//platform_app_id
-                        ."'".$v['platform_app_name']."',"//platform_app_name
-                        ."'".$v['ad_id']."',"//ad_id
-                        ."'".$v['ad_name']."',"//ad_name
-                        ."'',"//ad_type
-                        ."'',"//tongji_type;
-                        ."'".$v['impression']."',"//impression;
-                        ."'".$v['click']."',"//click;
-                        ."'".$v['new']."',"//new;
-                        ."'',"//new_phone;
-                        ."'',"//new_pad;
-                        ."'".$v['cost']."',"//cost;
-                        ."'".$v['cost_exc']."',"//cost_exc;
-                        ."'',"//device_type;
-                        ."'',"//remark;
-                        ."'".$time."',"//create_time
-                        ."'".$time."',"//update_time
-                        ."'".$v['cost_usd']."'),";//cost_usd
+                            ."'".$v['app_id']."',"  //app_id
+                            ."'',"//channel_id
+                            ."'".$v['country_id']."',"//country_id
+                            ."'".$v['platform_id']."',"//platform_id
+                            ."'".$v['agency_platform_id']."',"//agency_platform_id
+                            ."'',"//data_platform_id
+                            ."'1',"//type
+                            ."'".$v['platform_account']."',"//platform_account
+                            ."'".$v['data_account']."',"//data_account
+                            ."'1',"//cost_type
+                            ."'".$v['platform_app_id']."',"//platform_app_id
+                            ."'".$v['platform_app_name']."',"//platform_app_name
+                            ."'".$v['ad_id']."',"//ad_id
+                            ."'".$v['ad_name']."',"//ad_name
+                            ."'',"//ad_type
+                            ."'',"//tongji_type;
+                            ."'".$v['impression']."',"//impression;
+                            ."'".$v['click']."',"//click;
+                            ."'".$v['new']."',"//new;
+                            ."'',"//new_phone;
+                            ."'',"//new_pad;
+                            ."'".$v['cost']."',"//cost;
+                            ."'".$v['cost_exc']."',"//cost_exc;
+                            ."'',"//device_type;
+                            ."'',"//remark;
+                            ."'".$time."',"//create_time
+                            ."'".$time."',"//update_time
+                            ."'".$v['cost_usd']."'),";//cost_usd
 
-                     }
-                     $sql_str = rtrim($sql_str,',');
-                     Redis::rpush(env('REDIS_TG_KEYS'), $sql_str);
+                    }
+                    $sql_str = rtrim($sql_str,',');
+                    Redis::rpush(env('REDIS_TG_KEYS'), $sql_str);
                 }
             }
 

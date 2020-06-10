@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Artisan;
 use App\Common\CommonFunction;
 use Illuminate\Support\Facades\Redis;
+use MongoDB\BSON\UTCDateTime;
 
 class SnapchatTgCommond extends Command
 {
@@ -72,11 +73,6 @@ class SnapchatTgCommond extends Command
         // 获取Sino代理token
         $sino_api_url = 'https://adsapi.snapchat.com/v1';
         self::getSinoSnapchatToken($sino_api_url,$start_date, $end_date);
-
-        // 获取百度代理token
-//        $baidu_organization_id = 'fbbf7671-924a-4abf-adaa-a8c67f44fae9';
-//        $baidu_api_url = 'https://mediago.baidu.com/api/ads/?sf=v1';
-//        self::getBaiduSnapchatToken($baidu_api_url,$baidu_organization_id,$start_date, $end_date);
 
         // 数据处理
         Artisan::call('SnapchatTgHandleProcesses',['dayid'=>$end_date]);
@@ -181,6 +177,7 @@ class SnapchatTgCommond extends Command
                         $adaccount = $adaccounts['adaccount'];
                         $adaccount_id = $adaccount['id'];
                         $adaccount_name = $adaccount['name'];
+                        $timezone = $adaccount['timezone'];
                         // 查询删除数据
                         $map = [];
                         $map['dayid'] = $end_date;
@@ -191,15 +188,18 @@ class SnapchatTgCommond extends Command
                             $bool = DataImportLogic::deleteHistoryData(SCHEMA, TABLE_NAME, $map);
                         }
 
-                        self::getCampaigns($api_url, $organization_id, $adaccount_name, $adaccount_id, $header, $start_date, $end_date);
+                        $campaign_name_list = [];
+                        $campaign_name_list = self::getCampaigns($api_url,$organization_id,$adaccount_name,$adaccount_id, $header, $start_date, $end_date);
+                        self::getAdReport($api_url, $organization_id, $adaccount_name, $adaccount_id,$campaign_name_list, $header, $start_date, $end_date,$timezone);
                     }
                 }
             }
         }
     }
 
-    // 获取campaign id信息
+    // 获取campaign数据
     public static function getCampaigns($api_url,$organization_id,$adaccount_name,$adaccount_id, $header, $start_date, $end_date){
+        $campaign_name_list = [];
         $url = $api_url."/adaccounts/{$adaccount_id}/campaigns?limit=100";
         $campaigns_res = self::get_response($url, $header);
         $campaigns_res_i=1;
@@ -219,106 +219,53 @@ class SnapchatTgCommond extends Command
                         $campaign = $campaigns['campaign'];
                         $campaign_id = $campaign['id'];
                         $campaign_name = $campaign['name'];
-                        self::getAdSquads($api_url,$organization_id,$adaccount_name,$adaccount_id,$campaign_id,$campaign_name, $header, $start_date, $end_date);
+                        $campaign_name_list[$adaccount_id][$campaign_id] = $campaign_name;
                     }
                 }
             }
         }
-    }
-
-
-    // 获取adsquads id 信息
-    public static function getAdSquads($api_url,$organization_id,$adaccount_name,$adaccount_id,$campaign_id,$campaign_name, $header, $start_date, $end_date){
-        $url = $api_url."/campaigns/{$campaign_id}/adsquads?limit=100";
-        $adsquads_res = self::get_response($url, $header);
-        $adsquads_res_i=1;
-        while(!$adsquads_res){
-            $adsquads_res = self::get_response($url, $header);
-            $adsquads_res_i++;
-            if($adsquads_res_i>2)
-                break;
-        }
-        if ($adsquads_res){
-            $adsquads_res = json_decode($adsquads_res, true);
-            if (isset($adsquads_res['adsquads']) && $adsquads_res['adsquads']){
-                $adsquads_res = $adsquads_res['adsquads'];
-                foreach ($adsquads_res as $adsquads){
-                    if (isset($adsquads['adsquad']) && $adsquads['adsquad']){
-                        $adsquads = $adsquads['adsquad'];
-                        $adsquads_id = $adsquads['id'];
-                        $adsquads_name = $adsquads['name'];
-//                        self::getAds($organization_id,$adaccount_name,$adaccount_id,$campaign_id,$campaign_name,$adsquads_id,$adsquads_name, $header, $start_date, $end_date);
-                        self::getAdReport($api_url,$organization_id,$adaccount_name,$adaccount_id,$campaign_id,$campaign_name,$adsquads_id,$adsquads_name, $header, $start_date, $end_date);
-                    }
-                }
-            }
-        }
+        return $campaign_name_list;
     }
 
     // 获取adsquads id 信息
-    public static function getAdReport($api_url,$organization_id,$adaccount_name,$adaccount_id,$campaign_id,$campaign_name,$adsquads_id,$adsquads_name, $header, $start_date, $end_date)
+    public static function getAdReport($api_url, $organization_id, $adaccount_name, $adaccount_id,$campaign_name_list, $header, $start_date, $end_date,$timezone)
     {
-
-//        // todo 夏令时取数采用
-//        if (strtotime($end_date) >= strtotime('2020-03-08') && strtotime($end_date) <= strtotime('2020-11-01')){
-//            $start_date_z = $start_date . "T23:00:00Z";
-//            $end_date_z = $end_date . "T23:00:00Z";
-//        }elseif ($end_date == '2020-11-02'){
-//            // todo 东夏令时切换，特殊处理，取数采用
-//            $start_date_z = $start_date . "T23:00:00Z";
-//            $end_date_z = date('Y-m-d',strtotime($end_date)+2*86400) . "T00:00:00Z";
-//        }elseif($end_date == '2020-11-03'){
-//            // todo 东令时取数采用
-//            $start_date_z = date('Y-m-d',strtotime($start_date)+2*86400) . "T00:00:00Z"; // 28号
-//            $end_date_z = date('Y-m-d',strtotime($end_date)+86400) . "T00:00:00Z";
-//        }elseif(strtotime($end_date) >= strtotime('2019-10-29')) {
-//            $start_date_z = date('Y-m-d', strtotime($start_date) + 86400) . "T00:00:00Z"; // 29号之后
-//            $end_date_z = date('Y-m-d',strtotime($end_date)+86400) . "T00:00:00Z";
-//        }
-
-        // todo 夏令时取数采用
-        if ($adaccount_id == 'dee65c97-c782-4a7f-8629-0a1c1c4a78ad' || $adaccount_id == '6dc6bb62-d47a-4b49-84ff-d85a4f824859' || $adaccount_id == 'dbf5808a-7342-49ac-890b-f834b4b003bc' || $adaccount_id == '64fe2210-5b97-4fd4-bcbc-76ac22ea129c' || $adaccount_id == 'ebb0bb95-929a-469a-9074-b939513baf71' || $adaccount_id == '40ff78e0-22ec-4850-9b33-29642607c3b1'){
+        // GMT时区游戏数据
+        if ($timezone <> 'UTC'){
             if (strtotime($end_date) >= strtotime('2020-04-08') && strtotime($end_date) <= strtotime('2020-11-01')){
-                // todo 夏令时切换，特殊处理，取数采用
-                $start_date_z = $start_date . "T23:00:00Z";
-                $end_date_z = $end_date . "T23:00:00Z";
+                // 夏令时取数采用时间
+                $start_date_z = "{$start_date}T22:00:00.000-01:00";
+                $end_date_z = "{$end_date}T22:00:00.000-01:00";
+            }else{
+                // todo 冬令时取数采用
 
-//                var_dump($start_date_z);
-//                var_dump($end_date_z);
             }
         }else {
-            if (strtotime($end_date) == strtotime('2020-03-30')) {
-                // todo 夏令时切换，特殊处理，取数采用
-                $start_date_z = date('Y-m-d', strtotime($start_date) + 2 * 86400) . "T00:00:00Z"; // 29号之后
-                $end_date_z = date('Y-m-d', strtotime($end_date) + 86400) . "T00:00:00Z";
-            } elseif (strtotime($end_date) <= strtotime('2020-10-31')) {
-                // todo 夏令时切换，特殊处理，取数采用
-                $start_date_z = date('Y-m-d', strtotime($start_date) + 86400) . "T00:00:00Z"; // 29号之后
-                $end_date_z = date('Y-m-d', strtotime($end_date) + 86400) . "T00:00:00Z";
-            } elseif (strtotime($end_date) >= strtotime('2020-11-01') && strtotime($end_date) <= strtotime('2020-11-01')) {
-                // todo 夏令时切换，特殊处理，取数采用
-                $start_date_z = $start_date . "T23:00:00Z";
-                $end_date_z = $end_date . "T23:00:00Z";
-            } elseif ($end_date == '2020-11-02') {
-                // todo 冬令时切换，特殊处理，取数采用
-                $start_date_z = $start_date . "T23:00:00Z";
-                $end_date_z = date('Y-m-d', strtotime($end_date) + 2 * 86400) . "T00:00:00Z";
-            } elseif ($end_date == '2020-11-03') {
+            // UTC时区游戏数据
+            if (strtotime($end_date) >= strtotime('2020-04-08') && strtotime($end_date) <= strtotime('2020-11-01')){
+                // 夏令时取数采用时间
+                $start_date_z = "{$start_date}T23:00:00.000-01:00";
+                $end_date_z = "{$end_date}T23:00:00.000-01:00";
+
+            }else{
                 // todo 冬令时取数采用
-                $start_date_z = date('Y-m-d', strtotime($start_date) + 2 * 86400) . "T00:00:00Z"; // 28号
-                $end_date_z = date('Y-m-d', strtotime($end_date) + 86400) . "T00:00:00Z";
-            } elseif (strtotime($end_date) >= strtotime('2020-11-04')) {
-                // todo 冬令时切换，特殊处理，取数采用
-                $start_date_z = date('Y-m-d', strtotime($start_date) + 86400) . "T00:00:00Z"; // 29号之后
-                $end_date_z = date('Y-m-d', strtotime($end_date) + 86400) . "T00:00:00Z";
+
             }
         }
-
 
 //        var_dump($start_date_z);
 //        var_dump($end_date_z);
 
-        $url = $api_url."/adsquads/{$adsquads_id}/stats?granularity=TOTAL&start_time={$start_date_z}&end_time={$end_date_z}&fields=impressions,swipes,screen_time_millis,quartile_1,quartile_2,quartile_3,view_completion,spend,video_views,ios_installs,android_installs,total_installs";
+//        GMT
+//        https://adsapi.snapchat.com/v1/adaccounts/dbf5808a-7342-49ac-890b-f834b4b003bc/stats/?granularity=TOTAL&breakdown=campaign&fields=impressions,swipes,screen_time_millis,quartile_1,quartile_2,quartile_3,view_completion,spend,video_views,total_installs&start_time=2020-06-05T22:00:00.000-01:00&end_time=2020-06-06T22:00:00.000-01:00
+
+//        UTC
+//        https://adsapi.snapchat.com/v1/adaccounts/4c294245-1189-45b0-af2d-84cc0117c5f0/stats/?granularity=TOTAL&breakdown=campaign&fields=impressions,swipes,screen_time_millis,quartile_1,quartile_2,quartile_3,view_completion,spend,video_views,total_installs&report_dimension=country&start_time=2020-06-05T23:00:00.000-01:00&end_time=2020-06-06T23:00:00.000-01:00
+
+//        var_dump($adaccount_id);
+//        var_dump($campaign_name_list);
+
+        $url = $api_url."/adaccounts/{$adaccount_id}/stats?granularity=TOTAL&breakdown=campaign&start_time={$start_date_z}&end_time={$end_date_z}&fields=impressions,swipes,screen_time_millis,quartile_1,quartile_2,quartile_3,view_completion,spend,video_views,total_installs&report_dimension=country";
 
         $ads_stats_res = self::get_response($url, $header);
         $ads_stats_res_i=1;
@@ -342,32 +289,36 @@ class SnapchatTgCommond extends Command
                         $insert_data['organization_id'] = $organization_id;
                         $insert_data['adaccount_id'] = $adaccount_id;
                         $insert_data['adaccount_name'] = $adaccount_name;
-                        $insert_data['campaign_id'] = $campaign_id;
-                        $insert_data['campaign_name'] = $campaign_name;
-                        $insert_data['adsquads_id'] = $adsquads_id;
-                        $insert_data['adsquads_name'] = $adsquads_name;
-//                        $insert_data['ad_name'] = $ads_name;
-//                        $insert_data['ad_id'] = $total_stat['id'];
                         $insert_data['type'] = $total_stat['type'];
                         $insert_data['start_time'] = $total_stat['start_time'];
                         $insert_data['end_time'] = $total_stat['end_time'];
                         $insert_data['finalized_data_end_time'] = $total_stat['finalized_data_end_time'];
-                        if (isset($total_stat['stats']) && $total_stat['stats']){
-                            $stat = $total_stat['stats'];
-                            $insert_data['impressions'] = $stat['impressions'];
-                            $insert_data['swipes'] = $stat['swipes'];
-                            $insert_data['quartile_1'] = $stat['quartile_1'];
-                            $insert_data['quartile_2'] = $stat['quartile_2'];
-                            $insert_data['quartile_3'] = $stat['quartile_3'];
-                            $insert_data['spend'] = $stat['spend'];
-                            $insert_data['video_views'] = $stat['video_views'];
-                            $insert_data['view_completion'] = $stat['view_completion'];
-                            $insert_data['screen_time_millis'] = $stat['screen_time_millis'];
-                            $insert_data['total_installs'] = $stat['total_installs'];
-                            $insert_data['android_installs'] = $stat['android_installs'];
-                            $insert_data['ios_installs'] = $stat['ios_installs'];
-
-                            $all_data[] = $insert_data;
+                        if (isset($total_stat['breakdown_stats']) && $total_stat['breakdown_stats']){
+                            $breakdown_stats = $total_stat['breakdown_stats'];
+                            if (isset($breakdown_stats['campaign']) && $breakdown_stats['campaign']) {
+                                $campaign_stat = $breakdown_stats['campaign'];
+                                foreach ($campaign_stat as $campaign_list){
+                                    $insert_data['campaign_id'] = $campaign_list['id'];
+                                    $insert_data['campaign_name'] = isset($campaign_name_list[$adaccount_id][$campaign_list['id']]) ? $campaign_name_list[$adaccount_id][$campaign_list['id']] : '';
+                                    if (isset($campaign_list['dimension_stats']) && $campaign_list['dimension_stats']) {
+                                        $campaign_info = $campaign_list['dimension_stats'];
+                                        foreach ($campaign_info as $campaign) {
+                                            $insert_data['impressions'] = isset($campaign['impressions']) ? $campaign['impressions'] : 0;
+                                            $insert_data['swipes'] = isset($campaign['swipes']) ? $campaign['swipes'] : 0;
+                                            $insert_data['quartile_1'] = isset($campaign['quartile_1']) ? $campaign['quartile_1'] : 0;
+                                            $insert_data['quartile_2'] = isset($campaign['quartile_2']) ? $campaign['quartile_2'] : 0;
+                                            $insert_data['quartile_3'] = isset($campaign['quartile_3']) ? $campaign['quartile_3'] : 0;
+                                            $insert_data['view_completion'] = isset($campaign['view_completion']) ? $campaign['view_completion'] : 0;
+                                            $insert_data['spend'] = isset($campaign['spend']) ? $campaign['spend'] : 0;
+                                            $insert_data['video_views'] = isset($campaign['video_views']) ? $campaign['video_views'] : 0;
+                                            $insert_data['country'] = isset($campaign['country']) ? $campaign['country'] : 0;
+                                            $insert_data['screen_time_millis'] = isset($campaign['screen_time_millis']) ? $campaign['screen_time_millis'] : 0;
+                                            $insert_data['total_installs'] = isset($campaign['total_installs']) ? $campaign['total_installs'] : 0;
+                                            $all_data[] = $insert_data;
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -376,6 +327,8 @@ class SnapchatTgCommond extends Command
             }
         }
     }
+
+
 
     // 保存到数据库
     public static function insertData($all_data,$end_date,$organization_id,$adaccount_id){
@@ -398,14 +351,22 @@ class SnapchatTgCommond extends Command
             $insert_data[$k]['cost'] = isset($v['spend']) ? $v['spend']/1000000 : 0.00;;
         }
 
-        //var_dump(count($insert_data));
-        if ($insert_data) {
+        $ii = 0;
+        $step = [];
+        foreach ($insert_data as $kkkk => $insert_data_info) {
+            if ($kkkk % 1000 == 0) $ii++;
+            if ($insert_data_info) {
+                $step[$ii][] = $insert_data_info;
+            }
+        }
 
-            $result = DataImportLogic::insertChannelData(SCHEMA, TABLE_NAME, $insert_data);
-
-            if (!$result) {
-                $message = "{$end_date}, 当前Snapchat数据插入失败" . date('Y-m-d H:i:s');
-                self::saveLog(AD_PLATFORM, $message);
+        if ($step) {
+            foreach ($step as $k => $v) {
+                $result = DataImportLogic::insertChannelData(SCHEMA, TABLE_NAME, $v);
+                if (!$result) {
+                    $message = "{$end_date}, 当前Snapchat数据插入失败" . date('Y-m-d H:i:s');
+                    self::saveLog(AD_PLATFORM, $message);
+                }
             }
         }
     }
