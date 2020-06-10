@@ -183,7 +183,9 @@ class SnapchatTgCommond extends Command
                         $map['dayid'] = $end_date;
                         $map['source_id'] = SOURCE_ID;
                         $map['account'] = $adaccount_id;
+                        var_dump($map);
                         $count = DataImportLogic::getChannelData('tg_data', 'erm_data', $map)->count();
+                        var_dump($count);
                         if ($count > 0) {
                             $bool = DataImportLogic::deleteHistoryData(SCHEMA, TABLE_NAME, $map);
                         }
