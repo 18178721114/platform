@@ -235,20 +235,8 @@ class SnapchatTgHandleProcesses extends Command
             }
 
             // 匹配国家用
-//            $country_info_str = explode('_',$json_info['campaign_name']);
-//            $country_info_list = array_map('strtolower',$country_info_str);
-            $country_adsquads_name_str = explode('_',$json_info['adsquads_name']);
-            $country_adsquads_name_list = array_map('strtolower',$country_adsquads_name_str);
-
-//            $country_info_old_str = explode('-',$json_info['campaign_name']);
-//            $country_info_old_list = array_map('strtolower',$country_info_old_str);
-            $country_adsquads_old_name_str = explode('-',$json_info['adsquads_name']);
-            $country_adsquads_old_name_list = array_map('strtolower',$country_adsquads_old_name_str);
-
             foreach ($country_info as $country_k => $country_v) {
-                if ($country_v['name'] == 'KI') continue;
-//                if(in_array(strtolower($country_v['name']),$country_info_list) || in_array(strtolower($country_v['name']),$country_adsquads_name_list) || in_array(strtolower($country_v['name']),$country_info_old_list) || in_array(strtolower($country_v['name']),$country_adsquads_old_name_list)){
-                if(in_array(strtolower($country_v['name']),$country_adsquads_name_list) || in_array(strtolower($country_v['name']),$country_adsquads_old_name_list)){
+                if(isset($json_info['country']) && (strtoupper($json_info['country']) == strtoupper($country_v['name']))){
                     $array[$k]['country_id'] = $country_v['c_country_id'];
                     $num_country = 0;
                     break;
@@ -259,27 +247,11 @@ class SnapchatTgHandleProcesses extends Command
 
             }
 
+
             if ($num_country){
-                $array[$k]['country_id'] = 16;
-                $num_country = 0;
-//               $error_log_arr['country'][] = $json_info['campaign_id'].'('.$json_info['adsquads_name'].')';
+                $error_log_arr['country'][] = isset($json_info['country']) ? $json_info['country'] : 'Unknown Region';
             }
 
-
-            // foreach ($AdType_info as $AdType_k => $AdType_v) {
-            //  if(($json_info['size'].'-'.$json_info['ad_type']) == $AdType_v['name'] ){
-            //         $array[$k]['ad_type'] = $AdType_v['ad_type_id'];
-            //         $num_adtype = 0;
-            //         break;
-            //   }else{
-            //       //广告类型失败
-            //       $num_adtype++;
-
-            //   }
-            //  }
-            //  if ($num_adtype){
-            //     $error_log_arr['ad_type'][] = $json_info['size'].'-'.$json_info['ad_type'];
-            // }
 
             if(($num+$num_country+$num_adtype)>0){
 
