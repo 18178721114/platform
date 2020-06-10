@@ -93,6 +93,7 @@ class SnapchatTgCommond extends Command
                 'grant_type'=>'refresh_token',
                 'code' => $content_arr['refresh_token']
             ];
+            var_dump($get_access_token_data);
             $get_access_token_url = "https://accounts.snapchat.com/login/oauth2/access_token";
             $get_access_token_result = CurlRequest::curl_header_Post($get_access_token_url, $get_access_token_data,[]);
             $get_access_token_result = json_decode($get_access_token_result,true);
