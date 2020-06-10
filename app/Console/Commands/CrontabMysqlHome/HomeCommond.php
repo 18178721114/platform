@@ -59,8 +59,8 @@ class HomeCommond extends Command
 //        }
 
         // 入口方法
-    	$dayid = $this->argument('dayid')?$this->argument('dayid'):date('Y-m-d',strtotime('-2 day'));
-    	var_dump($dayid);
+        $dayid = $this->argument('dayid')?$this->argument('dayid'):date('Y-m-d',strtotime('-2 day'));
+        var_dump($dayid);
 
         $currency_type = 58;
         echo $currency_type .' 开始时间：'.date('Y-m-d H:i:s')."\r\n";
@@ -482,11 +482,11 @@ class HomeCommond extends Command
 
         echo $currency_type .' 结束时间：'.date('Y-m-d H:i:s')."\r\n";
 
- }
+    }
 
 
 
-     public function getDimId($tb_name,$field,$value,$currency_type){
+    public function getDimId($tb_name,$field,$value,$currency_type){
         $sql = "select dim_id,dim_table_id,dim_value from {$tb_name} where {$field}='{$value}' and currency_type = {$currency_type}";
         echo "getDimId:".$sql;
         $info = DB::select($sql);
@@ -494,11 +494,11 @@ class HomeCommond extends Command
 
         $dim_id = [];
         foreach ($info as $key => $value) {
-           $dim_id[$value['dim_table_id']] = $value;
+            $dim_id[$value['dim_table_id']] = $value;
         }
 
 
         return $dim_id;
-    }   
+    }
 
 }
