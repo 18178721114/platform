@@ -57,5 +57,13 @@ class UserController extends Controller
         UserImp::wholeUserList($this->params);
     }
 
+    /**
+     * 用户登录
+     */
+    public  function devlogin()
+    {
+        UserImp::devlogin($this->params);
+    }
+
 
 }

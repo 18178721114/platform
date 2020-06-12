@@ -152,6 +152,8 @@ class SetError
         618 => ['计费分成生效时间必填<br/>Billing share effective time is required',''],
         619 => ['应用全称每个单词首字母必须大写<br/>App full name The first letter of each word must be capitalized',''],
         620 => ['应用全称格式或字符有误<br/>Application full name format or wrong characters',''],
+        829 => ['应用全称(应用二级大类)修改失败<br/>Application full name (application level 2 major) modification failure',''],
+        830 => ['应用全称(应用二级大类)创建失败<br/>Application full name (application level 2 class) creation failure',''],
 
         // 统计配置
         621 => ['统计类型必填',''],
@@ -332,8 +334,24 @@ class SetError
         1020 => ['列表参数有误'],
         1021 => ['时间参数有误'],
         1022 => ['排序指标有误'],
-        1023 => ['当前ID所属公司不存在'],
+        1023 => ['公司ID有误'],
         1024 => ['分应用展示类型有误'],
+
+        // 开发者平台相关
+        1030 => ['应用ID必传'],
+        1031 => ['展示状态值有误'],
+        1032 => ['此ID应用不存在'],
+        1033 => ['展示状态修改失败'],
+        1034 => ['开发者邮箱必传'],
+        1035 => ['开发者ID必传'],
+        1036 => ['开发者ID有误'],
+        1037 => ['开发者信息已存在,请勿冲突添加'],
+        1038 => ['开发者账号注册失败'],
+        1039 => ['外网通行证提示:该用户已经存在'],
+        1040 => ['请求IP不合法,不在白名单之内(该IP添加需和together项目一同添加IP白名单)'],
+        1041 => ['参数不合法,为空或者邮箱格式不正确'],
+        1042 => ['开发者信息不存在,无法修改'],
+        1043 => ['开发者账号修改失败'],
     ];
 
     /**

@@ -28,7 +28,7 @@ class CApp extends Model{
      * @var array
      */
     protected $fillable = [
-        'app_id', 'app_name', 'app_full_name', 'developer_id', 'app_type_id', 'company_id', 'release_region_id', 'os_id', 'release_group', 'app_category_id', 'online_time', 'create_time', 'update_time','is_jailbreak'
+        'app_id', 'app_name', 'app_full_name', 'developer_id', 'app_type_id', 'company_id', 'release_region_id', 'os_id', 'release_group', 'app_category_id', 'online_time', 'create_time', 'update_time','is_jailbreak','is_dev_show'
     ];
 
     /**

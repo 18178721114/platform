@@ -32,5 +32,29 @@ class DeveloperController extends Controller
         DeveloperImp::createDeveloper($this->params);
     }
 
+    /**
+     * 开发者平台应用控制列表接口
+     * @param $params array 请求数据
+     */
+    public function developAppList(){
+        DeveloperImp::developAppList($this->params);
+    }
+
+    /**
+     * 开发者平台应用控制状态修改接口
+     * @param $params array 请求数据
+     */
+    public function developAppStatus(){
+        DeveloperImp::developAppStatus($this->params);
+    }
+
+    /**
+     * 开发者平台用户注册接口
+     * @param $params array 请求数据
+     */
+    public function developUserRegister(){
+        DeveloperImp::developUserRegister($this->params);
+    }
+
 
 }

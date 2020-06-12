@@ -17,6 +17,8 @@ Route::get('/', function () {
     return view('404');
 });
 Route::match(['post'], 'api/user/login', 'DataPlatform\UserController@login');
+
+Route::match(['post'], 'api/develop/platform/login', 'DataPlatform\UserController@devlogin');
 // Oauth2.0
 Route::match(['get'], 'api/oauth/authorize', 'OauthController@authorizecode');
 Route::match(['post'], 'api/oauth/token', 'OauthController@token');

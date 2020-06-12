@@ -60,6 +60,39 @@ class UserImp extends ApiBaseImp
         OperationLogImp::saveOperationLog(4,0);
         ApiResponseFactory::apiResponse($back_data,[]);
     }
+
+    /**
+     * 用户登录
+     * @param $params array 请求数据
+     */
+    public static function devlogin($params){
+        // 必填参数判断
+        if (!$params) ApiResponseFactory::apiResponse([],[],300);
+        $email = isset($params['email']) ? $params['email'] : ''; //获取token
+        if(!$email) ApiResponseFactory::apiResponse([],[],1034);
+        // 查询数据平台用户表有无此用户
+        $map['user_account'] = $email;
+        $map['account_type'] = 2;
+        $fields = ['id','user_account','developer_id','account_type'];
+
+        //验证用户是否有权限登录
+        $userInfo = UserLogic::Userlist($map,$fields)->get();
+        $userInfo =Service::data($userInfo);
+        if(!$userInfo) {
+            ApiResponseFactory::apiResponse([],[],1002);
+        }
+        $_SESSION['erm_dev_data']['guid'] = $userInfo[0]['id'];
+        $_SESSION['erm_dev_data']['email'] = $userInfo[0]['user_account'];
+        $_SESSION['erm_dev_data']['user_account'] = $userInfo[0]['user_account'];
+        $_SESSION['erm_dev_data']['developer_id'] = $userInfo[0]['developer_id'];
+        // 获取树形菜单
+        $back_data=[
+            'guid'=> $userInfo[0]['id'],
+            'email'=> $userInfo[0]['user_account'],
+            'developer_id'=> $userInfo[0]['developer_id'],
+        ];
+        ApiResponseFactory::apiResponse($back_data,[]);
+    }
         /**
      * 用户列表
      * @param $params array 请求数据
