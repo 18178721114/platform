@@ -576,8 +576,9 @@ class DataAppTotalImp extends ApiBaseImp
             }
 
         }else{
-
-            ApiResponseFactory::apiResponse([],[],302);
+            $chartList = [];
+            $chartList['total']['table_list'] = [0,0,0,0,0,0,0,0,0];
+            ApiResponseFactory::apiResponse(['table_list' => $chartList],[]);
         }
 
     }
