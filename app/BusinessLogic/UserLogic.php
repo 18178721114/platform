@@ -60,6 +60,16 @@ class UserLogic
         $bool = DB::table("user")->where('id',$id)->update($update_data);
         return $bool;
     }
+
+    /**
+     *  修改开发者用户信息
+     */
+    public static function userDevEdit($map, $update_data){
+
+        $bool = DB::table("user")->where($map)->update($update_data);
+        return $bool;
+    }
+
     //获取权限list
     public static function appList($map = [], $fields = '*'){
         $com_obj = DB::table("c_app");

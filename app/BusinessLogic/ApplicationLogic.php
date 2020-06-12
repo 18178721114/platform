@@ -178,6 +178,34 @@ class ApplicationLogic
         return $bool;
     }
 
+
+    /**
+     *  查询应用二级大类信息
+     */
+    public static function selectAppGenera($map){
+
+        $info = DB::table("c_app_genera")->where($map)->get();
+        return $info;
+    }
+
+    /**
+     *  创建应用二级大类信息
+     */
+    public static function insertAppGenera($insert_data){
+
+        $bool = DB::table("c_app_genera")->insert($insert_data);
+        return $bool;
+    }
+
+    /**
+     *  修改应用二级大类信息
+     */
+    public static function updateAppGenera($map, $update_data){
+
+        $bool = DB::table("c_app_genera")->where($map)->update($update_data);
+        return $bool;
+    }
+
     /**
      *  创建统计信息配置
      */

@@ -216,7 +216,7 @@ class ApplicationImp extends ApiBaseImp
                 $old_data['effective_date'] = '';
             }
 
-
+            $old_data_genera = $old_data['app_full_name'];
             $app_id = isset($params['app_id']) ? $params['app_id'] : ''; // 应用ID
             if (!$app_id) ApiResponseFactory::apiResponse([],[],617);
             $data['app_id'] = $app_id;
@@ -270,6 +270,21 @@ class ApplicationImp extends ApiBaseImp
                 if (!$result){
                     DB::rollBack();
                     ApiResponseFactory::apiResponse([],[],615);
+                }
+            }
+
+            // 维护应用二级大类
+            if ($old_data_genera && $data['app_full_name'] && ($old_data_genera !== $data['app_full_name'])){
+                $genera_map['app_genera_name'] = $old_data_genera;
+                $genera_info = ApplicationLogic::selectAppGenera($genera_map);
+                $genera_info = Service::data($genera_info);
+                if ($genera_info){
+                    $update_data['app_genera_name'] = $data['app_full_name'];
+                    $genera_res = ApplicationLogic::updateAppGenera($genera_map,$update_data);
+                    if (!$genera_res){
+                        DB::rollBack();
+                        ApiResponseFactory::apiResponse([],[],829);
+                    }
                 }
             }
 
@@ -433,6 +448,23 @@ class ApplicationImp extends ApiBaseImp
                     ApiResponseFactory::apiResponse([],[],615);
                 }
             }
+
+            // 维护应用二级大类
+            if (isset($data['app_full_name']) && $data['app_full_name']){
+                $genera_map['app_genera_name'] = $data['app_full_name'];
+                $genera_info = ApplicationLogic::selectAppGenera($genera_map);
+                $genera_info = Service::data($genera_info);
+                if (!$genera_info){
+                    $insert_data['app_genera_name'] = $data['app_full_name'];
+                    $insert_res = ApplicationLogic::insertAppGenera($insert_data);
+                    if (!$insert_res){
+                        DB::rollBack();
+                        ApiResponseFactory::apiResponse([],[],830);
+                    }
+                }
+            }
+
+
             $user_map['id']=$uid;
             //获取用户信息
             $userInfo = UserLogic::checkUserAccount($user_map)->first();

@@ -28,7 +28,7 @@ class User extends Model{
      * @var array
      */
     protected $fillable = [
-        'name', 'user_account','role_id','create_time','update_time','type','parent_uid','function_permission','company_id'
+        'name', 'user_account','role_id','create_time','update_time','type','parent_uid','function_permission','company_id','developer_id','account_type','dev_language'
     ];
 
     /**
