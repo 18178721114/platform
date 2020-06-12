@@ -265,11 +265,11 @@ class DataAppTotalImp extends ApiBaseImp
                 $group_by .= ' ,app_name ';
                 $total_group_by .= ' group by app_name ';
             }
-            $app_where .= " and app_id in ($app_id) ";
+            $app_where .= " and id in ($app_id) ";
             $total_where .= " and app_id in ($app_id) ";
         }elseif($app_permission) {
             $where .= " and app_id in ($app_permission) ";
-            $app_where .= " and app_id in ($app_permission) ";
+            $app_where .= " and id in ($app_permission) ";
             $total_where .= " and app_id in ($app_permission) ";
         }
 
@@ -290,7 +290,20 @@ class DataAppTotalImp extends ApiBaseImp
         $total_data_list = Service::data($total_data_list);
 //        var_dump($total_sql);var_dump($total_data_list);die;
 
-        $app_sql = " select app_full_name,app_name from $table_name $app_where group by app_full_name,app_name";
+        $app_sql = " select distinct app_full_name,concat(
+            	(case when release_region_id = 1 then '全球'
+            		 when release_region_id = 2 then '国外'
+            		 when release_region_id = 3 then '国内'
+            		 when release_region_id = 4 then '线下' 
+             		 end),'-',
+             	(case when os_id = 1 then 'IOS'
+             		when os_id = 2 then '安卓'
+             		when os_id = 3 then 'h5'
+             		when os_id = 4 then 'Amazon'
+             		end),'-',
+             		(case when app_name is null then '未知应用' else app_name end),'-',
+             		(case when app_id is null then '未知ID' else app_id end)			
+            ) as app_name from c_app $app_where ";
         $app_ids = DB::select($app_sql);
         $app_ids = Service::data($app_ids);
 
