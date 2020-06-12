@@ -65,33 +65,69 @@ class OutDevelopDivideCommond extends Command
     public function insertBasicDataHomePage($dayid){
         DB::beginTransaction();
         $sel_sql = "select count(1) as count  FROM
-        out_divide_develop
+        zplay_divide_develop_report
         WHERE
-         stats_date = '$dayid' ";
+         date = '$dayid' ";
         $sel_info = DB::select($sel_sql);
         $sel_info = Service::data($sel_info);
         if($sel_info[0]['count'] !=0){
             $del_sql ="DELETE
             FROM
-                out_divide_develop
-            WHERE stats_date = '$dayid' ";
+                zplay_divide_develop_report
+            WHERE date = '$dayid' ";
             $delete_info =DB::delete($del_sql);
 
             if(!$delete_info){
                 DB::rollBack();
             }
         }
-        $sql = "INSERT into out_divide_develop
+//        $sql = "INSERT into out_divide_develop
+//                SELECT
+//                '' as id ,
+//                application.gameid as app_id,
+//                a.developer_id as user_id,
+//                b.app_name,
+//                (CASE
+//                  WHEN app.release_region_id = 1 and app.os_id =1  THEN '1'   -- 操作系统(1、iOS-Global2、Android-Globa3、iOS-CN4、Android-CN)
+//                    WHEN app.release_region_id = 1 and app.os_id = 2 THEN '2'
+//                    WHEN app.release_region_id = 3 and app.os_id = 1 THEN '3'
+//                    WHEN app.release_region_id = 3 and app.os_id = 2 THEN '4'
+//                    ELSE ''
+//                END) as app_os,
+//                b.new_user,
+//                b.active_user,
+//                b.ff_income_taxAfter as ff_earning,
+//                b.ff_income_taxAfter as ff_income,
+//                b.ff_divide_taxAfter as ff_divide,
+//                b.ad_income_taxAfter as ad_earning,
+//                b.ad_income_taxAfter as ad_income,
+//                b.ad_divide_taxAfter as ad_divide,
+//                b.tg_cost as tg_cost,
+//                b.tg_divide as tg_expense,
+//                b.date as stats_date
+//                FROM
+//                    c_developer_app_divide a,
+//                    zplay_divide_develop b,
+//                    c_app app,
+//                 application
+//                WHERE
+//                b.app_id = app.id
+//                and a.app_id =  app.app_id
+//                and a.new_developer_id_key = b.developer_id
+//                and application.new_app_id = a.app_id
+//                and b.date = '$dayid'
+//            ";
+        $sql = "INSERT into zplay_divide_develop_report 
                 SELECT
                 '' as id ,
-                application.gameid as app_id,
-                a.developer_id as user_id,
+                b.app_id,
+                b.developer_id,
                 b.app_name,
                 (CASE 
-                    WHEN app.release_region_id = 1 and app.os_id =1  THEN 'iOS'
-                    WHEN app.release_region_id = 1 and app.os_id = 2 THEN 'GooglePlay'
-                    WHEN app.release_region_id = 3 and app.os_id = 1 THEN 'iOS'
-                    WHEN app.release_region_id = 3 and app.os_id = 2 THEN 'Android'
+                  WHEN app.release_region_id = 1 and app.os_id =1  THEN '1'   -- 操作系统(1、iOS-Global2、Android-Globa3、iOS-CN4、Android-CN)
+                    WHEN app.release_region_id = 1 and app.os_id = 2 THEN '2'
+                    WHEN app.release_region_id = 3 and app.os_id = 1 THEN '3'
+                    WHEN app.release_region_id = 3 and app.os_id = 2 THEN '4'
                     ELSE ''
                 END) as app_os,
                 b.new_user,
@@ -106,17 +142,11 @@ class OutDevelopDivideCommond extends Command
                 b.tg_divide as tg_expense,
                 b.date as stats_date
                 FROM
-                    c_developer_app_divide a,
                     zplay_divide_develop b,
-                    c_app app,
-                 application 	
+                    c_app app     	
                 WHERE
-                b.app_id = app.id 
-                and a.app_id =  app.app_id
-                and a.new_developer_id_key = b.developer_id 
-                and application.new_app_id = a.app_id
-                and b.date = '$dayid'
-            ";
+                b.app_id = app.id and app.is_dev_show = 2
+                and b.date = '$dayid'";
         $info = DB::insert($sql);
         if(!$info){
             DB::rollBack();
