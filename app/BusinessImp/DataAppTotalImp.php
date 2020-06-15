@@ -595,7 +595,11 @@ class DataAppTotalImp extends ApiBaseImp
                 foreach ($all_month as $month_single){
                     $chartList[$month_single]['table_list'] = [0,0,0,0,0,0,0,0,0];
                 }
-                $chartList['total']['table_list'] = [0,0,0,0,0,0,0,0,0];
+                if ($total_data_list){
+                    $chartList['total']['table_list'] = array_values($total_data_list[0]);
+                }else{
+                    $chartList['total']['table_list'] = [0,0,0,0,0,0,0,0,0];
+                }
 
             }elseif ($app_type_id == 1 && $app_id && $app_ids){
                 // 分应用大类
@@ -619,7 +623,17 @@ class DataAppTotalImp extends ApiBaseImp
                     foreach ($all_month as $month_single){
                         $chartList[$app_data_names_key]['table_list'][$month_single]['table_list'] = [0,0,0,0,0,0,0,0,0];
                     }
-                    $chartList[$app_data_names_key]['table_list']['total']['table_list'] = [0,0,0,0,0,0,0,0,0];
+                    if ($total_data_list){
+                        foreach ($total_data_list as $total_data_list_k => $total_data_list_v){
+                            if ($app_data_name == $total_data_list_v['data_name']){
+                                unset($total_data_list_v['data_name']);
+                                $chartList[$app_data_names_key]['table_list']['total']['table_list'] = array_values($total_data_list_v);
+                                break;
+                            }
+                        }
+                    }else {
+                        $chartList[$app_data_names_key]['table_list']['total']['table_list'] = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+                    }
                 }
 
             }else{
@@ -634,7 +648,17 @@ class DataAppTotalImp extends ApiBaseImp
                     foreach ($all_month as $month_single){
                         $chartList[$app_data_names_key]['table_list'][$month_single]['table_list'] = [0,0,0,0,0,0,0,0,0];
                     }
-                    $chartList[$app_data_names_key]['table_list']['total']['table_list'] = [0,0,0,0,0,0,0,0,0];
+                    if ($total_data_list){
+                        foreach ($total_data_list as $total_data_list_k => $total_data_list_v){
+                            if ($app_data_name == $total_data_list_v['data_name']){
+                                unset($total_data_list_v['data_name']);
+                                $chartList[$app_data_names_key]['table_list']['total']['table_list'] = array_values($total_data_list_v);
+                                break;
+                            }
+                        }
+                    }else {
+                        $chartList[$app_data_names_key]['table_list']['total']['table_list'] = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+                    }
                 }
 
             }
