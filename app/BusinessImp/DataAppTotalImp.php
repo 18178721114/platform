@@ -342,6 +342,9 @@ class DataAppTotalImp extends ApiBaseImp
                 // 日期 总
                 $chartList = [];
                 foreach ($all_month as $dtak => $dtav){
+                    $chartList[$dtav]['table_list'] = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+                }
+                foreach ($all_month as $dtak => $dtav){
                     foreach($data_list as $chart_data){
                         if ($dtav == $chart_data['date_time']) {
                             unset($chart_data['date_time']);
@@ -421,6 +424,12 @@ class DataAppTotalImp extends ApiBaseImp
                                     }
                                 }
                             }
+                            foreach ($all_month as $month_single){
+                                if (!isset($table_new_list[$month_single])){
+                                    $table_new_list[$month_single]['table_list'] = [0,0,0,0,0,0,0,0,0];
+                                }
+                            }
+                            ksort($table_new_list);
                             foreach ($total_data_list as $total_data_list_k => $total_data_list_v){
                                 if ($chartList_info['data_name'] == $total_data_list_v['data_name']){
                                     unset($total_data_list_v['data_name']);
@@ -518,6 +527,12 @@ class DataAppTotalImp extends ApiBaseImp
                                     }
                                 }
                             }
+                            foreach ($all_month as $month_single){
+                                if (!isset($table_new_list[$month_single])){
+                                    $table_new_list[$month_single]['table_list'] = [0,0,0,0,0,0,0,0,0];
+                                }
+                            }
+                            ksort($table_new_list);
                             foreach ($total_data_list as $total_data_list_k => $total_data_list_v){
                                 if ($chartList_info['data_name'] == $total_data_list_v['data_name']){
                                     unset($total_data_list_v['data_name']);
