@@ -307,6 +307,10 @@ class DataAppTotalImp extends ApiBaseImp
         $app_ids = DB::select($app_sql);
         $app_ids = Service::data($app_ids);
 
+        if (!$app_ids){
+            ApiResponseFactory::apiResponse([],[],1025);
+        }
+
         $app_list = [];
         if ($data_list){
             if ($app_type_id == 1 && $app_id){
@@ -576,8 +580,68 @@ class DataAppTotalImp extends ApiBaseImp
             }
 
         }else{
+
+            // 获取两个日期之间的所有月份信息
+            $all_month = [];
+            $all_month_arr = Service::getAllMonthNum($start_date,$end_date);
+            for ($m = 0;$m <= count($all_month_arr); $m++){
+                $all_month[$m] = date('Y-m',strtotime("{$start_date} +$m month"));
+            }
+
             $chartList = [];
-            $chartList['total']['table_list'] = [0,0,0,0,0,0,0,0,0];
+            $app_data_names = [];
+            if (!$app_id){
+                // 累计
+                foreach ($all_month as $month_single){
+                    $chartList[$month_single]['table_list'] = [0,0,0,0,0,0,0,0,0];
+                }
+                $chartList['total']['table_list'] = [0,0,0,0,0,0,0,0,0];
+
+            }elseif ($app_type_id == 1 && $app_id && $app_ids){
+                // 分应用大类
+                foreach ($app_ids as $app_ids_key => $app_id){
+                    $app_data_names[] = $app_id['app_full_name'];
+                }
+                $app_data_names = array_unique($app_data_names);
+                foreach ($app_data_names as $app_data_names_key => $app_data_name){
+                    $chartList[$app_data_names_key]['data_name'] = $app_data_name;
+                    $app_name_arr = [];
+                    if ($app_data_name) {
+                        if ($app_ids){
+                            foreach ($app_ids as $app_id){
+                                if ($app_data_name == $app_id['app_full_name']) {
+                                    $app_name_arr[] = $app_id['app_name'];
+                                }
+                            }
+                        }
+                    }
+                    $chartList[$app_data_names_key]['app_list'] = implode(',',$app_name_arr);
+                    foreach ($all_month as $month_single){
+                        $chartList[$app_data_names_key]['table_list'][$month_single]['table_list'] = [0,0,0,0,0,0,0,0,0];
+                    }
+                    $chartList[$app_data_names_key]['table_list']['total']['table_list'] = [0,0,0,0,0,0,0,0,0];
+                }
+
+            }else{
+                // 分应用
+                foreach ($app_ids as $app_ids_key => $app_id){
+                    $app_data_names[] = $app_id['app_name'];
+                }
+                $app_data_names = array_unique($app_data_names);
+                foreach ($app_data_names as $app_data_names_key => $app_data_name){
+                    $chartList[$app_data_names_key]['data_name'] = $app_data_name;
+                    $data_list[$app_data_names_key]['app_list'] = '';
+                    foreach ($all_month as $month_single){
+                        $chartList[$app_data_names_key]['table_list'][$month_single]['table_list'] = [0,0,0,0,0,0,0,0,0];
+                    }
+                    $chartList[$app_data_names_key]['table_list']['total']['table_list'] = [0,0,0,0,0,0,0,0,0];
+                }
+
+            }
+
+
+//            $chartList = [];
+//            $chartList['total']['table_list'] = [0,0,0,0,0,0,0,0,0];
             ApiResponseFactory::apiResponse(['table_list' => $chartList],[]);
         }
 
