@@ -385,7 +385,7 @@ class DataAppTotalImp extends ApiBaseImp
                 foreach($data_list as $data_k => $chart_data){
                     $chartList_old[] = $chart_data['data_name'];
                 }
-                $chartList_old = array_unique($chartList_old);
+                $chartList_old = array_values(array_unique($chartList_old));
                 $chartList_new = [];
                 if ($chartList_old){
                     foreach ($chartList_old as $chartList_old_k => $chartList_old_v){
@@ -484,7 +484,7 @@ class DataAppTotalImp extends ApiBaseImp
                 foreach($data_list as $data_k => $chart_data){
                     $chartList_old[] = $chart_data['data_name'];
                 }
-                $chartList_old = array_unique($chartList_old);
+                $chartList_old = array_values(array_unique($chartList_old));
                 $chartList_new = [];
                 if ($chartList_old){
                     foreach ($chartList_old as $chartList_old_k => $chartList_old_v){
@@ -602,7 +602,7 @@ class DataAppTotalImp extends ApiBaseImp
                 foreach ($app_ids as $app_ids_key => $app_id){
                     $app_data_names[] = $app_id['app_full_name'];
                 }
-                $app_data_names = array_unique($app_data_names);
+                $app_data_names = array_values(array_unique($app_data_names));
                 foreach ($app_data_names as $app_data_names_key => $app_data_name){
                     $chartList[$app_data_names_key]['data_name'] = $app_data_name;
                     $app_name_arr = [];
@@ -627,7 +627,7 @@ class DataAppTotalImp extends ApiBaseImp
                 foreach ($app_ids as $app_ids_key => $app_id){
                     $app_data_names[] = $app_id['app_name'];
                 }
-                $app_data_names = array_unique($app_data_names);
+                $app_data_names = array_values(array_unique($app_data_names));
                 foreach ($app_data_names as $app_data_names_key => $app_data_name){
                     $chartList[$app_data_names_key]['data_name'] = $app_data_name;
                     $data_list[$app_data_names_key]['app_list'] = '';
