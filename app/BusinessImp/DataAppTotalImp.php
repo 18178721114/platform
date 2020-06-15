@@ -485,6 +485,59 @@ class DataAppTotalImp extends ApiBaseImp
                     }
                 }
 
+
+                // 分应用大类
+                $app_data_names = [];
+                $app_data_names_no_data = [];
+                foreach ($app_ids as $app_ids_key => $app_id){
+                    $app_data_names[] = $app_id['app_full_name'];
+                }
+                $app_data_names = array_values(array_unique($app_data_names));
+
+                foreach ($app_data_names  as $app_data_name){
+                    $app_i = 0;
+                    foreach ($chartList_new as $chartList_new_kkk => $chartList_new_vvv){
+                        if ($app_data_name == $chartList_new_vvv['data_name']){
+                            $app_i++;
+                        }
+                    }
+                    if (!$app_i){
+                        $app_data_names_no_data[] = $app_data_name;
+                    }
+                }
+                $chartList_no = [];
+                if ($app_data_names_no_data) {
+                    foreach ($app_data_names_no_data as $app_data_names_key => $app_data_name){
+                        $chartList_no[$app_data_names_key]['data_name'] = $app_data_name;
+                        $app_name_arr = [];
+                        if ($app_data_name) {
+                            if ($app_ids){
+                                foreach ($app_ids as $app_id){
+                                    if ($app_data_name == $app_id['app_full_name']) {
+                                        $app_name_arr[] = $app_id['app_name'];
+                                    }
+                                }
+                            }
+                        }
+                        $chartList_no[$app_data_names_key]['app_list'] = implode(',',$app_name_arr);
+                        foreach ($all_month as $month_single){
+                            $chartList_no[$app_data_names_key]['table_list'][$month_single]['table_list'] = [0,0,0,0,0,0,0,0,0];
+                        }
+                        if ($total_data_list){
+                            foreach ($total_data_list as $total_data_list_k => $total_data_list_v){
+                                if ($app_data_name == $total_data_list_v['data_name']){
+                                    unset($total_data_list_v['data_name']);
+                                    $chartList_no[$app_data_names_key]['table_list']['total']['table_list'] = array_values($total_data_list_v);
+                                    break;
+                                }
+                            }
+                        }else {
+                            $chartList_no[$app_data_names_key]['table_list']['total']['table_list'] = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+                        }
+                    }
+                }
+                $chartList_new = array_merge($chartList_new,$chartList_no);
+
                 ApiResponseFactory::apiResponse(['table_list' => $chartList_new],[]);
             }else{
                 // 分应用
@@ -591,6 +644,46 @@ class DataAppTotalImp extends ApiBaseImp
                     }
                 }
 
+                $app_data_names = [];
+                $app_data_names_no_data = [];
+                // 分应用
+                foreach ($app_ids as $app_ids_key => $app_id){
+                    $app_data_names[] = $app_id['app_name'];
+                }
+                $app_data_names = array_values(array_unique($app_data_names));
+                foreach ($app_data_names  as $app_data_name){
+                    $app_i = 0;
+                    foreach ($chartList_new as $chartList_new_kkk => $chartList_new_vvv){
+                        if ($app_data_name == $chartList_new_vvv['data_name']){
+                            $app_i++;
+                        }
+                    }
+                    if (!$app_i){
+                        $app_data_names_no_data[] = $app_data_name;
+                    }
+                }
+                $chartList_no = [];
+                if ($app_data_names_no_data) {
+                    foreach ($app_data_names_no_data as $app_data_names_key => $app_data_name) {
+                        $chartList_no[$app_data_names_key]['data_name'] = $app_data_name;
+                        $chartList_no[$app_data_names_key]['app_list'] = '';
+                        foreach ($all_month as $month_single) {
+                            $chartList_no[$app_data_names_key]['table_list'][$month_single]['table_list'] = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+                        }
+                        if ($total_data_list) {
+                            foreach ($total_data_list as $total_data_list_k => $total_data_list_v) {
+                                if ($app_data_name == $total_data_list_v['data_name']) {
+                                    unset($total_data_list_v['data_name']);
+                                    $chartList_no[$app_data_names_key]['table_list']['total']['table_list'] = array_values($total_data_list_v);
+                                    break;
+                                }
+                            }
+                        } else {
+                            $chartList_no[$app_data_names_key]['table_list']['total']['table_list'] = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+                        }
+                    }
+                }
+                $chartList_new = array_merge($chartList_new,$chartList_no);
                 ApiResponseFactory::apiResponse(['table_list' => $chartList_new],[]);
             }
 
