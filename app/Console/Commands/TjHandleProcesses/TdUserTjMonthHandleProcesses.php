@@ -61,6 +61,8 @@ class TdUserTjMonthHandleProcesses extends Command
 
         $dayid = $this->argument('dayid') ? $this->argument('dayid'):date('Y-m-01',time());
 
+        $real_dayid = date('Y-m-01',strtotime('-1 month',strtotime($dayid)));
+        var_dump($real_dayid);
         $error_msg = $dayid.'号，'.$source_name.'数据处理程序开始时间：'.date('Y-m-d H:i:s');
         DataImportImp::saveDataErrorLog(2,$source_id,$source_name,1,$error_msg);
 
@@ -123,7 +125,7 @@ class TdUserTjMonthHandleProcesses extends Command
 
             $array[$k]['account'] = 'weibo@zplay.cn';
 //            $array[$k]['td_app_id'] = isset($app_v['td_app_id']) ? addslashes($app_v['td_app_id']) : '';
-            $array[$k]['date'] = $dayid;
+            $array[$k]['date'] = $real_dayid;
             $array[$k]['channel_plat_name'] = '';
             $array[$k]['version_id'] = '';
             $array[$k]['new_user'] = $v['new_user'];
@@ -134,8 +136,8 @@ class TdUserTjMonthHandleProcesses extends Command
             $array[$k]['type'] = 1;
             $array[$k]['platform_id'] = $source_id;
             $array[$k]['create_time'] = date('Y-m-d H:i:s');
-            $array[$k]['year'] = date('Y',strtotime($dayid));
-            $array[$k]['month'] = date('m',strtotime($dayid));
+            $array[$k]['year'] = date('Y',strtotime($real_dayid));
+            $array[$k]['month'] = date('m',strtotime($real_dayid));
         }
 
         // 保存错误信息
@@ -158,7 +160,7 @@ class TdUserTjMonthHandleProcesses extends Command
             DB::beginTransaction();
             $map_delete = [];
             $map_delete['platform_id'] = $source_id;
-            $map_delete['date'] = $dayid;
+            $map_delete['date'] = $real_dayid;
             $map_delete['type'] = 1;
             DataImportLogic::deleteMysqlHistoryData('zplay_user_tj_report_month', $map_delete);
             //拆分批次
