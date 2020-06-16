@@ -143,7 +143,7 @@ WHERE
 	app_id,
 	DATE_FORMAT( date, '%Y-%m' ) as date,
 	0 AS ad_income,
-	round(sum(INCOME_FIX*{$currency}),2) AS ff_income,
+	round(sum(INCOME_FIX/{$currency}),2) AS ff_income,
 	0 AS tg_cost,
   0 as developer_divide,	
 	0 as new_user,
