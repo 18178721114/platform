@@ -433,7 +433,7 @@ class DeveloperImp extends ApiBaseImp
         $update_data['is_dev_show'] = $is_dev_show;
         $result = ApplicationLogic::updateApplication($app_key,$update_data);
         if (!$result){
-            ApiResponseFactory::apiResponse([],[],1033);
+            ApiResponseFactory::apiResponse(['data'=>['status' => false]],[]);
         }
         ApiResponseFactory::apiResponse([],[]);
 
