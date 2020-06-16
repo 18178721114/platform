@@ -351,7 +351,16 @@ class DeveloperImp extends ApiBaseImp
             app.app_full_name,
             dev.`developer_name`
           from c_app app
-          left join c_developer dev on dev.id = app.`developer_id` {$where} group by app.app_full_name,dev.`developer_name`; ";
+          left join c_developer dev on dev.id = app.`developer_id` {$where} group by app.app_full_name,dev.`developer_name` order by app.app_full_name,dev.`developer_name` ";
+
+        $countSql = "select count(*) c from ($dev_category_sql)a";
+
+        $pageSize = isset($params['size']) ? $params['size'] : 10;
+        $p = isset($params['page']) ? $params['page'] : 1;
+
+        $start = ($p-1) * $pageSize;
+        $dev_category_sql = $dev_category_sql." limit {$start},{$pageSize}";
+
         $dev_cate_app_list = DB::select($dev_category_sql);
         $dev_cate_app_list = Service::data($dev_cate_app_list);
 
@@ -379,7 +388,17 @@ class DeveloperImp extends ApiBaseImp
             }
         }
 
-        ApiResponseFactory::apiResponse(['table_list' => $dev_cate_app_list],[]);
+        $return_data = [];
+        $c_answer = DB::select($countSql);
+        $c_answer = Service::data($c_answer);
+        $count = $c_answer['0']['c'];
+
+        $pageAll = ceil($count/$pageSize);
+        $return_data['total'] = $count;
+        $return_data['page_total'] = $pageAll;
+        $return_data['table_list'] = $dev_cate_app_list;
+
+        ApiResponseFactory::apiResponse($return_data,[]);
     }
 
     /**
