@@ -411,7 +411,7 @@ class DeveloperImp extends ApiBaseImp
             ApiResponseFactory::apiResponse([],[],741);
         }
         session_write_close();
-        $app_key = isset($params['app_key']) ? $params['app_key'] : ''; // 应用主键ID
+        $app_key = isset($params['app_id']) ? $params['app_id'] : ''; // 应用主键ID
         $is_dev_show = isset($params['is_dev_show']) ? $params['is_dev_show'] : ''; // 是否展示
 
         if (!$app_key){
