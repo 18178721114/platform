@@ -74,6 +74,9 @@ Route::match(['get'], 'api/talkdata/china/process', 'DataProcessController@tdChi
 //todo talkingdata 留存数据处理过程
 Route::match(['get'], 'api/talkdata/keepuser/process', 'DataProcessController@tdKeepUserProcess');
 
+//todo talkingdata 月活数据处理过程
+Route::match(['get'], 'api/talkdata/month/process', 'DataProcessController@tdMonthUserProcess');
+
 //todo talkingdata 留存数据处理过程
 Route::match(['get'], 'api/applovin/ad/process', 'DataProcessController@applovinAdProcess');
 

@@ -315,6 +315,19 @@ class DataProcessController extends Controller
     }
 
     /**
+     * 渠道手工处理过程 ad 保存数据
+     * @param $params array 请求数据
+     */
+    public function tdMonthUserProcess()
+    {
+        $params = $this->params;
+        $day = isset($params['dayid']) ? $params['dayid'] : '';
+        if ($day){
+            Artisan::call("TdUserTjMonthHandleProcesses",['dayid'=>$day]);
+        }
+    }
+
+    /**
      * applovinAdProcess ad 保存数据
      * @param $params array 请求数据
      */
