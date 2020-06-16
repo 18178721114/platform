@@ -187,7 +187,7 @@ FROM
 WHERE
  zplay_divide_develop.app_id = c_app.id and 
 	date >= '$firstday'  and date<= '$lastday'
-	and develop_cost>0
+	and develop_cost <> 0
 	GROUP BY app_id,DATE_FORMAT( date, '%Y-%m' )
 		union all
 	SELECT
