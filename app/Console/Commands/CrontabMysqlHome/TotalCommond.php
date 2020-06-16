@@ -143,7 +143,7 @@ WHERE
 	app_id,
 	DATE_FORMAT( date, '%Y-%m' ) as date,
 	0 AS ad_income,
-	round(sum(INCOME_FIX/{$currency}),2) AS ff_income,
+	round(sum(INCOME_FIX)/{$currency},2) AS ff_income,
 	0 AS tg_cost,
   0 as developer_divide,	
 	0 as new_user,
@@ -152,8 +152,8 @@ FROM
 	zplay_ff_report_daily   -- 付费收入
 WHERE
 	 date >= '$firstday'  and date<= '$lastday'
-	AND tongji_type>-1
-	and INCOME_FIX>0
+	AND tongji_type > -1
+	and INCOME_FIX <> 0
 	GROUP BY app_id,DATE_FORMAT( date, '%Y-%m' )
 union all
 	SELECT
