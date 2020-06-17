@@ -291,6 +291,7 @@ class DeveloperImp extends ApiBaseImp
             }
         }
 
+        $search = addslashes($search);
         // 拼接查询条件
         $where = '';
 
