@@ -44,3 +44,9 @@ Route::match(['post','get'], 'api/app/total/list', 'DataSearchController@getAppT
 
 // 累计页面 右侧列表接口
 Route::match(['post','get'], 'api/app/total/data', 'DataSearchController@getAppTotalData');
+
+// 红包变现 游戏列表
+Route::match(['post','get'], 'api/app/redpacket/list', 'DataSearchController@getRedPacketList');
+
+// 红包变现 数据报表
+Route::match(['post','get'], 'api/app/redpacket/data', 'DataSearchController@getRedPacketData');
