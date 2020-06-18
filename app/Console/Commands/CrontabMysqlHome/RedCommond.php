@@ -77,12 +77,21 @@ class RedCommond extends Command
             }
         }
 
+        $app_sql = "select id ,app_id  FROM c_app";
+        $app_info = DB::select($app_sql);
+        $app_info = Service::data($app_info);
+
 
         $create_time = date("Y-m-d H:i:s", time());
 
         foreach ($info as $k=> $v) {
+            foreach ($app_info as $a =>$b){
+                if($v['game_id'] ==  $b['app_id']){
+                    $insert_data[$k]['app_id'] = $b['id'];
+                    continue;
+                }
+            }
             $insert_data[$k]['date_time'] = $v['date_time'];
-            $insert_data[$k]['app_id'] = $v['game_id'];
             $insert_data[$k]['all_card_count'] = $v['all_card_count'];
             $insert_data[$k]['all_user_count'] = $v['all_user_count'];
             $insert_data[$k]['all_cat_count'] = $v['all_cat_count'];
