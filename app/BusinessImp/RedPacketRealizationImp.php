@@ -246,7 +246,7 @@ class RedPacketRealizationImp extends ApiBaseImp
             $return_data['table_list'] = $data_list;
             $return_data['table_total'] = isset($total_data_list[0]) ? $total_data_list[0] : [];
         }else{
-            ApiResponseFactory::apiResponse([],[],302);
+            ApiResponseFactory::apiResponse(['table_list' => []],[]);
         }
 
         ApiResponseFactory::apiResponse(['table_list' => $return_data],[]);
