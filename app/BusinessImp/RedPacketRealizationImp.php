@@ -214,13 +214,18 @@ class RedPacketRealizationImp extends ApiBaseImp
         $c_answer = Service::data($c_answer);
         $count = $c_answer['0']['c'];
 
-        $pageAll = ceil($count/$pageSize);
-        $return_data['total'] = $count;
-        $return_data['page_total'] = $pageAll;
-        $return_data['table_list'] = $data_list;
-        $return_data['table_total'] = isset($total_data_list[0]) ? $total_data_list[0] : [];
+        if ($data_list){
+            $pageAll = ceil($count/$pageSize);
+            $return_data['total'] = $count;
+            $return_data['page_total'] = $pageAll;
+            $return_data['table_list'] = $data_list;
+            $return_data['table_total'] = isset($total_data_list[0]) ? $total_data_list[0] : [];
+        }else{
+            ApiResponseFactory::apiResponse([],[]);
+        }
 
         ApiResponseFactory::apiResponse(['table_list' => $return_data],[]);
+
 
     }
 
