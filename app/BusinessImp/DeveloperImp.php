@@ -353,7 +353,7 @@ class DeveloperImp extends ApiBaseImp
             app.app_full_name,
             dev.`developer_name`
           from c_app app
-          left join c_developer dev on dev.id = app.`developer_id` {$where} group by app.app_full_name,dev.`developer_name` order by app.id desc,is_dev_show desc ";
+          left join c_developer dev on dev.id = app.`developer_id` {$where} group by app.app_full_name,dev.`developer_name` order by is_dev_show desc,app.id desc ";
 
         $countSql = "select count(*) c from ($dev_category_sql)a";
 
