@@ -116,9 +116,9 @@ class RedPacketRealizationImp extends ApiBaseImp
         // 应用ID
         $app_id = isset($params['app_id']) ? $params['app_id'] : '';
         // 开始时间
-        $start_date = isset($params['start_date']) ? $params['start_date'] : date("Y-m-d",strtotime("-7 day"));
+        $start_date = isset($params['start_time']) ? $params['start_time'] : date("Y-m-d",strtotime("-7 day"));
         // 结束时间
-        $end_date = isset($params['end_date']) ? $params['end_date'] : date('Y-m-d');
+        $end_date = isset($params['end_time']) ? $params['end_time'] : date('Y-m-d');
         // 公司
         $company = isset($params['user_company_id']) ? $params['user_company_id'] : 1;
         
@@ -145,7 +145,7 @@ class RedPacketRealizationImp extends ApiBaseImp
         }
 
         // 时间范围
-        $app_where .= " and red.date_time between '{$start_date}' and '{$end_date}' ";
+        $where .= " and red.date_time between '{$start_date}' and '{$end_date}' ";
 
         //验证用户是否有权限登录
         $map1 = [];
@@ -225,6 +225,7 @@ class RedPacketRealizationImp extends ApiBaseImp
 
         $start = ($p-1) * $pageSize;
         $sql = $detail_sql." limit {$start},{$pageSize}";
+
         $data_list = DB::select($sql);
         $data_list = Service::data($data_list);
 
