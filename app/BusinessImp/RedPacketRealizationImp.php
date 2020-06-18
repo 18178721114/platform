@@ -194,25 +194,27 @@ class RedPacketRealizationImp extends ApiBaseImp
         $order_by = " order by red.date_time desc";
 
         // 1、新增用户；2、活跃用户；3、付费收入；4、广告收入；5、总收入；6、推广成本；7、毛利润；8、开发者分成；9、总利润
-        $select .= " round(sum(red.all_card_count),2) as all_card_count, 
-        round(sum(all_user_count),2) as all_user_count, 
-        round(sum(all_cat_count),2) as all_cat_count, 
-        round(sum(all_cat_user_count),2) as all_cat_user_count, 
+        $select .= " 
+        sum(red.all_card_count) as all_card_count, 
+        sum(all_user_count) as all_user_count, 
+        sum(all_cat_count) as all_cat_count, 
+        sum(all_cat_user_count) as all_cat_user_count, 
         round(sum(game_total_amount),2) as game_total_amount, 
-        round(sum(all_9cat_user_count),2) as all_9cat_user_count, 
+        sum(all_9cat_user_count) as all_9cat_user_count, 
         round(sum(all_today_total),2) as all_today_total, 
-        round(sum(today_red_bags_user_count),2) as today_red_bags_user_count, 
+        sum(today_red_bags_user_count) as today_red_bags_user_count, 
         round(sum(tixian_total),2) as tixian_total, 
         round(sum(all_send_money),2) as all_send_money ";
 
-        $total_select .= " round(sum(red.all_card_count),2) as all_card_count, 
-        round(sum(all_user_count),2) as all_user_count, 
-        round(sum(all_cat_count),2) as all_cat_count, 
-        round(sum(all_cat_user_count),2) as all_cat_user_count, 
+        $total_select .= " 
+        sum(red.all_card_count) as all_card_count, 
+        sum(all_user_count) as all_user_count, 
+        sum(all_cat_count) as all_cat_count, 
+        sum(all_cat_user_count) as all_cat_user_count, 
         round(sum(game_total_amount),2) as game_total_amount, 
-        round(sum(all_9cat_user_count),2) as all_9cat_user_count, 
+        sum(all_9cat_user_count) as all_9cat_user_count, 
         round(sum(all_today_total),2) as all_today_total, 
-        round(sum(today_red_bags_user_count),2) as today_red_bags_user_count, 
+        sum(today_red_bags_user_count) as today_red_bags_user_count, 
         round(sum(tixian_total),2) as tixian_total, 
         round(sum(all_send_money),2) as all_send_money  ";
 
