@@ -160,6 +160,7 @@ class RedPacketRealizationImp extends ApiBaseImp
         }
 
         $select .= ' red.date_time, ';
+        $total_select .= " '-' as date_time, ";
         $group_by .= ' group by red.date_time ';
         if ($app_id){
             $select .= " app.app_id, concat(
@@ -177,7 +178,7 @@ class RedPacketRealizationImp extends ApiBaseImp
              		(case when app.app_id is null then '未知ID' else app.app_id end)			
             ) as app_name, ";
 
-            $total_select .= " '-' as date_time,'-' as app_id,'-' as app_name, ";
+            $total_select .= " '-' as app_id,'-' as app_name, ";
 
             $where .= " and red.app_id in ($app_id) ";
             $app_where .= " and red.app_id  in ($app_id) ";
