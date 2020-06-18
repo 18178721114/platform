@@ -162,20 +162,7 @@ class RedPacketRealizationImp extends ApiBaseImp
         $select .= ' red.date_time, ';
         $group_by .= ' group by red.date_time ';
         if ($app_id){
-            $where .= " and red.app_id in ($app_id) ";
-            $app_where .= " and red.app_id  in ($app_id) ";
-            $total_where .= " and red.app_id  in ($app_id) ";
-            $group_by .= ' ,red.app_id ';
-        }elseif($app_permission) {
-            $where .= " and red.app_id  in ($app_permission) ";
-            $app_where .= " and red.app_id  in ($app_permission) ";
-            $total_where .= " and red.app_id  in ($app_permission) ";
-        }
-
-        $order_by = " order by red.date_time desc";
-
-        // 1、新增用户；2、活跃用户；3、付费收入；4、广告收入；5、总收入；6、推广成本；7、毛利润；8、开发者分成；9、总利润
-        $select .= " app.app_id, concat(
+            $select .= " app.app_id, concat(
             	(case when app.release_region_id = 1 then '全球'
             		 when app.release_region_id = 2 then '国外'
             		 when app.release_region_id = 3 then '国内'
@@ -188,9 +175,27 @@ class RedPacketRealizationImp extends ApiBaseImp
              		end),'-',
              		(case when app.app_name is null then '未知应用' else app.app_name end),'-',
              		(case when app.app_id is null then '未知ID' else app.app_id end)			
-            ) as app_name, sum(red.all_card_count) as all_card_count, sum(all_user_count) as all_user_count, sum(all_cat_count) as all_cat_count, sum(all_cat_user_count) as all_cat_user_count, sum(game_total_amount) as game_total_amount, sum(all_9cat_user_count) as all_9cat_user_count, sum(all_today_total) as all_today_total, sum(today_red_bags_user_count) as today_red_bags_user_count, sum(tixian_total) as tixian_total, sum(all_send_money) as all_send_money ";
+            ) as app_name, ";
 
-        $total_select .= " '-' as date_time,'-' as app_id,'-' as app_name, sum(red.all_card_count) as all_card_count, sum(all_user_count) as all_user_count, sum(all_cat_count) as all_cat_count, sum(all_cat_user_count) as all_cat_user_count, sum(game_total_amount) as game_total_amount, sum(all_9cat_user_count) as all_9cat_user_count, sum(all_today_total) as all_today_total, sum(today_red_bags_user_count) as today_red_bags_user_count, sum(tixian_total) as tixian_total, sum(all_send_money) as all_send_money ";
+            $total_select .= " '-' as date_time,'-' as app_id,'-' as app_name, ";
+
+            $where .= " and red.app_id in ($app_id) ";
+            $app_where .= " and red.app_id  in ($app_id) ";
+            $total_where .= " and red.app_id  in ($app_id) ";
+            $group_by .= ' ,red.app_id ';
+        }elseif($app_permission) {
+            $where .= " and red.app_id  in ($app_permission) ";
+            $app_where .= " and red.app_id  in ($app_permission) ";
+            $total_where .= " and red.app_id  in ($app_permission) ";
+
+        }
+
+        $order_by = " order by red.date_time desc";
+
+        // 1、新增用户；2、活跃用户；3、付费收入；4、广告收入；5、总收入；6、推广成本；7、毛利润；8、开发者分成；9、总利润
+        $select .= " sum(red.all_card_count) as all_card_count, sum(all_user_count) as all_user_count, sum(all_cat_count) as all_cat_count, sum(all_cat_user_count) as all_cat_user_count, sum(game_total_amount) as game_total_amount, sum(all_9cat_user_count) as all_9cat_user_count, sum(all_today_total) as all_today_total, sum(today_red_bags_user_count) as today_red_bags_user_count, sum(tixian_total) as tixian_total, sum(all_send_money) as all_send_money ";
+
+        $total_select .= " sum(red.all_card_count) as all_card_count, sum(all_user_count) as all_user_count, sum(all_cat_count) as all_cat_count, sum(all_cat_user_count) as all_cat_user_count, sum(game_total_amount) as game_total_amount, sum(all_9cat_user_count) as all_9cat_user_count, sum(all_today_total) as all_today_total, sum(today_red_bags_user_count) as today_red_bags_user_count, sum(tixian_total) as tixian_total, sum(all_send_money) as all_send_money ";
 
         $table_name = 'zplay_red_data_statistics as red';
 
