@@ -10,6 +10,7 @@ use App\BusinessImp\CommonImp;
 use App\BusinessImp\DataAppTotalImp;
 use App\BusinessImp\DataImportImp;
 use App\BusinessImp\DataSearchImp;
+use App\BusinessImp\RedPacketRealizationImp;
 use App\BusinessImp\SysInItImp;
 use App\BusinessImp\UserImp;
 use App\Http\Controllers\Controller as Controller;
@@ -313,6 +314,24 @@ class DataSearchController extends Controller
     public function getAppTotalData()
     {
         DataAppTotalImp::getAppTotalData($this->params);
+    }
+
+    /**
+     * 红包变现 游戏列表
+     * @param $params array 请求数据
+     */
+    public function getRedPacketList()
+    {
+        RedPacketRealizationImp::getRedPacketList($this->params);
+    }
+
+    /**
+     * 红包变现 数据报表
+     * @param $params array 请求数据
+     */
+    public function getRedPacketData()
+    {
+        RedPacketRealizationImp::getRedPacketData($this->params);
     }
 
 
