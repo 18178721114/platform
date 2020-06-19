@@ -91,59 +91,83 @@ class TiktokReportCommond extends Command
                 $result = CurlRequest::get_response($url);
                 $result_arr = json_decode($result,true);
 
-//                var_dump($result_arr);die;
+                // 数据获取重试
+                $api_data_i=1;
+                while(!$result_arr){
+                    list($t1, $t2) = explode(' ', microtime());
+                    $time1 = floatval($t2);
+                    $time2 = round(floatval($t1)*100000);
+                    $time3 = uniqid();
+                    $nonce = md5($time1.$time2.$time3);
 
+                    $timestamp = time();
+                    $secure_key = $singleInfo['secret_key'];
+                    $keys = array($secure_key, $timestamp, $nonce);
+                    sort($keys,2);
+                    $sign = implode('',$keys);
+                    $sign = sha1($sign);
+
+                    $url = "https://partner.oceanengine.com/union/media/open/api/report/slot?user_id=".$user_id."&nonce=".$nonce."&timestamp=".$timestamp."&sign=".$sign."&start_date=".$start."&end_date=".$end;
+//                var_dump($url);
+                    $result = CurlRequest::get_response($url);
+                    $result_arr = json_decode($result,true);
+                    $api_data_i++;
+                    if($api_data_i>3)
+                        break;
+                }
                 //判断是否有数
-                if(isset($result_arr['code']) && $result_arr['code'] == 100 && count($result_arr['data'])>0){
-                    $map = [];
-                    $map['dayid'] = $dayid;
-                    $map['source_id'] = SOURCE_ID;
-                    $map['account'] = $company_account;
-                    $count = DataImportLogic::getChannelData('ad_data','erm_data',$map)->count();
+                if(isset($result_arr['code']) && $result_arr['code'] == 100 ){
+                    if (count($result_arr['data'])>0) {
+                        $map = [];
+                        $map['dayid'] = $dayid;
+                        $map['source_id'] = SOURCE_ID;
+                        $map['account'] = $company_account;
+                        $count = DataImportLogic::getChannelData('ad_data', 'erm_data', $map)->count();
 //                    var_dump($count);
-                    if($count>0){ 
-                        //删除数据
-                        DataImportLogic::deleteHistoryData('ad_data','erm_data',$map);
-                    }
-                    $step =[];
-                    $insert_data = [];
-
-                    foreach($result_arr['data'] as $data){
-                        if($data){
-                            $one_data['type'] = 2;
-                            $one_data['app_id'] = $data['appid'];
-                            $one_data['app_name'] = $data['site_name'];
-                            $one_data['account'] = $company_account;
-                            $one_data['source_id'] = SOURCE_ID;
-                            $one_data['json_data'] = str_replace('\'', '\'\'', json_encode($data));
-                            $one_data['dayid'] = $dayid;
-                            $one_data['create_time'] = date("Y-m-d H:i:s");
-                            $one_data['year'] = date("Y", strtotime($dayid));
-                            $one_data['month'] = date("m", strtotime($dayid));
-                            $one_data['ad_id'] = $data['ad_slot_id'];
-                            $one_data['ad_name'] = $data['ad_slot_type'];
-                            $one_data['income'] = $data['cost'];
-                            $insert_data[] = $one_data;
+                        if ($count > 0) {
+                            //删除数据
+                            DataImportLogic::deleteHistoryData('ad_data', 'erm_data', $map);
                         }
-                    }
+                        $step = [];
+                        $insert_data = [];
 
-                    if ($insert_data){
-                        //批量插入
-                        $i = 0;
-                        foreach ($insert_data as $kkkk => $insert_data_info) {
-                            if ($kkkk % 500 == 0) $i++;
-                            if ($insert_data_info) {
-                                $step[$i][] = $insert_data_info;
+                        foreach ($result_arr['data'] as $data) {
+                            if ($data) {
+                                $one_data['type'] = 2;
+                                $one_data['app_id'] = $data['appid'];
+                                $one_data['app_name'] = $data['site_name'];
+                                $one_data['account'] = $company_account;
+                                $one_data['source_id'] = SOURCE_ID;
+                                $one_data['json_data'] = str_replace('\'', '\'\'', json_encode($data));
+                                $one_data['dayid'] = $dayid;
+                                $one_data['create_time'] = date("Y-m-d H:i:s");
+                                $one_data['year'] = date("Y", strtotime($dayid));
+                                $one_data['month'] = date("m", strtotime($dayid));
+                                $one_data['ad_id'] = $data['ad_slot_id'];
+                                $one_data['ad_name'] = $data['ad_slot_type'];
+                                $one_data['income'] = $data['cost'];
+                                $insert_data[] = $one_data;
                             }
                         }
-                        if ($step) {
-                            foreach ($step as $k => $v) {
-                                $result = DataImportLogic::insertChannelData('ad_data','erm_data',$v);
-                                if (!$result) {
-                                    echo 'mysql_error'. PHP_EOL;
+
+                        if ($insert_data) {
+                            //批量插入
+                            $i = 0;
+                            foreach ($insert_data as $kkkk => $insert_data_info) {
+                                if ($kkkk % 500 == 0) $i++;
+                                if ($insert_data_info) {
+                                    $step[$i][] = $insert_data_info;
                                 }
                             }
+                            if ($step) {
+                                foreach ($step as $k => $v) {
+                                    $result = DataImportLogic::insertChannelData('ad_data', 'erm_data', $v);
+                                    if (!$result) {
+                                        echo 'mysql_error' . PHP_EOL;
+                                    }
+                                }
 
+                            }
                         }
                     }
 
