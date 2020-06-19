@@ -77,7 +77,6 @@ class TencentHandworkHandleProcesses extends Command
 
         $dayid = date('Y-m-d');
         $date_arr = $this->argument('dayid');
-        $date_arr = [];
         //查询pgsql 的数据
         $map =[];
         $map['in'] = ['dayid',$date_arr];
