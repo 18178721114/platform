@@ -174,7 +174,7 @@ class TencentHandworkHandleProcesses extends Command
             	$json_info = json_decode($v['json_data'],true);
             	foreach ($app_list as $app_k => $app_v) {
                     
-            		if($json_info['媒体名称'] == $app_v['platform_app_id']   ){
+            		if($json_info['媒体名称'] == $app_v['platform_app_name']   ){
             			$array[$k]['app_id'] = $app_v['app_id'];
                         $array[$k]['flow_type'] = $app_v['flow_type'];
             			$num = 0;
