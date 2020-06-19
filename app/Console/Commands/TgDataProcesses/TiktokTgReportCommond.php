@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 use App\BusinessLogic\DataImportLogic;
 use Illuminate\Support\Facades\Artisan;
 use App\Common\CommonFunction;
+use Illuminate\Support\Facades\Redis;
 
 class TiktokTgReportCommond extends Command
 {
@@ -37,6 +38,7 @@ class TiktokTgReportCommond extends Command
     public function __construct()
     {
         parent::__construct();
+        Redis::select(1);
     }
 
     /**
@@ -69,8 +71,11 @@ class TiktokTgReportCommond extends Command
         // self::getAccessToken($tiktok_conf_arr);
 
         $account_name = $tiktok_conf_arr['username'];
-        $access_token = self::refreshToken($tiktok_conf_arr);
-        if ($access_token) {
+//        $access_token = self::refreshToken($tiktok_conf_arr);
+        $access_json = Redis::get('tiktok_tg_access_token');
+        if ($access_json) {
+            $content_arr = json_decode($access_json, true);
+            $access_token = $content_arr['data']['access_token'];
             $app_id = $tiktok_conf_arr['app_id'];
             $secret = $tiktok_conf_arr['secret'];
 
@@ -79,6 +84,16 @@ class TiktokTgReportCommond extends Command
 
             $data = self::get_response($data_url);
             $data_arr = json_decode($data, true);
+
+            // 数据获取重试
+            $api_data_i = 1;
+            while(!$data_arr){
+                $data = self::get_response($data_url);
+                $data_arr = json_decode($data, true);
+                $api_data_i++;
+                if($api_data_i > 3)
+                    break;
+            }
 
             if (!empty($data_arr['data']['list'])) {
                 $tiktok_advertiser_list = $data_arr['data']['list'];
@@ -99,7 +114,13 @@ class TiktokTgReportCommond extends Command
                 }
                 // 数据处理过程
                 Artisan::call('TiktokTgHandleProcesses',['dayid'=>$dayid]);
+            }else{
+                $error_msg = AD_PLATFORM.'推广平台'.'获取数据失败,错误信息:'. (isset($data_arr['message']) ? $data_arr['message'] : '广告主列表获取失败!');;
+                DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,4,$error_msg);
             }
+        }else{
+            $error_msg = AD_PLATFORM.'推广平台'.'获取数据失败,错误信息:授权失败,access_token信息不存在,请重新授权!';
+            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,4,$error_msg);
         }
     }
 

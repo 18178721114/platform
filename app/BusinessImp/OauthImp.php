@@ -301,6 +301,7 @@ class OauthImp
     // getTiktokCode
 
     public function getTiktokCode(){
+        Redis::select(1);
         if(isset($_GET['auth_code']) && $_GET['auth_code']){
             $tiktok_conf_arr = [
                 'username' => 'promtion@zplay.com', 'pass' => 'Zpl@y1119', 'app_id' => 1648343684797446, 'secret' => '6c566e4b401d6fb14a0418e07eb30abd1681e202'
@@ -308,19 +309,19 @@ class OauthImp
 
             $code = $_GET['auth_code'];
             // todo 此处为生成access_token代码
-            $account_name = $tiktok_conf_arr['username'];
-            $token_file = "../tiktok_".$account_name.".txt";
             $get_access_token_data = [
                 'app_id'=>$tiktok_conf_arr['app_id'],
                 'secret'=>$tiktok_conf_arr['secret'],
-                'grant_type'=>'auth_code',
+//                'grant_type'=>'auth_code',
                 'auth_code'=>$code
             ];
-            $get_access_token_url = "https://ads.tiktok.com/open_api/oauth2/access_token/";
+            $get_access_token_url = "https://ads.tiktok.com/open_api/oauth2/access_token_v2/";
             $get_access_token_result = CurlRequest::curl_header_json_Post($get_access_token_url, $get_access_token_data,[]);
             var_dump($get_access_token_result);
-            file_put_contents($token_file, $get_access_token_result);
-            echo 'ok';
+            if($get_access_token_result){
+                Redis::set('tiktok_tg_access_token',$get_access_token_result);
+                echo '授权成功！';
+            }
 
         }else{
             echo 'auth_code获取失败';
