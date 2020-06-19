@@ -72,6 +72,7 @@ class TiktokTgReportCommond extends Command
 
         $account_name = $tiktok_conf_arr['username'];
 //        $access_token = self::refreshToken($tiktok_conf_arr);
+        Redis::select(1);
         $access_json = Redis::get('tiktok_tg_access_token');
         if ($access_json) {
             $content_arr = json_decode($access_json, true);
