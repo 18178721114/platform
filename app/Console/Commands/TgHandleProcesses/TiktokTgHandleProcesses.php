@@ -327,7 +327,7 @@ class TiktokTgHandleProcesses extends Command
 
         // 保存正确数据
         if ($array) {
-
+            Redis::select(0);
             $plat_str =$source_id.'lishuyang@lishuyang'.$dayid;
             Redis::rpush(env('REDIS_TG_KEYS'), $plat_str); 
                         //拆分批次
