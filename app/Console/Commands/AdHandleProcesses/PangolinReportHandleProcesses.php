@@ -22,14 +22,14 @@ use App\BusinessLogic\ChannelLogic;
 use App\Common\ApiResponseFactory;
 use Illuminate\Support\Facades\Redis;
 
-class TiktokReportHandleProcesses extends Command
+class PangolinReportHandleProcesses extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'TiktokReportHandleProcesses {dayid?} ';
+    protected $signature = 'PangolinReportHandleProcesses {dayid?} ';
 
     /**
      * The console command description.
@@ -57,15 +57,15 @@ class TiktokReportHandleProcesses extends Command
     public function handle()
     {
         set_time_limit(0);
-        $source_id ='pad271';
-        $platform_name ='tiktok';
+        $source_id ='pad272';
+        $platform_name ='穿山甲';
 
         $dayid = $this->argument('dayid')?$this->argument('dayid'):date('Y-m-d',strtotime('-1 day'));
-        self::TiktokAdDataProcess($source_id,$platform_name,$dayid);
+        self::PangolinAdDataProcess($source_id,$platform_name,$dayid);
     }
 
 
-    public static function TiktokAdDataProcess($source_id,$platform_name,$dayid){
+    public static function PangolinAdDataProcess($source_id,$platform_name,$dayid){
         //查询pgsql 的数据
         $map =[];
         $map['dayid'] = $dayid;
@@ -122,7 +122,7 @@ class TiktokReportHandleProcesses extends Command
         $app_list = DB::select($sql);
         $app_list = Service::data($app_list);
         if(!$app_list){
-            $error_msg = $dayid.'号，'.$platform_name.'渠道广告数据处理程序应用数据查询为空';
+            $error_msg = $dayid.'号，'.$platform_name.'广告数据处理程序应用数据查询为空';
             DataImportImp::saveDataErrorLog(2,$source_id,$platform_name,2,$error_msg);
             ApiResponseFactory::apiResponse([],[],'',$error_msg);
             exit;
@@ -186,15 +186,7 @@ class TiktokReportHandleProcesses extends Command
                         $app_info_detail = Service::data($app_info_detail);
                         if (isset($app_info_detail[0]) && $app_info_detail[0]){
                             $ad_type = '';
-//                            if ($json_info['ad_slot_type'] == '全屏视频'){
-//                                $ad_type = 1;
-//                            }elseif ($json_info['ad_slot_type'] == '激励视频'){
-//                                $ad_type = 3;
-//                            }elseif ($json_info['ad_slot_type'] == 'Full Page Video Ads'){
-//                                $ad_type = 1;
-//                            }elseif ($json_info['ad_slot_type'] == 'Rewarded Video Ads'){
-//                                $ad_type = 3;
-//                            }
+
                             // 匹配广告类型
                             foreach ($AdType_info as $AdType_k => $AdType_v) {
                                 if($json_info['ad_slot_type'] == $AdType_v['name'] ){
@@ -320,7 +312,7 @@ class TiktokReportHandleProcesses extends Command
                     DB::rollBack();
                 } else {
                     DB::commit();
-                    self::TiktokAdDataProcess($source_id,$platform_name,$dayid);
+                    self::PangolinAdDataProcess($source_id,$platform_name,$dayid);
                     exit;
                 }
             }
