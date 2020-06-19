@@ -1145,7 +1145,7 @@ class PlatformImp extends ApiBaseImp
             // 自定义排序
             $sort_platform_list = [
                 'tj' => ['ptj01','ptj02'],
-                'ad' => ['pad01','pad23','pad05','pad24','pad36','pad09','pad33','pad02','pad11','pad10','pad03','pad50','pad52','pad29','pad21','pad12','pad44','pad69','pad262','pad63','pad54','pad35','pad34','pad16','pad261','pad271','pad272','pad42','pad40','pad65','pad64','pad62','pad56'],
+                'ad' => ['pad01','pad23','pad05','pad24','pad36','pad09','pad33','pad02','pad11','pad10','pad03','pad50','pad52','pad29','pad21','pad12','pad44','pad69','pad262','pad271','pad272','pad63','pad54','pad35','pad34','pad16','pad261','pad42','pad40','pad65','pad64','pad62','pad56'],
                 'jf' => ['pff02','pff03','pff05','pff04','pcf06','pcf25','pcf23','pcf11','pcf19','pcf13','pcf07'],
                 'tg' => ['ptg40','ptg33','ptg36','ptg21','ptg03','ptg25','ptg75','ptg37','ptg07','ptg05','ptg72','ptg66','ptg74','ptg06','ptg67','ptg76','ptg68','ptg80','ptg78','ptg63'],
             ];
