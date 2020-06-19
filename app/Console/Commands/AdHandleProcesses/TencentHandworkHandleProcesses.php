@@ -77,6 +77,7 @@ class TencentHandworkHandleProcesses extends Command
 
         $dayid = date('Y-m-d');
         $date_arr = $this->argument('dayid');
+        $date_arr = [];
         //查询pgsql 的数据
         $map =[];
         $map['in'] = ['dayid',$date_arr];
@@ -204,7 +205,7 @@ class TencentHandworkHandleProcesses extends Command
                 }
                 //默认中国
                 $array[$k]['country_id'] = 64;
-            	if(($num)>0){                
+            	if(($num+$num_adtype)>0){
                     $error_detail_arr[$k]['platform_id'] = $source_id;
                     $error_detail_arr[$k]['platform_name'] = $platform_name;
                     $error_detail_arr[$k]['platform_type'] =2;
