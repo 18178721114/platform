@@ -138,71 +138,72 @@ class FacebookAdBiddingCommond extends Command
 
                 // pgsql 逻辑
                 if(!isset($re['error'])){
-                    $message = $date . ", 获取到当前账号：" . $account . "的数据条数为：" . count($re);
-                    self::saveLog(AD_PLATFORM, $message);
+                    if ($re) {
+                        $message = $date . ", 获取到当前账号：" . $account . "的数据条数为：" . count($re);
+                        self::saveLog(AD_PLATFORM, $message);
 
-                    $map = [];
-                    $map['type'] = 3;
-                    $map['dayid'] = $date;
-                    $map['source_id'] = SOURCE_ID;
-                    $map['account'] = $account;
-                    $map['app_id'] = $facebook[$j]['appid'];
+                        $map = [];
+                        $map['type'] = 3;
+                        $map['dayid'] = $date;
+                        $map['source_id'] = SOURCE_ID;
+                        $map['account'] = $account;
+                        $map['app_id'] = $facebook[$j]['appid'];
 
-                    $count = DataImportLogic::getChannelData(SCHEMA,TABLE_NAME,$map)->count();
-                    $bool = 0;
-                    if($count>0){
-                        $bool = DataImportLogic::deleteHistoryData(SCHEMA, TABLE_NAME, $map);
-                    }
-
-
-
-                    $message = $date . ", 删除当前账号：" . $account . "的数据条数：" . $bool;
-                    self::saveLog(AD_PLATFORM, $message);
-
-                    $create_time = date("Y-m-d H:i:s", time());
-                    $insert_data = [];
-                    foreach ($re as $k => $v) {
-                        $v['account'] = $account;
-                        $insert_data[$k]['type'] = 3;
-                        $insert_data[$k]['app_id'] = $v['appid'];
-                        $insert_data[$k]['account'] = $account;
-                        $insert_data[$k]['source_id'] = SOURCE_ID;
-                        $insert_data[$k]['json_data'] = json_encode($v);
-                        $insert_data[$k]['dayid'] = $date;
-                        $insert_data[$k]['create_time'] = $create_time;
-                        $insert_data[$k]['year'] = date("Y", strtotime($date));
-                        $insert_data[$k]['month'] = date("m", strtotime($date));
-                        $insert_data[$k]['ad_id'] = '';
-                        $insert_data[$k]['ad_name'] = '';
-                        $insert_data[$k]['income'] =$v['income'];
-
-                    }
-
-                    if ($insert_data) {
-
-                        //拆分批次
-                        $step = array();
-                        $i = 0;
-                        foreach ($insert_data as $kkkk => $insert_data_info) {
-                            if ($kkkk % 1000 == 0) $i++;
-                            if ($insert_data_info) {
-                                $step[$i][] = $insert_data_info;
-                            }
+                        $count = DataImportLogic::getChannelData(SCHEMA, TABLE_NAME, $map)->count();
+                        $bool = 0;
+                        if ($count > 0) {
+                            $bool = DataImportLogic::deleteHistoryData(SCHEMA, TABLE_NAME, $map);
                         }
 
-                        $is_success = [];
-                        if ($step) {
-                            foreach ($step as $k => $v) {
-                                $result = DataImportLogic::insertChannelData(SCHEMA, TABLE_NAME, $v);
-                                if (!$result) {
-                                    $is_success[] = $k;
+
+                        $message = $date . ", 删除当前账号：" . $account . "的数据条数：" . $bool;
+                        self::saveLog(AD_PLATFORM, $message);
+
+                        $create_time = date("Y-m-d H:i:s", time());
+                        $insert_data = [];
+                        foreach ($re as $k => $v) {
+                            $v['account'] = $account;
+                            $insert_data[$k]['type'] = 3;
+                            $insert_data[$k]['app_id'] = $v['appid'];
+                            $insert_data[$k]['account'] = $account;
+                            $insert_data[$k]['source_id'] = SOURCE_ID;
+                            $insert_data[$k]['json_data'] = json_encode($v);
+                            $insert_data[$k]['dayid'] = $date;
+                            $insert_data[$k]['create_time'] = $create_time;
+                            $insert_data[$k]['year'] = date("Y", strtotime($date));
+                            $insert_data[$k]['month'] = date("m", strtotime($date));
+                            $insert_data[$k]['ad_id'] = '';
+                            $insert_data[$k]['ad_name'] = '';
+                            $insert_data[$k]['income'] = $v['income'];
+
+                        }
+
+                        if ($insert_data) {
+
+                            //拆分批次
+                            $step = array();
+                            $i = 0;
+                            foreach ($insert_data as $kkkk => $insert_data_info) {
+                                if ($kkkk % 1000 == 0) $i++;
+                                if ($insert_data_info) {
+                                    $step[$i][] = $insert_data_info;
                                 }
                             }
-                        }
 
-                        if (count($is_success)) {
-                            $message = "{$date}, Facebook广告平台分bidding，账号{$account}数据插入失败" . date('Y-m-d H:i:s');
-                            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$message);
+                            $is_success = [];
+                            if ($step) {
+                                foreach ($step as $k => $v) {
+                                    $result = DataImportLogic::insertChannelData(SCHEMA, TABLE_NAME, $v);
+                                    if (!$result) {
+                                        $is_success[] = $k;
+                                    }
+                                }
+                            }
+
+                            if (count($is_success)) {
+                                $message = "{$date}, Facebook广告平台分bidding，账号{$account}数据插入失败" . date('Y-m-d H:i:s');
+                                DataImportImp::saveDataErrorLog(1, SOURCE_ID, AD_PLATFORM, 2, $message);
+                            }
                         }
                     }
 
