@@ -64,7 +64,7 @@ class MopubReportCommond extends Command
 //        $PlatInfo = DataImportLogic::getConf(SOURCE_ID_CONF);
 //        $PlatInfo = Service::data($PlatInfo);
 
-        $sql = " SELECT  data_account as company_account,account_api_key  as api_key,account_user_id  as CAMPAIGN_REPORT_ID from c_platform_account_mapping WHERE platform_id ='pad34' ";
+        $sql = " SELECT  data_account as company_account,account_api_key  as api_key,account_user_id  as CAMPAIGN_REPORT_ID from c_platform_account_mapping WHERE platform_id ='pad34' and account_user_id <> '' and account_user_id is not null";
         $PlatInfo = DB::select($sql);
         $PlatInfo = Service::data($PlatInfo);
 
