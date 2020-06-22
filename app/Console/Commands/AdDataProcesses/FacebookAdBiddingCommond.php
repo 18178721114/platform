@@ -85,11 +85,12 @@ class FacebookAdBiddingCommond extends Command
 //        $PlatInfo = Service::data($PlatInfo);
         $where = '';
         if ($fb_app_id){
-            $where .= "  and b.platform_app_id = '{$fb_app_id}' ";
+            $where .= "  and (b.platform_app_id = '{$fb_app_id}' or b.publisher_id = '{$fb_app_id}') ";
         }
         $sql = "SELECT distinct a.platform_id,
         a.data_account AS company_account,
         b.platform_app_id AS application_id,
+        b.publisher_id as publisher_id,
         a.account_api_key AS appkey  from c_app_ad_platform b LEFT JOIN  c_platform_account_mapping a  ON b.platform_id = a.platform_id
         WHERE
         a.platform_id = 'pad23' and a.account_api_key != '' $where ;";
@@ -112,7 +113,11 @@ class FacebookAdBiddingCommond extends Command
 
         foreach ($PlatInfo as $rss){
             $account = $rss['company_account'];
-            $facebook[$j]['appid'] = trim($rss['application_id']);
+            if (trim($rss['publisher_id']) != -1){
+                $facebook[$j]['appid'] = trim($rss['publisher_id']);
+            }else{
+                $facebook[$j]['appid'] = trim($rss['application_id']);
+            }
             $facebook[$j]['appkey'] = trim($rss['appkey']);
 
             if($facebook[$j]['appkey']){
@@ -132,7 +137,7 @@ class FacebookAdBiddingCommond extends Command
 //                }
 
                 // pgsql 逻辑
-                if($re){
+                if(!isset($re['error'])){
                     $message = $date . ", 获取到当前账号：" . $account . "的数据条数为：" . count($re);
                     self::saveLog(AD_PLATFORM, $message);
 
@@ -202,7 +207,7 @@ class FacebookAdBiddingCommond extends Command
                     }
 
                 }else{
-                    $error_application_ids[] = trim($rss['application_id']);
+                    $error_application_ids[] = trim($rss['application_id'])."取数失败,失败原因:".(isset($re['error']['message']) ? $re['error']['message'] : '未知错误');
                 }
                 sleep(6);
             }
@@ -210,7 +215,7 @@ class FacebookAdBiddingCommond extends Command
 
         if ($error_application_ids){
             $error_application_str = implode(',',$error_application_ids);
-            $message = "{$date}, Facebook广告平台分bidding应用".$error_application_str."取数失败,失败原因:返回数据为空" ;
+            $message = "{$date}, Facebook广告平台分bidding应用".$error_application_str ;
             DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$message);
         }
 
