@@ -79,6 +79,7 @@ class FacebookBiddingHandleProcesses extends Command
         //获取匹配应用的数据 
             $sql = "SELECT DISTINCT
             c_app.os_id,
+            c_app_ad_platform.publisher_id,
             c_app_ad_platform.platform_app_id,
             c_app_ad_platform.platform_app_name,
             `c_platform`.`divide_ad`,
@@ -156,7 +157,7 @@ class FacebookBiddingHandleProcesses extends Command
         foreach ($info as $k => $v) {
         	$json_info = json_decode($v['json_data'],true);
         	foreach ($app_list as $app_k => $app_v) {
-        		if($json_info['placement'] == $app_v['ad_slot_id'] && $json_info['appid'] == $app_v['platform_app_id'] ){
+        		if($json_info['placement'] == $app_v['ad_slot_id'] && ($json_info['appid'] == $app_v['platform_app_id'] || $json_info['appid'] == $app_v['publisher_id']) ){
         			$array[$k]['app_id'] = $app_v['app_id'];
         			$array[$k]['ad_type'] = $app_v['ad_type'];
                     $array[$k]['flow_type'] = $app_v['flow_type'];
