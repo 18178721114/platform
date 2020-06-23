@@ -132,6 +132,8 @@ class AdcolonyTgHandleProcesses extends Command
             $data_account = $v['account'];
             $json_info = json_decode($v['json_data'],true);
             $third_app_id = $json_info['store_id'];
+            $err_name = (isset($json_info['campaign_id']) ? $json_info['campaign_id'] : 'Null') . '#' . (isset($json_info['campaign_name']) ? addslashes($json_info['campaign_name']) : 'Null') . '#' . (isset($json_info['store_id']) ? $json_info['store_id'] : 'Null') . '#' . (isset($json_info['app_name']) ?$json_info['app_name'] : 'Null');
+
             foreach ($app_list as $app_k => $app_v) {
                 if(isset($json_info['campaign_id']) && ($json_info['campaign_id'] == $app_v['campaign_id'])){
                     $array[$k]['app_id'] = $app_v['app_id'];
@@ -189,7 +191,7 @@ class AdcolonyTgHandleProcesses extends Command
                     }
                 }
 
-                $error_log_arr['campaign_id'][] = $json_info['campaign_id'].'('.$third_app_id.')';
+                $error_log_arr['campaign_id'][] = $json_info['campaign_id'].'('.$err_name.')';
             }
 
             // 当前地域匹配字段需要重新确认 匹配国家用
@@ -206,7 +208,7 @@ class AdcolonyTgHandleProcesses extends Command
             }
 
             if ($num_country){
-                $error_log_arr['country'][] = isset($json_info['country']) ? $json_info['country'] : 'Unknown Region';
+                $error_log_arr['country'][] = (isset($json_info['country']) ? $json_info['country'] : 'Unknown Region').'('.$err_name.')';
             }
 
             if(($num+$num_country)>0){
@@ -301,6 +303,8 @@ class AdcolonyTgHandleProcesses extends Command
         if ($error_log_arr){
             $error_msg_array = [];
             $error_msg_mail = [];
+            $error_log_arr = Service::shield_error($source_id,$error_log_arr);
+
             if (isset($error_log_arr['campaign_id'])){
                 $offer_id = implode(',',array_unique($error_log_arr['campaign_id']));
                 $error_msg_array[] = 'campaign_id匹配失败,ID为:'.$offer_id;
@@ -313,10 +317,14 @@ class AdcolonyTgHandleProcesses extends Command
                 $error_msg_mail[] = '国家匹配失败，code为：'.$country;
             }
 
-            DataImportImp::saveDataErrorLog(2,$source_id,$source_name,4,implode(';',$error_msg_array));
+            if(!empty($error_msg_array)) {
+                DataImportImp::saveDataErrorLog(2, $source_id, $source_name, 4, implode(';', $error_msg_array));
+                // 发送邮件
+                CommonFunction::sendMail($error_msg_mail,$source_name.'推广平台数据处理error');
+            }
+
             DataImportImp::saveDataErrorMoneyLog($source_id,$dayid,$error_detail_arr);
-            // 发送邮件
-            CommonFunction::sendMail($error_msg_mail,$source_name.'推广平台数据处理error');
+
         }
 
         // 保存正确数据
