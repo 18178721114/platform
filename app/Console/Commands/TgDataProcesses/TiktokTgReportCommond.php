@@ -150,8 +150,11 @@ class TiktokTgReportCommond extends Command
     {
         // 获取数据
         $campaign_ids = json_encode(array($campaign_id));
+        $dimensions = json_encode(['COUNTRY']);
+        $fields = json_encode(['click_cnt', 'conversion_cost', 'conversion_rate', 'convert_cnt', 'ctr', 'show_cnt', 'stat_cost', 'time_attr_convert_cnt']);
+
 //        $data_url = "https://ads.tiktok.com/open_api/2/audience/ad/get/?advertiser_id={$advertiser_id}&ad_ids={$ad_ids}&start_date={$dayid}&end_date={$dayid}&page_size=1000&dimension=COUNTRY";
-        $data_url = "https://ads.tiktok.com/open_api/2/audience/campaign/get/?advertiser_id={$advertiser_id}&campaign_ids={$campaign_ids}&start_date={$dayid}&end_date={$dayid}&page_size=1000&dimensions=COUNTRY";
+        $data_url = "https://ads.tiktok.com/open_api/2/audience/campaign/get/?advertiser_id={$advertiser_id}&campaign_ids={$campaign_ids}&start_date={$dayid}&end_date={$dayid}&page_size=1000&dimensions={$dimensions}&fields={$fields}";
         var_dump($data_url);
         $data = self::getContent($data_url, $access_token);
         var_dump($data);
