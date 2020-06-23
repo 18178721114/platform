@@ -75,6 +75,16 @@ class KedaxunfeiReportCommond extends Command
                 $post_data = array("email" => $value['company_account'], 'start_date' => $dayid, 'end_date' => $dayid, 'sign' => $sign);
                 //echo $url . PHP_EOL;
                 $data = self::zplay_curl($url, 'post', $post_data);
+
+                // 数据获取重试
+                $api_data_i=1;
+                while(!$data){
+                    $data = self::zplay_curl($url, 'post', $post_data);
+                    $api_data_i++;
+                    if($api_data_i>3)
+                        break;
+                }
+
                 if (!$data['msg']) {
                     //删除数据库里原来数据
                     $map['dayid'] = $dayid;

@@ -86,6 +86,17 @@ class FyberReportCommond extends Command
     		$url = "https://api.fyber.com/publishers/v2/reporting/ad-networks-kpis.json?since={$dayid}&until={$dayid}";
     		$datalist = self::get_response($url,$headers);
     		$ret = json_decode($datalist,true);
+
+            // 数据获取重试
+            $api_data_i=1;
+            while(!$ret){
+                $datalist = self::get_response($url,$headers);
+                $ret = json_decode($datalist,true);
+                $api_data_i++;
+                if($api_data_i>3)
+                    break;
+            }
+
             if(isset($ret['data'])){
                 if ($ret['data']){
                     var_dump(count($ret['data']));

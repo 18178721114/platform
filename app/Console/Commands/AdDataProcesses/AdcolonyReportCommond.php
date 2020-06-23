@@ -80,66 +80,73 @@ class AdcolonyReportCommond extends Command
             //echo $url;
     		$datalist = self::get_response($url);
             $ret = json_decode($datalist,true);
+
+            // 数据获取重试
+            $api_data_i=1;
+            while(!$ret){
+                $datalist = self::get_response($url);
+                $ret = json_decode($datalist,true);
+                $api_data_i++;
+                if($api_data_i>3)
+                    break;
+            }
+
             //var_dump($ret);
-                if (count($ret['results']) > 0){
-                    //删除数据库里原来数据
-                    $map['dayid'] = $dayid;
-                    $map['source_id'] = SOURCE_ID;
-                    $map['account'] = $value['company_account'];
-                    $count = DataImportLogic::getChannelData('ad_data','erm_data',$map)->count();
-                    if($count>0){        
-                        //删除数据
-                        DataImportLogic::deleteHistoryData('ad_data','erm_data',$map);
-                    }
-
-                    $index =0;
-                    $insert_data =[];
-                    $step =[];
-                    foreach ($ret['results'] as  $appInfo) {
-                        $insert_data[$index]['account'] = $value['company_account'];
-                        $insert_data[$index]['type'] = 2;
-                        $insert_data[$index]['source_id'] = SOURCE_ID;
-                        $insert_data[$index]['dayid'] = $dayid;
-                        $insert_data[$index]['json_data'] =str_replace('\'','\'\'',json_encode($appInfo));
-                        $insert_data[$index]['create_time'] = date("Y-m-d H:i:s");
-                        $insert_data[$index]['ad_id'] =$appInfo['zone_id'];
-                        $insert_data[$index]['ad_name'] =$appInfo['zone_name'];
-                        $insert_data[$index]['app_id'] =$appInfo['app_id'];
-                        $insert_data[$index]['app_name'] =$appInfo['app_name'];
-                        $insert_data[$index]['income'] =$appInfo['earnings'];
-                        $insert_data[$index]['year'] = date("Y",strtotime($dayid));
-                        $insert_data[$index]['month'] = date("m",strtotime($dayid));
-                        $index++;
-
-                    }
-                    $index =0;
-                    $i = 0;
-                    foreach ($insert_data as $kkkk => $insert_data_info) {
-                        if ($kkkk % 2000 == 0) $i++;
-                        if ($insert_data_info) {
-                            $step[$i][] = $insert_data_info;
-                        }
-                    }
-
-                    if ($step) {
-                        foreach ($step as $k => $v) {
-                            $result = DataImportLogic::insertChannelData('ad_data','erm_data',$v);
-                            if (!$result) {
-                                echo 'mysql_error'. PHP_EOL;
-                            }
-                        }
-                    }
-                }else{
-                    $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:'.(isset($datalist) ? $datalist : '未知错误');
-                    DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
-
-                    $error_msg_arr[] = $error_msg;
-                    CommonFunction::sendMail($error_msg_arr,AD_PLATFORM.'广告平台取数error');
+            if (count($ret['results']) > 0){
+                //删除数据库里原来数据
+                $map['dayid'] = $dayid;
+                $map['source_id'] = SOURCE_ID;
+                $map['account'] = $value['company_account'];
+                $count = DataImportLogic::getChannelData('ad_data','erm_data',$map)->count();
+                if($count>0){
+                    //删除数据
+                    DataImportLogic::deleteHistoryData('ad_data','erm_data',$map);
                 }
 
-            
-                
-            
+                $index =0;
+                $insert_data =[];
+                $step =[];
+                foreach ($ret['results'] as  $appInfo) {
+                    $insert_data[$index]['account'] = $value['company_account'];
+                    $insert_data[$index]['type'] = 2;
+                    $insert_data[$index]['source_id'] = SOURCE_ID;
+                    $insert_data[$index]['dayid'] = $dayid;
+                    $insert_data[$index]['json_data'] =str_replace('\'','\'\'',json_encode($appInfo));
+                    $insert_data[$index]['create_time'] = date("Y-m-d H:i:s");
+                    $insert_data[$index]['ad_id'] =$appInfo['zone_id'];
+                    $insert_data[$index]['ad_name'] =$appInfo['zone_name'];
+                    $insert_data[$index]['app_id'] =$appInfo['app_id'];
+                    $insert_data[$index]['app_name'] =$appInfo['app_name'];
+                    $insert_data[$index]['income'] =$appInfo['earnings'];
+                    $insert_data[$index]['year'] = date("Y",strtotime($dayid));
+                    $insert_data[$index]['month'] = date("m",strtotime($dayid));
+                    $index++;
+
+                }
+                $index =0;
+                $i = 0;
+                foreach ($insert_data as $kkkk => $insert_data_info) {
+                    if ($kkkk % 2000 == 0) $i++;
+                    if ($insert_data_info) {
+                        $step[$i][] = $insert_data_info;
+                    }
+                }
+
+                if ($step) {
+                    foreach ($step as $k => $v) {
+                        $result = DataImportLogic::insertChannelData('ad_data','erm_data',$v);
+                        if (!$result) {
+                            echo 'mysql_error'. PHP_EOL;
+                        }
+                    }
+                }
+            }else{
+                $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:'.(isset($datalist) ? $datalist : '未知错误');
+                DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
+
+                $error_msg_arr[] = $error_msg;
+                CommonFunction::sendMail($error_msg_arr,AD_PLATFORM.'广告平台取数error');
+            }
 
     	}
 

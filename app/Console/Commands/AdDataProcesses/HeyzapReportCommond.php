@@ -90,6 +90,17 @@ class HeyzapReportCommond extends Command
     				$dataUrl = str_replace(array('_COMPANY_USERNAME_','_API_KEY_','_END_DATE_','_BEGIN_DATE_','_APP_ID_'),array($value['company_username'],$api_key,$dayid,$dayid,$appInfo['app_id']),env('HEYZAP_INFO'));
     				$dataInfo = self::get_response($dataUrl);
     				$dataInfo = json_decode($dataInfo,true);
+
+                    // 数据获取重试
+                    $api_data_i=1;
+                    while(!$dataInfo){
+                        $dataInfo = self::get_response($dataUrl);
+                        $dataInfo = json_decode($dataInfo,true);
+                        $api_data_i++;
+                        if($api_data_i>3)
+                            break;
+                    }
+
     				if(!empty($dataInfo['data'])){
     					$map['dayid'] = $dayid;
     					$map['source_id'] = SOURCE_ID;

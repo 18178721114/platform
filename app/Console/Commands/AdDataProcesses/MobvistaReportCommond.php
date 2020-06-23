@@ -96,6 +96,29 @@ class MobvistaReportCommond extends Command
                     //var_dump($url);
                     $result = self::get_response($url);
                     $result = json_decode($result, true);
+
+                    // 数据获取重试
+                    $api_data_i=1;
+                    while(!$result){
+                        $str_arr = array("skey" => $value['Skey'], "v" => "1.3", "time" => time(), "start" => $dayid, "end" => $dayid, 'group_by' => urlencode('date,app_id,unit_id,country'), 'limit' => 1000, 'page' => $mo_i);
+                        ksort($str_arr);
+                        $str = '';
+                        foreach ($str_arr as $k => $v) {
+                            $str .= "&$k=$v";
+                        }
+                        $str = ltrim($str, '&');
+                        $str1 = urlencode($str);
+                        $signature = md5(md5($str) . $value['Secret']);
+                        $url = env('MOBVISTA_URL');
+                        $url .= "?" . $str . "&sign=" . $signature;
+                        //var_dump($url);
+                        $result = self::get_response($url);
+                        $result = json_decode($result, true);
+                        $api_data_i++;
+                        if($api_data_i>3)
+                            break;
+                    }
+
                     if ($result['code'] == 'ok') {
                         if (!empty($result['data']['lists'])) {
 

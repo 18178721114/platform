@@ -105,6 +105,36 @@ class GuangdiantongReportCommond extends Command
     		$info_url =env('GUANGDIANTONG_URL').$value['company_account'].'.txt';
     		$content = self::get_response($info_url);
     		$content = json_decode($content, true);
+
+            // 数据获取重试
+            $api_data_i=1;
+            while(!$content){
+                $time = time();
+                $sign = sha1($appid . $appkey . $time);
+                $token = base64_encode($agid . ',' . $appid . ',' . $time . ',' . $sign);
+
+                $post_data['token'] = $token;
+                $post_data['memberId'] = $value['company_account'];
+
+                $post_data['start_date'] = date('Ymd', strtotime($dayid));
+                $post_data['end_date'] = date('Ymd', strtotime($dayid));
+                $post_data['placement_name'] = '';
+                $post_data['placement_type'] = '';
+                $post_data['medium_name'] = '';
+                $post_data['agid'] = $agid;
+                $post_data['appid'] = $appid;
+                $post_data['key'] = $appkey;
+
+                $url =env('GUANGDIANTONG_URL').'gdt_tx_service.php';
+                self::zplay_curl($url, 'post', $post_data);
+                $info_url =env('GUANGDIANTONG_URL').$value['company_account'].'.txt';
+                $content = self::get_response($info_url);
+                $content = json_decode($content, true);
+                $api_data_i++;
+                if($api_data_i>3)
+                    break;
+            }
+
          	//获取应用信息
 		    if ($content['msg'] == 'Success') {//成功取到数
     			//删除数据库里原来数据
