@@ -247,6 +247,8 @@ class DataImportImp extends ApiBaseImp
                     Artisan::call('TiktokHandworkHandleProcesses', ['dayid' => $data_date_arr]);
                 }elseif($channel_id == 432){
                     Artisan::call('PangolinHandworkHandleProcesses', ['dayid' => $data_date_arr]);
+                }elseif($channel_id == 434){
+                    Artisan::call('TencentHandworkHandleProcesses', ['dayid' => $data_date_arr]);
                 }
             }elseif ($data_type == 1) {
                 if($channel_id == 50){
