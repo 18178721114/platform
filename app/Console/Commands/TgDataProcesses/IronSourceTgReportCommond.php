@@ -145,7 +145,7 @@ class IronSourceTgReportCommond extends Command
                     if (isset($dataList['errorMessage'])) {
                         $error_msg .= $dataList['errorMessage'];
                     } else {
-                        $error_msg .= '该账号无数据';
+                        $error_msg .= '无数据,接口未返回任何信息';
                     }
                     $all_data_err[] = $error_msg;
                 }
