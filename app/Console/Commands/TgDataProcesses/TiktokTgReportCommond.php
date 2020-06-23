@@ -185,8 +185,8 @@ class TiktokTgReportCommond extends Command
 
             self::getReportData($final_insert_arr, $data_account, $dayid);
         }else{
-            $error_msg = AD_PLATFORM.'推广平台'.'获取数据失败,错误信息:'. (isset($data_arr['message']) ? $data_arr['message'] : '暂无数据');;
-            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,4,$error_msg);
+//            $error_msg = AD_PLATFORM.'推广平台'.'获取数据失败,错误信息:'. (isset($data_arr['message']) ? $data_arr['message'] : '暂无数据');;
+//            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,4,$error_msg);
         }
     }
 
