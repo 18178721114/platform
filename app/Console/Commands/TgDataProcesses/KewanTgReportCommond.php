@@ -82,6 +82,33 @@ class KewanTgReportCommond extends Command
 
             $appInfoList = self::get_response($url);
             $appInfoList = json_decode($appInfoList,true);
+
+            // 数据获取重试
+            $api_data_i=1;
+            while(!$appInfoList){
+                // 生成签名
+                $timestamp = time();
+                $nonce = rand(1,999);
+                $tmpArr = array($token, $timestamp, $nonce);
+                sort($tmpArr, SORT_STRING);
+                $signature = implode( $tmpArr );
+                $signature = sha1( $signature );
+
+                $params = array(
+                    'signature' => $signature,
+                    'timestamp' => $timestamp,
+                    'nonce' => $nonce,
+                );
+                $url = env('KEWAN_URL')."/advertiser/{$value['company_username']}/apps";
+                $url .= '?' . http_build_query($params, null, '&');
+
+                $appInfoList = self::get_response($url);
+                $appInfoList = json_decode($appInfoList,true);
+                $api_data_i++;
+                if($api_data_i>3)
+                    break;
+            }
+
             //获取应用信息
             if(!empty($appInfoList['data'])){
 

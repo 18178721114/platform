@@ -80,6 +80,17 @@ class ApplovinReportCommond extends Command
     		$url = str_replace(array('_API_KEY_','_END_DATE_','_BEGIN_DATE_'),array($api_key,$dayid,$dayid),env('APPLOVIN_URL'));
     		$info  =self::get_response ( $url );
     		$ret = json_decode($info,true);
+
+    		// 数据获取重试
+            $api_data_i=1;
+            while(!$ret){
+                $info  =self::get_response ( $url );
+                $ret = json_decode($info,true);
+                $api_data_i++;
+                if($api_data_i>3)
+                    break;
+            }
+
 		    if ($ret['code'] == '200') {//成功取到数
 
                     //删除数据库里原来数据
