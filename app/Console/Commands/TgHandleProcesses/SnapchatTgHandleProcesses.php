@@ -85,8 +85,8 @@ class SnapchatTgHandleProcesses extends Command
         $sql = "SELECT  distinct
                 c_app.id,c_app.app_id,c_generalize.platform_id,c_generalize.data_account,c_generalize.application_id,c_generalize.application_name,c_generalize.agency_platform_id,c_generalize_ad_app.campaign_id,c_generalize_ad_app.campaign_name,c_generalize_ad_app.ad_group_id,c_platform.currency_type_id,cpp.currency_type_id as ageccy_currency_type_id
                 FROM c_app 
-                LEFT JOIN c_generalize ON c_app.id = c_generalize.app_id 
-                LEFT JOIN c_generalize_ad_app ON c_generalize.id = c_generalize_ad_app.generalize_id 
+                LEFT JOIN c_generalize ON c_app.id = c_generalize.app_id and c_generalize.generalize_status = 1
+                LEFT JOIN c_generalize_ad_app ON c_generalize.id = c_generalize_ad_app.generalize_id and  c_generalize_ad_app.status = 1
                 LEFT JOIN c_platform ON c_generalize.platform_id = c_platform.platform_id 
                 LEFT JOIN c_platform as cpp ON c_generalize.agency_platform_id = cpp.platform_id 
                 WHERE 

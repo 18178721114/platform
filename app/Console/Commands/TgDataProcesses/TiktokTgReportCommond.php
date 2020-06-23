@@ -57,21 +57,25 @@ class TiktokTgReportCommond extends Command
         define('TABLE_NAME', 'erm_data');
         define('SOURCE_ID', 'ptg76'); // todo 这个需要根据平台信息表确定平台ID
 
-        $tiktok_conf_arr = [
-            'username' => 'promtion@zplay.com', 'pass' => 'Zpl@y1119', 'app_id' => 1648343684797446, 'secret' => '6c566e4b401d6fb14a0418e07eb30abd1681e202'
-        ];
+        try {
+            $tiktok_conf_arr = ['username' => 'promtion@zplay.com', 'pass' => 'Zpl@y1119', 'app_id' => 1648343684797446, 'secret' => '6c566e4b401d6fb14a0418e07eb30abd1681e202'];
 
-        self::getAdvertiserList($tiktok_conf_arr,$dayid);
+            self::getAdvertiserList($tiktok_conf_arr, $dayid);
+        }catch (\Exception $e) {
+            // 异常报错
+            $message = "{$dayid}号, " . AD_PLATFORM . " 推广平台程序报错,报错原因:".$e->getMessage();
+            DataImportImp::saveDataErrorLog(5, SOURCE_ID, AD_PLATFORM, 4, $message);
+            $error_msg_arr[] = $message;
+            CommonFunction::sendMail($error_msg_arr, '推广平台程序error');
+            exit;
+
+        }
     }
 
     //获取 Advertiser List
     private static function getAdvertiserList($tiktok_conf_arr,$dayid){
 
-        // todo 此处为生成access_token代码
-        // self::getAccessToken($tiktok_conf_arr);
-
         $account_name = $tiktok_conf_arr['username'];
-//        $access_token = self::refreshToken($tiktok_conf_arr);
         Redis::select(1);
         $access_json = Redis::get('tiktok_tg_access_token');
         if ($access_json) {
@@ -116,11 +120,18 @@ class TiktokTgReportCommond extends Command
                 // 数据处理过程
                 Artisan::call('TiktokTgHandleProcesses',['dayid'=>$dayid]);
             }else{
-                $error_msg = AD_PLATFORM.'推广平台'.'获取数据失败,错误信息:'. (isset($data_arr['message']) ? $data_arr['message'] : '广告主列表获取失败!');;
+                $error_msg = AD_PLATFORM.'推广平台'.'获取advertiser列表数据失败,错误信息:';
+                if (key_exists('code',$data_arr) && $data_arr['code'] == 0){
+                    $error_msg .= '暂无数据';
+                }elseif(key_exists('code',$data_arr) && $data_arr['code'] != 0){
+                    $error_msg .= $data_arr['message'];
+                }else{
+                    $error_msg .= '无数据，接口未返回任何信息';
+                }
                 DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,4,$error_msg);
             }
         }else{
-            $error_msg = AD_PLATFORM.'推广平台'.'获取数据失败,错误信息:授权失败,access_token信息不存在,请重新授权!';
+            $error_msg = AD_PLATFORM.'推广平台'.'获取access_token数据失败,错误信息:授权失败,access_token信息不存在,请重新授权!';
             DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,4,$error_msg);
         }
     }
@@ -136,12 +147,18 @@ class TiktokTgReportCommond extends Command
             foreach ($data_arr['data']['list'] as $ad_info){
                 $campaign_name = $ad_info['campaign_name'];
                 $campaign_id = $ad_info['campaign_id'];
-//                $adgroup_name = $ad_info['adgroup_name'];
-//                $adgroup_id = $ad_info['adgroup_id'];
-//                $ad_name = $ad_info['ad_name'];
-//                $ad_id = $ad_info['ad_id'];
                 self::getTiktokData($access_token,$data_account,$advertiser_id, $advertiser_name, $campaign_name, $campaign_id,$dayid);
             }
+        }else{
+            $error_msg = AD_PLATFORM.'推广平台'.'获取campaign列表数据失败,错误信息:';
+            if (key_exists('code',$data_arr) && $data_arr['code'] == 0){
+                $error_msg .= '暂无数据';
+            }elseif(key_exists('code',$data_arr) && $data_arr['code'] != 0){
+                $error_msg .= $data_arr['message'];
+            }else{
+                $error_msg .= '无数据，接口未返回任何信息';
+            }
+            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,4,$error_msg);
         }
     }
 
@@ -185,8 +202,15 @@ class TiktokTgReportCommond extends Command
 
             self::getReportData($final_insert_arr, $data_account, $dayid);
         }else{
-//            $error_msg = AD_PLATFORM.'推广平台'.'获取数据失败,错误信息:'. (isset($data_arr['message']) ? $data_arr['message'] : '暂无数据');;
-//            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,4,$error_msg);
+            $error_msg = AD_PLATFORM.'推广平台'.'获取报表列表数据失败,错误信息:';
+            if (key_exists('code',$data_arr) && $data_arr['code'] == 0){
+                $error_msg .= '暂无数据';
+            }elseif(key_exists('code',$data_arr) && $data_arr['code'] != 0){
+                $error_msg .= $data_arr['message'];
+            }else{
+                $error_msg .= '无数据，接口未返回任何信息';
+            }
+            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,4,$error_msg);
         }
     }
 
@@ -239,73 +263,6 @@ class TiktokTgReportCommond extends Command
                 }
             }
         }
-    }
-
-    // 获取access_token
-    public static function getAccessToken($tiktok_conf_arr){
-        // todo 此处为生成access_token代码
-        $account_name = $tiktok_conf_arr['username'];
-        $token_file = "./tiktok_".$account_name.".txt";
-        $get_access_token_data = [
-            'app_id'=>$tiktok_conf_arr['app_id'],
-            'secret'=>$tiktok_conf_arr['secret'],
-            'grant_type'=>'auth_code',
-            'auth_code'=>'4935cfd496259af0f52d74540036b11730bd2ca8'
-        ];
-        var_dump($get_access_token_data);
-        $get_access_token_url = "https://ads.tiktok.com/open_api/oauth2/access_token/";
-        $get_access_token_result = CurlRequest::curl_header_json_Post($get_access_token_url, $get_access_token_data,[]);
-        var_dump($get_access_token_result);
-        file_put_contents($token_file, $get_access_token_result);
-    }
-
-    // 刷新token
-    private static function refreshToken($tiktok_conf_arr){
-
-        $account_name = $tiktok_conf_arr['username'];
-        $token_file = "./tiktok_".$account_name.".txt";
-        $app_id = $tiktok_conf_arr['app_id'];
-        $secret = $tiktok_conf_arr['secret'];
-
-        if (file_exists($token_file)) {
-            $content = file_get_contents($token_file);
-            $content_arr = json_decode($content, true);
-            if (isset($content_arr['data']) && $content_arr['data']){
-                $content_arr_data = $content_arr['data'];
-                if (isset($content_arr_data['refresh_token']) && $content_arr_data['refresh_token']){
-                    $refresh_token = $content_arr_data['refresh_token'];
-                    $refresh_token_data = [
-                        'app_id' => $app_id,
-                        'secret' => $secret,
-                        'grant_type' => 'refresh_token',
-                        'refresh_token' => $refresh_token
-                    ];
-                    $get_access_token_url = "https://ads.tiktok.com/open_api/oauth2/refresh_token/";
-                    $get_access_token_result = CurlRequest::curl_header_json_Post($get_access_token_url, $refresh_token_data,[]);
-                    var_dump($get_access_token_result);
-                    if($get_access_token_result){
-                        file_put_contents($token_file, $get_access_token_result);
-                        $get_access_token_arr = json_decode($get_access_token_result, true);
-                        if (isset($get_access_token_arr['data']) && isset($get_access_token_arr['data']['access_token']) && $get_access_token_arr['data']['access_token']) {
-                            $access_token = $get_access_token_arr['data']['access_token'];
-                            var_dump($access_token);
-                            return $access_token;
-                        }else{
-                            return false;
-                        }
-                    }else{
-                        return false;
-                    }
-                }else{
-                    return false;
-                }
-            }else{
-                return false;
-            }
-        }else{
-            return false;
-        }
-
     }
 
     // 重试机制 获取数据内容
