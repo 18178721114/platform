@@ -5,6 +5,7 @@ namespace App\Console\Commands\AdDataProcesses;
 use App\BusinessImp\DataImportImp;
 use App\BusinessLogic\AdReportLogic;
 use App\BusinessLogic\DataImportLogic;
+use App\Common\ApiResponseFactory;
 use App\Common\CommonFunction;
 use App\Common\CurlRequest;
 use App\Common\ParseDayid;
@@ -69,6 +70,7 @@ class FacebookAdBiddingCommond extends Command
         $dayid = $dayid = $this->argument('dayid') ? $this->argument('dayid') : date('Y-m-d',strtotime('-1 day'));
         $fb_app_id = $this->argument('app_id') ? $this->argument('app_id') : '';
         $date = ParseDayid::get_dayid($dayid);
+        try{
 
         if (empty($date)) {
             $msg = "invalid date.";
@@ -226,6 +228,11 @@ class FacebookAdBiddingCommond extends Command
 
         // 调用数据处理过程
         Artisan::call('FacebookBiddingHandleProcesses',['dayid' => $date]);
+        } catch (\Exception $e) {
+            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'渠道数据匹配失败：'.$e->getMessage();
+            DataImportImp::saveDataErrorLog(5,SOURCE_ID,AD_PLATFORM,2,$error_msg_info);
+
+        }
     }
 
     /**

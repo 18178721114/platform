@@ -59,7 +59,7 @@ class YumiPolymerizationCommond extends Command
         //查询pgsql 的数据
         $source_id = 'pad262';
         $source_name = '玉米广告国内安卓渠道';
-
+        try{
         $sql = "SELECT
         a.platform_app_id
         FROM
@@ -215,7 +215,13 @@ class YumiPolymerizationCommond extends Command
             sleep(10);
             Artisan::call('YumiPolymerizationHandleProcesses' ,['dayid'=>$dayid]);
         }
+        } catch (\Exception $e) {
+            $error_msg_info = $dayid.'号,'.$source_name.'渠道数据匹配失败：'.$e->getMessage();
+            DataImportImp::saveDataErrorLog(5,$source_id,$source_name,2,$error_msg_info);
 
+        }
 
     }
+
+
 }

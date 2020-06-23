@@ -58,7 +58,7 @@ class TapjoyReportCommond extends Command
         define('SCHEMA', 'ad_data');
         define('TABLE_NAME', 'erm_data');
         define('SOURCE_ID', 'pad31');
-
+        try{
         $sql = "  SELECT  data_account as company_account,account_api_key  as api_key from c_platform_account_mapping WHERE platform_id ='pad31'";
         $info = DB::select($sql);
         $info = Service::data($info);
@@ -169,6 +169,11 @@ class TapjoyReportCommond extends Command
         }
         // todo 正式打开
         Artisan::call('TapjoyHandleProcesses', ['dayid' => $dayid]);
+        } catch (\Exception $e) {
+            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'渠道数据匹配失败：'.$e->getMessage();
+            DataImportImp::saveDataErrorLog(5,SOURCE_ID,AD_PLATFORM,2,$error_msg_info);
+
+        }
 
     }
 

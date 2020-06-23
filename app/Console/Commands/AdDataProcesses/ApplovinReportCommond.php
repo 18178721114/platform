@@ -61,7 +61,7 @@ class ApplovinReportCommond extends Command
         define('TABLE_NAME', 'erm_data');
         define('SOURCE_ID_CONF', '10005'); // todo 这个需要根据平台信息表确定平台ID
         define('SOURCE_ID', 'pad33'); // todo 这个需要根据平台信息表确定平台ID
-
+        try{
         // todo  数据库配置
         $sql = "SELECT  data_account as company_account,account_api_key  as api_key from c_platform_account_mapping WHERE platform_id ='pad33' ";
         $PlatInfo = DB::select($sql);
@@ -144,8 +144,12 @@ class ApplovinReportCommond extends Command
     	}
 
         // 调用数据处理过程
-       Artisan::call('ApplovinHandleProcesses',['dayid' => $dayid]);
+            Artisan::call('ApplovinHandleProcesses',['dayid' => $dayid]);
+        } catch (\Exception $e) {
+            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'渠道数据匹配失败：'.$e->getMessage();
+            DataImportImp::saveDataErrorLog(5,SOURCE_ID,AD_PLATFORM,2,$error_msg_info);
 
+        }
 
     		
     }

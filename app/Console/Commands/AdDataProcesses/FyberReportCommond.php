@@ -58,7 +58,7 @@ class FyberReportCommond extends Command
         define('SCHEMA', 'ad_data');
         define('TABLE_NAME', 'erm_data');
         define('SOURCE_ID', 'pad54'); // todo 这个需要根据平台信息表确定平台ID
-
+        try{
 
         // todo  数据库配置
 //        $PlatInfo = DataImportLogic::getConf(SOURCE_ID_CONF);
@@ -153,7 +153,12 @@ class FyberReportCommond extends Command
     	}
 
         // 调用数据处理过程
-       Artisan::call('FyberHandleProcesses',['dayid' => $dayid]);
+            Artisan::call('FyberHandleProcesses',['dayid' => $dayid]);
+        } catch (\Exception $e) {
+            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'渠道数据匹配失败：'.$e->getMessage();
+            DataImportImp::saveDataErrorLog(5,SOURCE_ID,AD_PLATFORM,2,$error_msg_info);
+
+        }
     		
     }
     public static function get_response($url,$headers=array())

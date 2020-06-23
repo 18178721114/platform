@@ -61,7 +61,7 @@ class KewanReportCommond extends Command
         define('SCHEMA', 'ad_data');
         define('TABLE_NAME', 'erm_data');
         define('SOURCE_ID', 'pad69'); // todo 这个需要根据平台信息表确定平台ID
-
+        try{
         //这里面要写新测试平台里的数据配置 从数据库里取数据
         $info[0]['company_username'] ='8C8F7D4B-B2A5-F9FC-1371-CB271911B84E';
         $info[0]['api_key'] ='5392FE33-1AD4-A98F-B4FE-527718366B27';
@@ -178,7 +178,12 @@ class KewanReportCommond extends Command
                 DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
             }
         }
-        Artisan::call('KewanHandleProcesses' ,['dayid'=>$dayid]);
+            Artisan::call('KewanHandleProcesses' ,['dayid'=>$dayid]);
+        } catch (\Exception $e) {
+            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'渠道数据匹配失败：'.$e->getMessage();
+            DataImportImp::saveDataErrorLog(5,SOURCE_ID,AD_PLATFORM,2,$error_msg_info);
+
+        }
     }
     public static function get_response($url, $headers='')
     {

@@ -57,7 +57,7 @@ class IronSourceReportCommond extends Command
         define('SCHEMA', 'ad_data');
         define('TABLE_NAME', 'erm_data');
         define('SOURCE_ID', 'pad05'); // todo 这个需要根据平台信息表确定平台ID
-
+        try{
         //这里面要写新测试平台里的数据配置 从数据库里取数据
 //        $PlatInfo[0]['company_account'] ='weibo@zplay.cn';
 //        $PlatInfo[0]['access_key'] ='f35e652190d0';
@@ -173,6 +173,11 @@ class IronSourceReportCommond extends Command
 
             }
             Artisan::call('IronsourceHandleProcesses' ,['dayid'=>$dayid]);
+        }
+        } catch (\Exception $e) {
+            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'渠道数据匹配失败：'.$e->getMessage();
+            DataImportImp::saveDataErrorLog(5,SOURCE_ID,AD_PLATFORM,2,$error_msg_info);
+
         }
     }
 
