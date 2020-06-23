@@ -319,8 +319,8 @@ class AdcolonyTgHandleProcesses extends Command
 
             if(!empty($error_msg_array)) {
                 DataImportImp::saveDataErrorLog(2, $source_id, $source_name, 4, implode(';', $error_msg_array));
-                // 发送邮件
-                CommonFunction::sendMail($error_msg_mail,$source_name.'推广平台数据处理error');
+//                // 发送邮件
+//                CommonFunction::sendMail($error_msg_mail,$source_name.'推广平台数据处理error');
             }
 
             DataImportImp::saveDataErrorMoneyLog($source_id,$dayid,$error_detail_arr);
