@@ -74,6 +74,7 @@ class ApplovinReportCommond extends Command
         }
 
     	foreach ($PlatInfo as $key => $value) {
+    	    if($value['company_account'] != 'noodlecake') continue;
 
             $api_key = $value['api_key'];
         	//获取应用信息
@@ -90,6 +91,14 @@ class ApplovinReportCommond extends Command
                 if($api_data_i>3)
                     break;
             }
+            //取数四次 取数结果仍为空
+            if($api_data_i ==4){
+                $error_msg_1 = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:返回数据为空';
+                DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg_1);
+                continue;
+
+            }
+
 
 		    if ($ret['code'] == '200') {//成功取到数
 
@@ -146,7 +155,7 @@ class ApplovinReportCommond extends Command
 
 		    } else {
 
-                $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:'.$info;
+                $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:返回数据为空'.json_encode($ret);
                 DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
                 $error_msg_arr[] = $error_msg;
                 CommonFunction::sendMail($error_msg_arr,AD_PLATFORM.'广告平台取数error');

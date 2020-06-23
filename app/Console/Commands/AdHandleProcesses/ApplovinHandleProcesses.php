@@ -306,25 +306,40 @@ class ApplovinHandleProcesses extends Command
         if ($error_log_arr){
             $error_msg_array = [];
             $error_msg_mail = [];
-            if (isset($error_log_arr['application'])){
+            $sql = " select name from c_redundancy_config where  platform_id = '$source_id'";
+
+            $ex_info = DB::select($sql);
+            $ex_info = Service::data($ex_info);
+            foreach ($ex_info as $a => $b){
+                foreach ($error_log_arr  as $h => $f){
+                    foreach ($f as $item  => $a1 ){
+                        if($b['name'] == $a1 ){
+                            unset ($error_log_arr[$h][$item]);
+                        }
+                    }
+
+                }
+            }
+            if (isset($error_log_arr['application']) && !empty($error_log_arr['application'])){
                 $application = implode(',',array_unique($error_log_arr['application']));
                 $error_msg_array[] = '应用名称匹配失败,ID为:'.$application;
                 $error_msg_mail[] = '应用名称匹配失败，ID为：'.$application;
             }
 
-            if (isset($error_log_arr['country'])){
+            if (isset($error_log_arr['country']) && !empty($error_log_arr['country'])){
                 $country = implode(',',array_unique($error_log_arr['country']));
                 $error_msg_array[] = '国家匹配失败,code为:'.$country;
                 $error_msg_mail[] = '国家匹配失败，code为：'.$country;
             }
-            if (isset($error_log_arr['ad_type'])){
+            if (isset($error_log_arr['ad_type']) && !empty($error_log_arr['ad_type'])){
                 $ad_type = implode(',',array_unique($error_log_arr['ad_type']));
                 $error_msg_array[] = '广告类型匹配失败,code为:'.$ad_type;
                 $error_msg_mail[] = '广告类型匹配失败，code为：'.$ad_type;
             }
-
-            DataImportImp::saveDataErrorLog(2,$source_id,$source_name,2,implode(';',$error_msg_array));
-            DataImportImp::saveDataErrorMoneyLog($source_id,$dayid,$error_detail_arr);
+            if(!empty($error_msg_array)) {
+                DataImportImp::saveDataErrorLog(2, $source_id, $source_name, 2, implode(';', $error_msg_array));
+                DataImportImp::saveDataErrorMoneyLog($source_id, $dayid, $error_detail_arr);
+            }
 
             // 发送邮件
             //CommonFunction::sendMail($error_msg_mail,$source_name.'广告平台数据处理error');
