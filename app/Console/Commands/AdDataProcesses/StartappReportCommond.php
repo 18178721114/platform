@@ -85,6 +85,17 @@ class StartappReportCommond extends Command
             $url = "http://api.startapp.com/pub/report/1.0?partner=" . $partner . "&token=" . $token . "&startDate={$stime}&endDate={$etime}&dimension=segId,adType,country,os,prod";
     		$datalist = self::get_response($url);
     		$ret = json_decode($datalist,true);
+
+            // 数据获取重试
+            $api_data_i=1;
+            while(!$ret){
+                $datalist = self::get_response($url);
+                $ret = json_decode($datalist,true);
+                $api_data_i++;
+                if($api_data_i>3)
+                    break;
+            }
+
             if(isset($ret['data'])){
                 if ($ret['data']){
                     //var_dump(count($ret['data']));

@@ -86,6 +86,17 @@ class ChangsiReportCommond extends Command
             $url = str_replace(array('_USERNAME_','_KEY_','_END_DATE_','_BEGIN_DATE_'),array($value['company_account'],$key,$dayid,$dayid),env('CHANGSI_URL'));
             $data = self::get_response($url);
             $ret = json_decode($data, true);
+
+            // 数据获取重试
+            $api_data_i=1;
+            while(!$ret){
+                $data = self::get_response($url);
+                $ret = json_decode($data, true);
+                $api_data_i++;
+                if($api_data_i>3)
+                    break;
+            }
+
             if(isset($ret['status']) && $ret['status'] == 1){
                 if ($ret['data']){
                         //删除数据库里原来数据

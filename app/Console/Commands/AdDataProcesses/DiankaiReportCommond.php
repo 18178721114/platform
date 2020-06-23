@@ -78,6 +78,16 @@ class DiankaiReportCommond extends Command
                 $slot_ids = array("UW2G03"=>"b1cbd186f6d5fbae5fc70571ebe8c322", "UW270I"=>"f364edf7cc4ceb545f23ff98d92d4fc2", "UW2E0I"=>"1d211c1cda2896dea6f65d9957d9e9cf","UW5Z0Z"=>"854b828c570f0bca3f011e50f925dfae");
                 var_dump($result);
                 $result_arr = json_decode($result,true);
+
+                // 数据获取重试
+                $api_data_i=1;
+                while(!$result_arr){
+                    $result = file_get_contents($url);
+                    $result_arr = json_decode($result,true);
+                    $api_data_i++;
+                    if($api_data_i>3)
+                        break;
+                }
                 //判断是否有数
                 if(isset($result_arr['success']) && $result_arr['success']===true && count($result_arr['data'])>0){
                     $map = [];

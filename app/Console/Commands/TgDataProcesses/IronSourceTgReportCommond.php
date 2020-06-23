@@ -76,7 +76,17 @@ class IronSourceTgReportCommond extends Command
             $url = str_replace(array('_END_DATE_','_BEGIN_DATE_'),array($dayid,$dayid),env('IRONSRC_TG_URL'));
             $dataList = $this->get_response($url,$header);
             $dataList  = json_decode($dataList,true);
-            
+
+            // 数据获取重试
+            $api_data_i=1;
+            while(!$dataList){
+                $dataList = $this->get_response($url,$header);
+                $dataList  = json_decode($dataList,true);
+                $api_data_i++;
+                if($api_data_i>3)
+                    break;
+            }
+
             /*如果数据返回正常，则response不含code属性*/
             if (!empty($dataList['data'])) {
                     $map = [];

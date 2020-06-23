@@ -70,6 +70,17 @@ class AdcolonyTgReportCommond extends Command
             //var_dump($url);
     		$info  =self::get_response($url);
     		$ret = json_decode($info,true);
+
+            // 数据获取重试
+            $api_data_i=1;
+            while(!$ret){
+                $info  =self::get_response($url);
+                $ret = json_decode($info,true);
+                $api_data_i++;
+                if($api_data_i>3)
+                    break;
+            }
+
 		    if ($ret['status'] == 'success') {//成功取到数
     			//删除数据库里原来数据
 		    	$map['dayid'] = $dayid;

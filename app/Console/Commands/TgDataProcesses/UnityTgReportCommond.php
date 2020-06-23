@@ -73,6 +73,17 @@ class UnityTgReportCommond extends Command
     		$url = str_replace(array('_Organization_ID_','_API_KEY_','_END_DATE_','_BEGIN_DATE_'),array($value['Organization_ID'],$value['api_key'],$dayid,$dayid),env('UNITY_TG_URL'));
     		$info  =self::get_response($url);
     		$result_info = json_decode($info,true);
+
+            // 数据获取重试
+            $api_data_i=1;
+            while(!$result_info){
+                $info  =self::get_response($url);
+                $result_info = json_decode($info,true);
+                $api_data_i++;
+                if($api_data_i>3)
+                    break;
+            }
+
     		if (isset($result_info['error'])){
                 $error_msg_arr = $result_info['error']['parameters'][0];
                 $error_msg_arr = array_values($error_msg_arr);

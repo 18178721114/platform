@@ -72,6 +72,17 @@ class TapjoyTgReportCommond extends Command
             $token_url = env('TAPJOY_TOKEN_URL');
             $response = self::curl($token_url, 'POST', $access_token_header);
             $response = json_decode($response, true);
+
+            // 数据获取重试
+            $api_data_i=1;
+            while(!$response){
+                $response = self::curl($token_url, 'POST', $access_token_header);
+                $response = json_decode($response, true);
+                $api_data_i++;
+                if($api_data_i>3)
+                    break;
+            }
+
             if (isset($response['error'])) {
                 $error_msg = AD_PLATFORM . '推广平台' . $company_account . '账号获取access_token失败,错误信息:' . $response['error'];
                 DataImportImp::saveDataErrorLog(1, SOURCE_ID, AD_PLATFORM, 4, $error_msg);

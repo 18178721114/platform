@@ -72,7 +72,7 @@ class SmaatoCommond extends Command
         $PlatInfo = Service::data($PlatInfo);
 
         if (!$PlatInfo){
-            $message = "{$dayid}, " . AD_PLATFORM . " 广告平台取数失败,失败原因:取数配置信息为空" ;
+            $message = "{$date}, " . AD_PLATFORM . " 广告平台取数失败,失败原因:取数配置信息为空" ;
             DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$message);
 
             $error_msg_arr = [];
