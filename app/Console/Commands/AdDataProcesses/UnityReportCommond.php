@@ -52,7 +52,7 @@ class UnityReportCommond extends Command
         // 入口方法
         $dayid = $this->argument('dayid')?$this->argument('dayid'):date('Y-m-d',strtotime('-1 day'));
         $appid = $this->argument('appid')?$this->argument('appid'):'';
-
+        try{
         define('AD_PLATFORM', 'Unity');
         define('SCHEMA', 'ad_data');
         define('TABLE_NAME', 'erm_data');
@@ -141,6 +141,11 @@ class UnityReportCommond extends Command
                 }
             }
             Artisan::call('UnityHandleProcesses' ,['dayid'=>$dayid]);
+        }
+        } catch (\Exception $e) {
+            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'渠道数据匹配失败：'.$e->getMessage();
+            DataImportImp::saveDataErrorLog(5,SOURCE_ID,AD_PLATFORM,2,$error_msg_info);
+
         }
 
     }

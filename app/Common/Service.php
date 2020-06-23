@@ -7,6 +7,7 @@
  */
 namespace App\Common;
 use function foo\func;
+use Illuminate\Support\Facades\DB;
 
 /**
  *
@@ -529,6 +530,24 @@ class Service
 
 
         return $data;
+    }
+    //报错页面数据屏蔽
+    public  static  function shield_error ($platform_id,$error_log_arr){
+        $sql = " select name from c_redundancy_config where  platform_id = '$platform_id'";
+
+        $ex_info = DB::select($sql);
+        $ex_info = Service::data($ex_info);
+        foreach ($ex_info as $a => $b){
+            foreach ($error_log_arr  as $h => $f){
+                foreach ($f as $item  => $a1 ){
+                    if($b['name'] == $a1 ){
+                        unset ($error_log_arr[$h][$item]);
+                    }
+                }
+
+            }
+        }
+        return $error_log_arr;
     }
 
 }

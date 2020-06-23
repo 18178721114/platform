@@ -56,7 +56,7 @@ class PangolinReportCommond extends Command
         define('SCHEMA', 'ad_data');
         define('TABLE_NAME', 'erm_data');
         define('SOURCE_ID', 'pad272'); // todo 这个需要根据平台信息表确定平台ID
-
+        try{
         $start = $dayid;
         $end = $start;
         $time = time();
@@ -182,6 +182,11 @@ class PangolinReportCommond extends Command
             }
             // 穿山甲 广告处理过程
             Artisan::call('PangolinReportHandleProcesses' ,['dayid'=>$dayid]);
+        }
+        } catch (\Exception $e) {
+            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'渠道数据匹配失败：'.$e->getMessage();
+            DataImportImp::saveDataErrorLog(5,SOURCE_ID,AD_PLATFORM,2,$error_msg_info);
+
         }
     }
 

@@ -61,7 +61,7 @@ class ApplovinReportCommond extends Command
         define('TABLE_NAME', 'erm_data');
         define('SOURCE_ID_CONF', '10005'); // todo 这个需要根据平台信息表确定平台ID
         define('SOURCE_ID', 'pad33'); // todo 这个需要根据平台信息表确定平台ID
-
+        try{
         // todo  数据库配置
         $sql = "SELECT  data_account as company_account,account_api_key  as api_key from c_platform_account_mapping WHERE platform_id ='pad33' ";
         $PlatInfo = DB::select($sql);
@@ -74,6 +74,7 @@ class ApplovinReportCommond extends Command
         }
 
     	foreach ($PlatInfo as $key => $value) {
+    	    if($value['company_account'] != 'noodlecake') continue;
 
             $api_key = $value['api_key'];
         	//获取应用信息
@@ -90,6 +91,14 @@ class ApplovinReportCommond extends Command
                 if($api_data_i>3)
                     break;
             }
+            //取数四次 取数结果仍为空
+            if($api_data_i ==4){
+                $error_msg_1 = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:返回数据为空';
+                DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg_1);
+                continue;
+
+            }
+
 
 		    if ($ret['code'] == '200') {//成功取到数
 
@@ -146,7 +155,7 @@ class ApplovinReportCommond extends Command
 
 		    } else {
 
-                $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:'.$info;
+                $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:返回数据为空'.json_encode($ret);
                 DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
                 $error_msg_arr[] = $error_msg;
                 CommonFunction::sendMail($error_msg_arr,AD_PLATFORM.'广告平台取数error');
@@ -155,8 +164,12 @@ class ApplovinReportCommond extends Command
     	}
 
         // 调用数据处理过程
-       Artisan::call('ApplovinHandleProcesses',['dayid' => $dayid]);
+            Artisan::call('ApplovinHandleProcesses',['dayid' => $dayid]);
+        } catch (\Exception $e) {
+            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'渠道数据匹配失败：'.$e->getMessage();
+            DataImportImp::saveDataErrorLog(5,SOURCE_ID,AD_PLATFORM,2,$error_msg_info);
 
+        }
 
     		
     }

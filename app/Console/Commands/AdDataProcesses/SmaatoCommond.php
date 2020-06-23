@@ -58,7 +58,7 @@ class SmaatoCommond extends Command
         define('TABLE_NAME', 'erm_data');
         define('SOURCE_ID_CONF', '10015'); // todo 这个需要根据平台信息表确定平台ID
         define('SOURCE_ID', 'pad21'); // todo 这个需要根据平台信息表确定平台ID
-
+        try{
         $date = $this->argument('dayid') ? $this->argument('dayid') : date('Y-m-d',strtotime('-1 day'));
         $account = $this->argument('account');
 
@@ -101,6 +101,11 @@ class SmaatoCommond extends Command
                 // 调用数据处理过程
                 Artisan::call('SmaatoHandleProcesses',['dayid' => $date]);
             }
+        }
+        } catch (\Exception $e) {
+            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'渠道数据匹配失败：'.$e->getMessage();
+            DataImportImp::saveDataErrorLog(5,SOURCE_ID,AD_PLATFORM,2,$error_msg_info);
+
         }
 
     }

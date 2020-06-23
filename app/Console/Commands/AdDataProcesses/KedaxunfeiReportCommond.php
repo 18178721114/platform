@@ -58,7 +58,7 @@ class KedaxunfeiReportCommond extends Command
         define('SCHEMA', 'ad_data');
         define('TABLE_NAME', 'erm_data');
         define('SOURCE_ID', 'pad29'); // todo 这个需要根据平台信息表确定平台ID
-
+        try{
         //这里面要写新测试平台里的数据配置 从数据库里取数据
 //    	$info[0]['company_account'] ='weibo@zplay.com';
 //    	$info[0]['accessKey'] ='324ed4a52f1b71ff';
@@ -145,6 +145,11 @@ class KedaxunfeiReportCommond extends Command
 
             }
             Artisan::call('KedaxunfeiHandleProcesses', ['dayid' => $dayid]);
+        }
+        } catch (\Exception $e) {
+            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'渠道数据匹配失败：'.$e->getMessage();
+            DataImportImp::saveDataErrorLog(5,SOURCE_ID,AD_PLATFORM,2,$error_msg_info);
+
         }
     		
     }

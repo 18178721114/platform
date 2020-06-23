@@ -60,7 +60,7 @@ class DiankaiReportCommond extends Command
         $start = $dayid;
         $end = $start;
         $time = time();
-
+        try{
         // todo 正式
         $sql = " select distinct platform_id,data_account as company_account,account_token as secret_key from c_platform_account_mapping where platform_id = 'pad63' ";
         $PlatInfo = DB::select($sql);
@@ -173,6 +173,12 @@ class DiankaiReportCommond extends Command
 
             }
             Artisan::call('DiankaiHandleProcesses' ,['dayid'=>$dayid]);
+
+        }
+        } catch (\Exception $e) {
+            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'渠道数据匹配失败：'.$e->getMessage();
+            DataImportImp::saveDataErrorLog(5,SOURCE_ID,AD_PLATFORM,2,$error_msg_info);
+
         }
     }
 
