@@ -86,8 +86,8 @@ class FacebookTgHandleProcesses extends Command
         $sql = "SELECT  distinct
                 c_app.id,c_app.app_id,c_generalize.platform_id,c_generalize.data_account,c_generalize.application_id,c_generalize.application_name,c_generalize.agency_platform_id,c_generalize_ad_app.campaign_id,c_generalize_ad_app.campaign_name,c_generalize_ad_app.ad_group_id,c_platform.currency_type_id,cpp.currency_type_id as ageccy_currency_type_id
                 FROM c_app 
-                LEFT JOIN c_generalize ON c_app.id = c_generalize.app_id 
-                LEFT JOIN c_generalize_ad_app ON c_generalize.id = c_generalize_ad_app.generalize_id 
+                LEFT JOIN c_generalize ON c_app.id = c_generalize.app_id  and c_generalize.generalize_status = 1
+                LEFT JOIN c_generalize_ad_app ON c_generalize.id = c_generalize_ad_app.generalize_id and  c_generalize_ad_app.status = 1
                 LEFT JOIN c_platform ON c_generalize.platform_id = c_platform.platform_id 
                 LEFT JOIN c_platform as cpp ON c_generalize.agency_platform_id = cpp.platform_id 
                 WHERE 
@@ -129,8 +129,8 @@ class FacebookTgHandleProcesses extends Command
         $new_campaign_ids = [];
         foreach ($info as $k => $v) {
             $third_app_id = $v['account'];
-//            var_dump($third_app_id);
             $json_info = json_decode($v['json_data'],true);
+            $err_name = (isset($json_info['campaign_id']) ? $json_info['campaign_id'] : 'Null') . '#' . (isset($json_info['campaign_name']) ? addslashes($json_info['campaign_name']) : 'Null') . '#' . (isset($v['account']) ? $v['account'] : 'Null') . '#' . (isset($json_info['app_name']) ?$json_info['app_name'] : 'Null');
 
             foreach ($app_list as $app_k => $app_v) {
                 if(isset($json_info['campaign_id']) && ($json_info['campaign_id'] == $app_v['campaign_id'])){
@@ -197,7 +197,7 @@ class FacebookTgHandleProcesses extends Command
 //                    var_dump($new_campaign_ids);
                 }
 
-                $error_log_arr['campaign_id'][] = $json_info['campaign_id'].'('.$third_app_id.')';
+                $error_log_arr['campaign_id'][] = $json_info['campaign_id'].'('.$err_name.')';
             }
 
 
@@ -216,7 +216,7 @@ class FacebookTgHandleProcesses extends Command
             }
 
             if ($num_country){
-                $error_log_arr['country'][] = isset($json_info['country']) ? $json_info['country'] : 'Unknown Region';
+                $error_log_arr['country'][] = (isset($json_info['country']) ? $json_info['country'] : 'Unknown Region').'('.$err_name.')';
             }
 
             if(($num+$num_country)>0){
@@ -319,6 +319,8 @@ class FacebookTgHandleProcesses extends Command
         if ($error_log_arr){
             $error_msg_array = [];
             $error_msg_mail = [];
+            $error_log_arr = Service::shield_error($source_id,$error_log_arr);
+
             if (isset($error_log_arr['campaign_id'])){
                 $campaign_id = implode(',',array_unique($error_log_arr['campaign_id']));
                 $error_msg_array[] = 'campaign_id匹配失败,ID为:'.$campaign_id;
@@ -331,10 +333,13 @@ class FacebookTgHandleProcesses extends Command
                 $error_msg_mail[] = '国家匹配失败，code为：'.$country;
             }
 
-            DataImportImp::saveDataErrorLog(2,$source_id,$source_name,4,implode(';',$error_msg_array));
+            if(!empty($error_msg_array)) {
+                DataImportImp::saveDataErrorLog(2, $source_id, $source_name, 4, implode(';', $error_msg_array));
+                // 发送邮件
+//                CommonFunction::sendMail($error_msg_mail,$source_name.'推广平台数据处理error');
+            }
             DataImportImp::saveDataErrorMoneyLog($source_id,$dayid,$error_detail_arr);
-            // 发送邮件
-//            CommonFunction::sendMail($error_msg_mail,$source_name.'推广平台数据处理error');
+
 
         }
 

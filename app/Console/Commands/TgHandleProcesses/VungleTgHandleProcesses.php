@@ -130,6 +130,8 @@ class VungleTgHandleProcesses extends Command
             $third_app_id = $v['app_id'];
             $third_app_account = $v['account'];
             $json_info = json_decode($v['json_data'],true);
+            $err_name = (isset($json_info['campaign id']) ? $json_info['campaign id'] : 'Null') . '#' . (isset($json_info['campaign name']) ? addslashes($json_info['campaign name']) : 'Null') . '#' . (isset($json_info['app_id']) ? $json_info['app_id'] : 'Null') . '#' . (isset($json_info['app_name']) ?$json_info['app_name'] : 'Null');
+
             foreach ($app_list as $app_k => $app_v) {
                 if(isset($json_info['campaign id']) && ($json_info['campaign id'] == $app_v['campaign_id'])){
                     $array[$k]['app_id'] = $app_v['app_id'];
@@ -164,7 +166,7 @@ class VungleTgHandleProcesses extends Command
                 if ($third_app_id && $json_info['campaign id']){
                     $new_campaign_ids[$third_app_id][] = $json_info['campaign id'];
                 }
-                $error_log_arr['campaign_id'][] = $json_info['campaign id'].'('.$third_app_account.'/'.$third_app_id.')';
+                $error_log_arr['campaign_id'][] = $json_info['campaign id'].'('.$err_name.')';
             }
 
             // todo 匹配国家用
@@ -181,7 +183,7 @@ class VungleTgHandleProcesses extends Command
             }
 
             if ($num_country){
-                $error_log_arr['country'][] = isset($json_info['country']) ? $json_info['country'] : 'Unknown Region';
+                $error_log_arr['country'][] = (isset($json_info['country']) ? $json_info['country'] : 'Unknown Region').'('.$err_name.')';
             }
 
             if(($num+$num_country)>0){
@@ -282,6 +284,8 @@ class VungleTgHandleProcesses extends Command
         if ($error_log_arr){
             $error_msg_array = [];
             $error_msg_mail = [];
+            $error_log_arr = Service::shield_error($source_id,$error_log_arr);
+
             if (isset($error_log_arr['campaign_id'])){
                 $campaign_id = implode(',',array_unique($error_log_arr['campaign_id']));
                 $error_msg_array[] = 'campaign id匹配失败,ID为:'.$campaign_id;
@@ -294,10 +298,12 @@ class VungleTgHandleProcesses extends Command
                 $error_msg_mail[] = '国家匹配失败，code为：'.$country;
             }
 
-            DataImportImp::saveDataErrorLog(2,$source_id,$source_name,4,implode(';',$error_msg_array));
-            DataImportImp::saveDataErrorMoneyLog($source_id,$dayid,$error_detail_arr);
-            // 发送邮件
-//            CommonFunction::sendMail($error_msg_mail,$source_name.'推广平台数据处理error');
+            if(!empty($error_msg_array)) {
+                DataImportImp::saveDataErrorLog(2, $source_id, $source_name, 4, implode(';', $error_msg_array));
+                // 发送邮件
+//                CommonFunction::sendMail($error_msg_mail,$source_name.'推广平台数据处理error');
+            }
+            DataImportImp::saveDataErrorMoneyLog($source_id, $dayid, $error_detail_arr);
         }
 
         // 保存正确数据

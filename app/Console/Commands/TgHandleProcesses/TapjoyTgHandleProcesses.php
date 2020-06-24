@@ -118,17 +118,6 @@ class TapjoyTgHandleProcesses extends Command
             exit;
         }
 
-        // //获取对照表广告类型
-        // $AdType_map['platform_id'] = $source_id;
-        // $AdType_info = CommonLogic::getAdTypeCorrespondingList($AdType_map)->get();
-        // $AdType_info = Service::data($AdType_info);
-        // if(!$AdType_info){
-        //     $error_msg = '广告类型数据查询失败';
-        //     DataImportImp::saveDataErrorLog(2,$source_id,$source_name,4,$error_msg);
-        //     exit;
-        // }
-
-
         $array = [];
         $num = 0;
         $num_country = 0;
@@ -140,6 +129,8 @@ class TapjoyTgHandleProcesses extends Command
         foreach ($info as $k => $v) {
             $data_account = $v['account'];
             $json_info = json_decode($v['json_data'],true);
+            $err_name = (isset($json_info['ad_group_id']) ? $json_info['ad_group_id'] : 'Null') . '#' . (isset($json_info['ad_group_name']) ? addslashes($json_info['ad_group_name']) : 'Null') . '#' . (isset($json_info['app_id']) ? $json_info['app_id'] : 'Null') . '#' . (isset($json_info['app_name']) ?$json_info['app_name'] : 'Null');
+
             foreach ($app_list as $app_k => $app_v) {
                 if(isset($json_info['ad_group_id']) && ($json_info['ad_group_id'] == $app_v['campaign_id'])){
                     $array[$k]['app_id'] = $app_v['app_id'];
@@ -190,7 +181,7 @@ class TapjoyTgHandleProcesses extends Command
 
                 }
 
-                $error_log_arr['campaign_id'][] = $json_info['ad_group_id']."(".$json_info['ad_group_name'].")";
+                $error_log_arr['campaign_id'][] = $json_info['ad_group_id']."(".$err_name.")";
             }
 
 
@@ -209,7 +200,7 @@ class TapjoyTgHandleProcesses extends Command
             }
 
             if ($num_country){
-                $error_log_arr['country'][] = isset($json_info['country']) ? $json_info['country'] :  'Unknown Region';
+                $error_log_arr['country'][] = (isset($json_info['country']) ? $json_info['country'] :  'Unknown Region')."(".$err_name.")";
             }
 
 
@@ -234,8 +225,6 @@ class TapjoyTgHandleProcesses extends Command
                 //插入错误数据
                 continue;
             }
-
-//            {"ad_group_id":"236014af-f0a3-4f61-ab8a-c68ec9ecd2b0","ad_group_name":"Will Hero tracking for video button-iOS-UK-iPad","logins":0,"paid_clicks":0,"global_renders":0,"global_conversions":0,"installs_spend":0,"country_code":"","name":"Will Hero","platform":"iOS","device_types":"iphone,itouch,ipad"}
 
             $array[$k]['data_account'] = $v['account'];
             $array[$k]['date'] = $dayid;
@@ -307,6 +296,8 @@ class TapjoyTgHandleProcesses extends Command
         if ($error_log_arr){
             $error_msg_array = [];
             $error_msg_mail = [];
+            $error_log_arr = Service::shield_error($source_id,$error_log_arr);
+
             if (isset($error_log_arr['campaign_id'])){
                 $campaign_id = implode(',',array_unique($error_log_arr['campaign_id']));
                 $error_msg_array[] = 'ad_group_id匹配失败,ID为:'.$campaign_id;
@@ -317,15 +308,13 @@ class TapjoyTgHandleProcesses extends Command
                 $error_msg_array[] = '国家匹配失败,code为:'.$country;
                 $error_msg_mail[] = '国家匹配失败，code为：'.$country;
             }
-            // if (isset($error_log_arr['ad_type'])){
-            //     $ad_type = implode(',',array_unique($error_log_arr['ad_type']));
-            //     $error_msg_array[] = '广告类型匹配失败，ID为：<font color="red">'.$ad_type."</font>";
-            // }
 
-            DataImportImp::saveDataErrorLog(2,$source_id,$source_name,4,implode(';',$error_msg_array));
-            DataImportImp::saveDataErrorMoneyLog($source_id,$dayid,$error_detail_arr);
-            // 发送邮件
-//            CommonFunction::sendMail($error_msg_mail,$source_name.'推广平台数据处理error');
+            if(!empty($error_msg_array)) {
+                DataImportImp::saveDataErrorLog(2, $source_id, $source_name, 4, implode(';', $error_msg_array));
+                // 发送邮件
+//                CommonFunction::sendMail($error_msg_mail,$source_name.'推广平台数据处理error');
+            }
+            DataImportImp::saveDataErrorMoneyLog($source_id, $dayid, $error_detail_arr);
         }
 
         // 保存正确数据

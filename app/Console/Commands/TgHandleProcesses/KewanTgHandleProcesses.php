@@ -150,6 +150,9 @@ class KewanTgHandleProcesses extends Command
             $kewan_app_id = $v['app_id'];
             $third_app_account = $v['account'];
             $json_info = json_decode($v['json_data'],true);
+
+            $err_name = (isset($json_info['ad_id']) ? $json_info['ad_id'] : 'Null') . '#' . (isset($json_info['name']) ? addslashes($json_info['name']) : 'Null') . '#' . (isset($v['app_id']) ? $v['app_id'] : 'Null') . '#' . (isset($json_info['app_name']) ?$json_info['app_name'] : 'Null');
+
             foreach ($app_list as $app_k => $app_v) {
                 if(isset($json_info['ad_id']) && ($json_info['ad_id'] == $app_v['campaign_id'])){
                     $array[$k]['app_id'] = $app_v['app_id'];
@@ -184,7 +187,7 @@ class KewanTgHandleProcesses extends Command
                 if ($kewan_app_id && $json_info['ad_id']){
                     $new_campaign_ids[$kewan_app_id][] = $json_info['ad_id'];
                 }
-                $error_log_arr['campaign_id'][] = $json_info['ad_id'].'('.$third_app_account.'/'.$kewan_app_id.')';
+                $error_log_arr['campaign_id'][] = $json_info['ad_id'].'('.$err_name.')';
             }
 
             // todo 匹配国家用
@@ -201,22 +204,8 @@ class KewanTgHandleProcesses extends Command
             }
 
             if ($num_country){
-                $error_log_arr['country'][] = isset($json_info['country']) ? $json_info['country'] :  'Unknown Region';
+                $error_log_arr['country'][] = (isset($json_info['country']) ? $json_info['country'] :  'Unknown Region').'('.$err_name.')';
             }
-            // foreach ($AdType_info as $AdType_k => $AdType_v) {
-            //  if(($json_info['size'].'-'.$json_info['ad_type']) == $AdType_v['name'] ){
-            //         $array[$k]['ad_type'] = $AdType_v['ad_type_id'];
-            //         $num_adtype = 0;
-            //         break;
-            //   }else{
-            //       //广告类型失败
-            //       $num_adtype++;
-
-            //   }
-            //  }
-            //  if ($num_adtype){
-            //     $error_log_arr['ad_type'][] = $json_info['size'].'-'.$json_info['ad_type'];
-            // }
 
             if(($num+$num_country+$num_adtype)>0){
 
@@ -314,6 +303,8 @@ class KewanTgHandleProcesses extends Command
         if ($error_log_arr){
             $error_msg_array = [];
             $error_msg_mail = [];
+            $error_log_arr = Service::shield_error($source_id,$error_log_arr);
+
             if (isset($error_log_arr['campaign_id'])){
                 $campaign_id = implode(',',array_unique($error_log_arr['campaign_id']));
                 $error_msg_array[] = 'ad_id匹配失败,ID为:'.$campaign_id;
@@ -324,15 +315,15 @@ class KewanTgHandleProcesses extends Command
                 $error_msg_array[] = '国家匹配失败,code为:'.$country;
                 $error_msg_mail[] = '国家匹配失败，code为：'.$country;
             }
-            // if (isset($error_log_arr['ad_type'])){
-            //     $ad_type = implode(',',array_unique($error_log_arr['ad_type']));
-            //     $error_msg_array[] = '广告类型匹配失败，ID为：<font color="red">'.$ad_type."</font>";
-            // }
 
-            DataImportImp::saveDataErrorLog(2,$source_id,$source_name,4,implode(';',$error_msg_array));
+            if(!empty($error_msg_array)) {
+                DataImportImp::saveDataErrorLog(2, $source_id, $source_name, 4, implode(';', $error_msg_array));
+                // 发送邮件
+//                CommonFunction::sendMail($error_msg_mail,$source_name.'推广平台数据处理error');
+            }
+
             DataImportImp::saveDataErrorMoneyLog($source_id,$dayid,$error_detail_arr);
-            // 发送邮件
-//            CommonFunction::sendMail($error_msg_mail,$source_name.'推广平台数据处理error');
+
         }
 
         // 保存正确数据
