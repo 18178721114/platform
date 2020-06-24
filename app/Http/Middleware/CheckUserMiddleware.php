@@ -34,10 +34,9 @@ class CheckUserMiddleware extends Middleware
         }
         $logFilename = $dir.'/'.'country.log';
         //生成日志
-        file_put_contents( $logFilename,'测试' . "\n\n",FILE_APPEND);
-        file_put_contents( $logFilename,json_encode($_SESSION) . "\n\n",FILE_APPEND);
+        file_put_contents( $logFilename,'接口请求有效时间记录:'.json_encode($_SESSION) . "\n\n",FILE_APPEND);
         if(!isset($_SESSION['erm_data']['expireTime'])|| (time() - $_SESSION['erm_data']['expireTime']) > 0) {
-            file_put_contents( $logFilename,json_encode($_SESSION) . "\n\n",FILE_APPEND);
+            file_put_contents( $logFilename,'接口请求有效时间过期记录:'.json_encode($_SESSION) . "\n\n",FILE_APPEND);
             unset($_SESSION['erm_data']);
             ApiResponseFactory::apiResponse([],[],1002);
         }
@@ -49,7 +48,7 @@ class CheckUserMiddleware extends Middleware
         //验证用户是否有权限登录
         $userInfo = UserLogic::Userlist($map,$fields)->get();
         $userInfo =Service::data($userInfo);
-        file_put_contents( $logFilename,json_encode($userInfo) . "\n\n",FILE_APPEND);
+        file_put_contents( $logFilename,'接口请求有效时间用户信息权限记录:'.json_encode($userInfo) . "\n\n",FILE_APPEND);
         if(!$userInfo) ApiResponseFactory::apiResponse([],[],1002);
         return $next($request);
 
