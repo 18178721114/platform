@@ -79,8 +79,8 @@ class FacebookTgHandleProcesses extends Command
             $info = Service::data($info);
             if (!$info) {
                 //var_dump(123);
-//            $error_msg = $dayid.'号，'.$source_name.'推广平台数据处理程序获取原始数据为空';
-//            DataImportImp::saveDataErrorLog(2,$source_id,$source_name,4,$error_msg);
+                $error_msg = $dayid.'号，'.$source_name.'推广平台数据处理程序获取原始数据为空';
+                DataImportImp::saveDataErrorLog(2,$source_id,$source_name,4,$error_msg);
                 exit;
             }
 
