@@ -61,7 +61,14 @@ class UnityTgReportCommond extends Command
             $sql = " select distinct platform_id,data_account as company_account,account_api_key as api_key,account_user_id as Organization_ID from c_platform_account_mapping where platform_id = 'ptg36' ";
             $info = DB::select($sql);
             $info = Service::data($info);
-            if (!$info) return;
+            if (!$info) {
+                // 无配置报错提醒
+                $message = "{$dayid}号, " . AD_PLATFORM . " 推广平台取数失败,失败原因:取数配置信息为空";
+                DataImportImp::saveDataErrorLog(1, SOURCE_ID, AD_PLATFORM, 4, $message);
+                $error_msg_arr[] = $message;
+                CommonFunction::sendMail($error_msg_arr, '推广平台取数error');
+                exit;
+            }
 
 //    	$info[0]['company_account'] ='contact@zplay.com';
 //    	$info[0]['api_key'] ='32227f77a958a849b8b782c8db75fdd1fb0416b4e54df09e2bde6563ef59a97f';
@@ -82,7 +89,7 @@ class UnityTgReportCommond extends Command
                     if ($api_data_i > 3) break;
                 }
 
-                if (isset($result_info['error']) || !$result_info) {
+                if (isset($result_info['error']) || !$info) {
                     if($result_info){
                         $error_msg_arr = $result_info['error']['parameters'][0];
                         $error_msg_arr = array_values($error_msg_arr);
