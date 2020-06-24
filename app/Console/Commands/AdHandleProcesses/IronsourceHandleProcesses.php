@@ -189,7 +189,7 @@ class IronsourceHandleProcesses extends Command
 
         	}
             if($num){
-                $error_log_arr['app_id'][] = $json_info['appKey'].'('.addslashes(str_replace('\'\'','\'',$json_info['appName'])).')';
+                $error_log_arr['app_id'][] = $json_info['appKey'].'('.addslashes(str_replace('\'\'','\'',$json_info['app_name'])).')';
             }
             
         	foreach ($country_info as $country_k => $country_v) {
@@ -227,7 +227,7 @@ class IronsourceHandleProcesses extends Command
                 $error_detail_arr[$k]['platform_type'] =2;
                 $error_detail_arr[$k]['err_date'] = $dayid;
                 $error_detail_arr[$k]['first_level_id'] =  $json_info['appKey'];
-                $error_detail_arr[$k]['first_level_name'] = addslashes(str_replace('\'\'','\'',$json_info['appName']));
+                $error_detail_arr[$k]['first_level_name'] = addslashes(str_replace('\'\'','\'',$json_info['app_name']));
                 $error_detail_arr[$k]['second_level_id'] = '';
                 $error_detail_arr[$k]['second_level_name'] = '';
                 $error_detail_arr[$k]['money'] = $json_info['revenue'];
@@ -242,7 +242,7 @@ class IronsourceHandleProcesses extends Command
         	$array[$k]['date'] = $dayid;
         	$array[$k]['data_account'] = $v['account'];
         	$array[$k]['platform_app_id'] = addslashes($json_info['appKey']);
-        	$array[$k]['platform_app_name'] = addslashes(str_replace('\'\'','\'',$json_info['appName']));
+        	$array[$k]['platform_app_name'] = addslashes(str_replace('\'\'','\'',$json_info['app_name']));
         	$array[$k]['ad_unit_name'] = addslashes(str_replace('\'\'','\'',$json_info['adUnits']));
         	$array[$k]['impression'] = $json_info['impressions'];
         	$array[$k]['success_requests'] = $json_info['adSourceResponses'];
