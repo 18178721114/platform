@@ -53,7 +53,7 @@ class KewanTgReportCommond extends Command
         $dayid = str_replace('-', '', $dayid);
         var_dump($dayid);
 
-        define('AD_PLATFORM', 'KeWanTg');
+        define('AD_PLATFORM', '可玩');
         define('SCHEMA', 'tg_data');
         define('TABLE_NAME', 'erm_data');
         define('SOURCE_ID', 'ptg74'); // todo 这个需要根据平台信息表确定平台ID
