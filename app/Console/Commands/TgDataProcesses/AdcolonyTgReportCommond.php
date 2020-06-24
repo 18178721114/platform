@@ -88,8 +88,7 @@ class AdcolonyTgReportCommond extends Command
                     $api_data_i++;
                     if ($api_data_i > 3) break;
                 }
-
-                if ($ret['status'] == 'success') {
+                if (isset($ret['status']) && $ret['status'] == 'success') {
                     // 接口成功，是否有无数据
                     if ($ret['results']) {
                         // 成功取到数
@@ -144,7 +143,7 @@ class AdcolonyTgReportCommond extends Command
                     }
                 } else {
                     // 取数错误报错
-                    $all_data_err[] = $value['company_account'] . '账号取数失败,错误信息:' . (isset($ret['results']) ? $ret['results'] : '无数据,接口未返回任何信息');
+                    $all_data_err[] = $value['company_account'] . '账号取数失败,错误信息:' . (isset($ret['result']) ? $ret['result'] : '无数据,接口未返回任何信息');
                 }
 
             }
