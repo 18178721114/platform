@@ -143,7 +143,7 @@ class ApplovinTgHandleProcesses extends Command
 
             $json_info = json_decode($v['json_data'],true);
 
-            $err_name = (isset($json_info['campaign_id']) ? $json_info['campaign_id'] : 'Null') . '#' . (isset($json_info['campaign_name']) ? addslashes($json_info['campaign_name']) : 'Null') . '#' . (isset($json_info['campaign_package_name']) ? $json_info['campaign_package_name'] : 'Null') . '#' . (isset($json_info['app_name']) ?$json_info['app_name'] : 'Null');
+            $err_name = (isset($json_info['campaign_id_external']) ? $json_info['campaign_id_external'] : 'Null') . '#' . (isset($json_info['campaign']) ? addslashes($json_info['campaign']) : 'Null') . '#' . (isset($json_info['campaign_package_name']) ? $json_info['campaign_package_name'] : 'Null') . '#' . (isset($json_info['app_name']) ?$json_info['app_name'] : 'Null');
 
             foreach ($app_list as $app_k => $app_v) {
 
