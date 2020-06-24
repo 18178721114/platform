@@ -34,6 +34,7 @@ class CheckUserMiddleware extends Middleware
         }
         $logFilename = $dir.'/'.'country.log';
         //生成日志
+        file_put_contents( $logFilename,'测试' . "\n\n",FILE_APPEND);
         file_put_contents( $logFilename,json_encode($_SESSION) . "\n\n",FILE_APPEND);
         if(!isset($_SESSION['erm_data']['expireTime'])|| (time() - $_SESSION['erm_data']['expireTime']) > 0) {
             file_put_contents( $logFilename,json_encode($_SESSION) . "\n\n",FILE_APPEND);
