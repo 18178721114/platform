@@ -95,7 +95,7 @@ class ChartboostTgReportCommond extends Command
                 }
                 // 获取jobId失败
                 if (!isset($response['jobId']) || !$response) {
-                    $all_data_err[] = 'Chartboos推广平台' . $value['company_account'] . '账号获取jobId失败,错误信息:' . (isset($response['message']) ? $response['message'] : '无数据,接口未返回任何信息');
+                    $all_data_err[] = $value['company_account'] . '账号获取jobId失败,错误信息:' . (isset($response['message']) ? $response['message'] : '无数据,接口未返回任何信息');
                 }else{
                     $jobId = $response['jobId'];
                     $dataUrl = env('CHARTBOOST_TG_URL_INFO') . $jobId;
