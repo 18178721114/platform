@@ -48,7 +48,7 @@ class IronSourceReportCommond extends Command
     public function handle()
     {
         set_time_limit(0);
-        ini_set("memory_limit",'3096M');
+        ini_set("memory_limit",'7000M');
         // 入口方法
         $dayid = $this->argument('dayid')?$this->argument('dayid'):date('Y-m-d',strtotime('-1 day'));
         $appid = $this->argument('appid')?$this->argument('appid'):'';
