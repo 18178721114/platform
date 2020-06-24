@@ -71,7 +71,6 @@ class VungleTgReportCommond extends Command
                 exit;
             }
 
-            $error_app_id = [];
             foreach ($info as $key => $value) {
                 $header = array("accept: application/json", "authorization: Bearer " . $value['api_key'], "cache-control: no-cache", "vungle-version: 1");
                 // todo 获取应用信息 上线需要修改下取数URL
@@ -127,26 +126,8 @@ class VungleTgReportCommond extends Command
                         }
                     }
 
-                } else {
-
-                    $error_app_id[$key]['application_id'] = $value['application_id'];
-                    $error_app_id[$key]['status'] = isset($ret['status']) ? $ret['status'] : '';
-                    $error_app_id[$key]['error'] = isset($ret['error']) ? $ret['error'] : '未知错误';
                 }
             }
-
-            if ($error_app_id) {
-                $error_app_str_arr = [];
-                foreach ($error_app_id as $error_info) {
-                    $error_app_str_arr[] = '应用ID为' . $error_info['application_id'] . '取数失败,错误信息:' . $error_info['status'] . ',' . $error_info['error'];
-                }
-
-                $error_app_str = implode(',', $error_app_str_arr);
-                $error_msg = 'Vungle推广平台' . $error_app_str;
-
-                DataImportImp::saveDataErrorLog(1, SOURCE_ID, AD_PLATFORM, 4, $error_msg);
-            }
-
 
             // 调用数据处理过程
             Artisan::call('VungleTgHandleProcesses', ['dayid' => $dayid]);
@@ -182,18 +163,26 @@ class VungleTgReportCommond extends Command
         }
 
         $data = json_decode($content, true);
+        if (isset($data['error']) || !$data) {
+            if (!$data){
+                $status = '';
+                $error = '暂无数据'.json_encode($data);
+            }else{
+                $status = isset($data['status']) ? $data['status'] : '';
+                $error = isset($data['error']) ? $data['error'] : '暂无数据'.json_encode($data);
+            }
 
-        if (!$data || isset($data['error'])) {
-            $status = isset($ret['status']) ? $data['status'] : '';
-            $error = isset($ret['error']) ? $data['error'] : '未知错误';
             $error_msg = 'Vungle推广平台'.$account.'账号下应用ID为'.$application_id.'取数失败,错误信息:'.$status.','.$error;
 
             DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,4,$error_msg);
             $error_msg_arr[] = $error_msg;
             CommonFunction::sendMail($error_msg_arr,AD_PLATFORM.'推广平台取数error');
+
+            return false;
+        }else{
+            return $data;
         }
 
-        return $data;
     }
 
     public static function get_response($url, $header=[])
