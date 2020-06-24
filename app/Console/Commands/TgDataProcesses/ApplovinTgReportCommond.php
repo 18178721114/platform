@@ -138,7 +138,7 @@ class ApplovinTgReportCommond extends Command
                     }
                 } else {
                     // 取数错误报错
-                    $all_data_err[] = $value['company_account'] . '账号取数失败,错误信息:' . (isset($ret['results']) ? $ret['results'] : '无数据,接口未返回任何信息');
+                    $all_data_err[] = $value['company_account'] . '账号取数失败,错误信息:' . (isset($ret['result']) ? $ret['result'] : $info ? $info :'无数据,接口未返回任何信息');
                 }
 
             }
