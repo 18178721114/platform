@@ -68,6 +68,7 @@ class FacebookTgHandleProcesses extends Command
 
     private static function facebookTgDataProcess($dayid, $source_id, $source_name){
         try {
+            static $facebook_num = 0;
             //查询pgsql 的数据
             $map = [];
             $map['dayid'] = $dayid;
@@ -301,17 +302,21 @@ class FacebookTgHandleProcesses extends Command
 
 
                 if ($insert_generalize_ad_app) {
-                    var_dump(count($insert_generalize_ad_app));
-                    // 开启事物 保存数据
-                    DB::beginTransaction();
-                    $app_info = DB::table('c_generalize_ad_app')->insert($insert_generalize_ad_app);
-//                var_dump($app_info);
-                    if (!$app_info) { // 应用信息已经重复
-                        DB::rollBack();
-                    } else {
-                        DB::commit();
-                        self::facebookTgDataProcess($dayid, $source_id, $source_name);
-                        exit;
+                    var_dump($facebook_num);
+                    if ($facebook_num == 1) {
+                        var_dump('反更新有问题：'.json_encode($insert_generalize_ad_app));
+                    }else {
+                        // 开启事物 保存数据
+                        DB::beginTransaction();
+                        $app_info = DB::table('c_generalize_ad_app')->insert($insert_generalize_ad_app);
+                        if (!$app_info) { // 应用信息已经重复
+                            DB::rollBack();
+                        } else {
+                            DB::commit();
+                            $facebook_num ++;
+                            self::facebookTgDataProcess($dayid, $source_id, $source_name);
+                            exit;
+                        }
                     }
                 }
             }

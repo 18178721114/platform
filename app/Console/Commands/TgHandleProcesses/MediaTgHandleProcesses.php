@@ -258,14 +258,6 @@ class MediaTgHandleProcesses extends Command
 
         // 保存正确数据
         if ($array) {
-
-//            $plat_str =$source_id.'lishuyang@lishuyang'.$dayid;
-//            Redis::rpush(env('REDIS_TG_KEYS'), $plat_str);
-                        //拆分批次
-
-
-            //$ad_sql = "insert into ".MYSQL_AD_TABLE_NAME." (`date`,`app_id`,`channel_id`,`country_id`,`platform_id`,`agency_platform_id`,`data_platform_id`,`type`,`platform_account`,`data_account`,`cost_type`,`platform_app_id`,`platform_app_name`,`ad_id`,`ad_name`,`ad_type`,`tongji_type`,`impression`,`click`,`new`,`new_phone`,`new_pad`,`cost`,`cost_exc`,`device_type`,`remark`,`create_time`,`update_time`)values";
-
             $time = date('Y-m-d H:i:s');
             foreach ($dayid as $key => $value) {
                 $sql_str ='';

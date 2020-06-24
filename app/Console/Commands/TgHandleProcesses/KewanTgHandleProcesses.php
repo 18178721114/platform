@@ -75,6 +75,7 @@ class KewanTgHandleProcesses extends Command
 
 
     private static function KewanDataProcess($dayid,$source_id,$source_name){
+        static $kewan_num = 0;
         //查询pgsql 的数据
         $map =[];
         $map['dayid'] = $dayid;
@@ -285,17 +286,22 @@ class KewanTgHandleProcesses extends Command
             }
 
             if ($insert_generalize_ad_app){
-                // 开启事物 保存数据
-                DB::beginTransaction();
-                $app_info = DB::table('c_generalize_ad_app')->insert($insert_generalize_ad_app);;
-                if (!$app_info){ // 应用信息已经重复
-                    DB::rollBack();
-                }else{
-                    DB::commit();
-                    self::KewanDataProcess($dayid,$source_id,$source_name);
-                    exit;
+                var_dump($kewan_num);
+                if ($kewan_num == 1) {
+                    var_dump('反更新有问题：'.json_encode($insert_generalize_ad_app));
+                }else {
+                    // 开启事物 保存数据
+                    DB::beginTransaction();
+                    $app_info = DB::table('c_generalize_ad_app')->insert($insert_generalize_ad_app);;
+                    if (!$app_info) { // 应用信息已经重复
+                        DB::rollBack();
+                    } else {
+                        DB::commit();
+                        $kewan_num ++;
+                        self::KewanDataProcess($dayid, $source_id, $source_name);
+                        exit;
+                    }
                 }
-
             }
         }
 

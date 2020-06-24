@@ -66,6 +66,7 @@ class TapjoyTgHandleProcesses extends Command
     }
 
     private static function TapjoyTgDataProcess($dayid, $source_id, $source_name){
+        static $tapjoy_num = 0;
         //查询pgsql 的数据
         $map =[];
         $map['dayid'] = $dayid;
@@ -276,18 +277,21 @@ class TapjoyTgHandleProcesses extends Command
 
 
             if ($insert_generalize_ad_app) {
-//                var_dump($insert_generalize_ad_app);
-                var_dump(count($insert_generalize_ad_app));
-                // 开启事物 保存数据
-                DB::beginTransaction();
-                $app_info = DB::table('c_generalize_ad_app')->insert($insert_generalize_ad_app);
-//                var_dump($app_info);
-                if (!$app_info) { // 应用信息已经重复
-                    DB::rollBack();
-                } else {
-                    DB::commit();
-                    self::TapjoyTgDataProcess($dayid, $source_id, $source_name);
-                    exit;
+                var_dump($tapjoy_num);
+                if ($tapjoy_num == 1) {
+                    var_dump('反更新有问题：'.json_encode($insert_generalize_ad_app));
+                }else {
+                    // 开启事物 保存数据
+                    DB::beginTransaction();
+                    $app_info = DB::table('c_generalize_ad_app')->insert($insert_generalize_ad_app);
+                    if (!$app_info) { // 应用信息已经重复
+                        DB::rollBack();
+                    } else {
+                        DB::commit();
+                        $tapjoy_num ++;
+                        self::TapjoyTgDataProcess($dayid, $source_id, $source_name);
+                        exit;
+                    }
                 }
             }
         }

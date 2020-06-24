@@ -67,6 +67,7 @@ class SnapchatTgHandleProcesses extends Command
     }
 
     private static function snapchatDataProcess($dayid,$source_id,$source_name){
+        static $snapchat_num = 0;
         //查询pgsql 的数据
         $map =[];
         $map['dayid'] = $dayid;
@@ -333,21 +334,24 @@ class SnapchatTgHandleProcesses extends Command
 
 
             if ($insert_generalize_ad_app) {
-                var_dump(count($insert_generalize_ad_app));
-                // 开启事物 保存数据
-                DB::beginTransaction();
-                $app_info = DB::table('c_generalize_ad_app')->insert($insert_generalize_ad_app);
-//                var_dump($app_info);
-                if (!$app_info) { // 应用信息已经重复
-                    DB::rollBack();
-                } else {
-                    DB::commit();
-                    self::snapchatDataProcess($dayid,$source_id,$source_name);
-                    exit;
+                var_dump($snapchat_num);
+                if ($snapchat_num == 1) {
+                    var_dump('反更新有问题：'.json_encode($insert_generalize_ad_app));
+                }else{
+                    // 开启事物 保存数据
+                    DB::beginTransaction();
+                    $app_info = DB::table('c_generalize_ad_app')->insert($insert_generalize_ad_app);
+                    if (!$app_info) { // 应用信息已经重复
+                        DB::rollBack();
+                    } else {
+                        DB::commit();
+                        $snapchat_num ++;
+                        self::snapchatDataProcess($dayid,$source_id,$source_name);
+                        exit;
+                    }
                 }
             }
         }
-
         // 保存错误信息
         if ($error_log_arr){
             $error_msg_array = [];

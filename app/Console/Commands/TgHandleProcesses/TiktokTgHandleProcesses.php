@@ -286,21 +286,20 @@ class TiktokTgHandleProcesses extends Command
 
             if ($insert_generalize_ad_app){
                 var_dump($tiktok_num);
-                if ($tiktok_num > 2) {
+                if ($tiktok_num == 1) {
                     var_dump('反更新有问题：'.json_encode($insert_generalize_ad_app));
-                    return false;
-                }
-                $tiktok_num ++;
-
-                // 开启事物 保存数据
-                DB::beginTransaction();
-                $app_info = DB::table('c_generalize_ad_app')->insert($insert_generalize_ad_app);;
-                if (!$app_info){ // 应用信息已经重复
-                    DB::rollBack();
-                }else{
-                    DB::commit();
-                    self::TiktokDataProcess($dayid,$source_id,$source_name);
-                    exit;
+                }else {
+                    // 开启事物 保存数据
+                    DB::beginTransaction();
+                    $app_info = DB::table('c_generalize_ad_app')->insert($insert_generalize_ad_app);;
+                    if (!$app_info) { // 应用信息已经重复
+                        DB::rollBack();
+                    } else {
+                        DB::commit();
+                        $tiktok_num ++;
+                        self::TiktokDataProcess($dayid, $source_id, $source_name);
+                        exit;
+                    }
                 }
             }
         }
