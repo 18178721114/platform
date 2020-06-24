@@ -63,7 +63,7 @@ class ApplovinReportCommond extends Command
         define('SOURCE_ID', 'pad33'); // todo 这个需要根据平台信息表确定平台ID
         try{
         // todo  数据库配置
-        $sql = "SELECT  data_account as company_account,account_api_key  as api_key from c_platform_account_mapping WHERE platform_id ='pad33' ";
+        $sql = "SELECT  data_account as company_account,account_api_key  as api_key from c_platform_account_mapping WHERE platform_id ='pad33' and status = 1 ";
         $PlatInfo = DB::select($sql);
         $PlatInfo = Service::data($PlatInfo);
 
@@ -92,8 +92,8 @@ class ApplovinReportCommond extends Command
                     break;
             }
             //取数四次 取数结果仍为空
-            if($api_data_i ==4){
-                $error_msg_1 = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:返回数据为空';
+            if($api_data_i ==4 && empty($ret) ){
+                $error_msg_1 = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:返回数据为空('.$info.')';
                 DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg_1);
                 continue;
 
@@ -155,7 +155,7 @@ class ApplovinReportCommond extends Command
 
 		    } else {
 
-                $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:返回数据为空'.json_encode($ret);
+                $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:'.json_encode($ret);
                 DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
                 $error_msg_arr[] = $error_msg;
                 CommonFunction::sendMail($error_msg_arr,AD_PLATFORM.'广告平台取数error');
@@ -166,7 +166,7 @@ class ApplovinReportCommond extends Command
         // 调用数据处理过程
             Artisan::call('ApplovinHandleProcesses',['dayid' => $dayid]);
         } catch (\Exception $e) {
-            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'渠道数据匹配失败：'.$e->getMessage();
+            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'广告平台程序失败，失败原因：'.$e->getMessage();
             DataImportImp::saveDataErrorLog(5,SOURCE_ID,AD_PLATFORM,2,$error_msg_info);
 
         }

@@ -70,7 +70,7 @@ class IronSourceReportCommond extends Command
 //        $PlatInfo[2]['secret_key'] ='0e16d28f99033925ef9fb25e28d98c5f';
 
 
-        $sql = "SELECT  data_account as company_account,account_api_key  as access_key,account_token  as secret_key from c_platform_account_mapping WHERE platform_id ='pad05' ";
+        $sql = "SELECT  data_account as company_account,account_api_key  as access_key,account_token  as secret_key from c_platform_account_mapping WHERE platform_id ='pad05' and status = 1 ";
         $PlatInfo = DB::select($sql);
         $PlatInfo = Service::data($PlatInfo);
         if ($PlatInfo){
@@ -175,7 +175,7 @@ class IronSourceReportCommond extends Command
             Artisan::call('IronsourceHandleProcesses' ,['dayid'=>$dayid]);
         }
         } catch (\Exception $e) {
-            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'渠道数据匹配失败：'.$e->getMessage();
+            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'广告平台程序失败，失败原因：'.$e->getMessage();
             DataImportImp::saveDataErrorLog(5,SOURCE_ID,AD_PLATFORM,2,$error_msg_info);
 
         }

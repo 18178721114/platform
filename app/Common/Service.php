@@ -537,14 +537,17 @@ class Service
 
         $ex_info = DB::select($sql);
         $ex_info = Service::data($ex_info);
-        foreach ($ex_info as $a => $b){
-            foreach ($error_log_arr  as $h => $f){
-                foreach ($f as $item  => $a1 ){
-                    if($b['name'] == $a1 ){
-                        unset ($error_log_arr[$h][$item]);
-                    }
-                }
+        if($ex_info) {
+            foreach ($ex_info as $a => $b) {
+                foreach ($error_log_arr as $h => $f) {
+                    foreach ($f as $item => $a1) {
+                        if ($b['name'] == $a1) {
 
+                            unset ($error_log_arr[$h][$item]);
+                        }
+                    }
+
+                }
             }
         }
         return $error_log_arr;

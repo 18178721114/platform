@@ -90,8 +90,8 @@ class AdmobHandleProcesses extends Command
             `c_app_ad_platform`.`flow_type` 
             FROM
             `c_app`
-            LEFT JOIN `c_app_ad_platform` ON `c_app_ad_platform`.`app_id` = `c_app`.`id`
-            LEFT JOIN `c_app_ad_slot` ON `c_app_ad_slot`.`app_ad_platform_id` = `c_app_ad_platform`.`id`
+            LEFT JOIN `c_app_ad_platform` ON `c_app_ad_platform`.`app_id` = `c_app`.`id` and `c_app_ad_platform`.`status` = 1
+            LEFT JOIN `c_app_ad_slot` ON `c_app_ad_slot`.`app_ad_platform_id` = `c_app_ad_platform`.`id`   and `c_app_ad_slot`.`status` = 1
 
             LEFT JOIN (
             SELECT
@@ -165,9 +165,10 @@ class AdmobHandleProcesses extends Command
 
         		}
         	}
+            $err_name = (isset($json_info['ad_unit_id']) ?$json_info['ad_unit_id']:'Null').'#'.(isset($json_info['ad_unit_name']) ?$json_info['ad_unit_name']:'Null').'#'.(isset($json_info['app_id']) ?$json_info['app_id']:'Null').'#'.(isset($json_info['package_name']) ?$json_info['package_name']:'Null');
 
         	if ($num){
-                $error_log_arr['ad_unit_id'][] = $json_info['ad_unit_id'].'('.$json_info['ad_unit_name'].')';
+                $error_log_arr['ad_unit_id'][] = $json_info['ad_unit_id'].'('.$err_name.')';
             }
 
         	foreach ($country_info as $country_k => $country_v) {
@@ -183,7 +184,7 @@ class AdmobHandleProcesses extends Command
         	}
 
             if ($num_country){
-                $error_log_arr['country'][] = isset($json_info['country_name']) ? $json_info['country_name'] : isset($json_info['country_code']) ? $json_info['country_code'] : 'Unknown Region';
+                $error_log_arr['country'][] = isset($json_info['country_name']) ? $json_info['country_name'].'('.$err_name.')' : isset($json_info['country_code']) ? $json_info['country_code'].'('.$err_name.')' : 'Unknown Region';
             }
 
 
@@ -262,24 +263,25 @@ class AdmobHandleProcesses extends Command
         	$array[$k]['create_time'] = date('Y-m-d H:i:s');
         	$array[$k]['update_time'] = date('Y-m-d H:i:s');
         }
-        
         // 保存错误信息
         if ($error_log_arr){
             $error_msg_array = [];
             $error_msg_mail = [];
-            if (isset($error_log_arr['ad_unit_id'])){
+            $error_log_arr = Service::shield_error($source_id,$error_log_arr);
+            if (isset($error_log_arr['ad_unit_id']) && !empty($error_log_arr['ad_unit_id'])){
                 $ad_unit_id = implode(',',array_unique($error_log_arr['ad_unit_id']));
                 $error_msg_array[] = '广告位匹配失败,ID为:'.$ad_unit_id;
                 $error_msg_mail[] = '广告位匹配失败，ID为：'.$ad_unit_id;
             }
 
-            if (isset($error_log_arr['country'])){
+            if (isset($error_log_arr['country']) && !empty($error_log_arr['country'])){
                 $country = implode(',',array_unique($error_log_arr['country']));
                 $error_msg_array[] = '国家匹配失败,code为:'.$country;
                 $error_msg_mail[] = '国家匹配失败，code为：'.$country;
             }
-
-            DataImportImp::saveDataErrorLog(2,$source_id,$source_name,2,implode(';',$error_msg_array));
+            if(!empty($error_msg_array)) {
+                DataImportImp::saveDataErrorLog(2, $source_id, $source_name, 2, implode(';', $error_msg_array));
+            }
             DataImportImp::saveDataErrorMoneyLog($source_id,$dayid,$error_detail_arr);
 
             // 发送邮件

@@ -62,7 +62,7 @@ class DiankaiReportCommond extends Command
         $time = time();
         try{
         // todo 正式
-        $sql = " select distinct platform_id,data_account as company_account,account_token as secret_key from c_platform_account_mapping where platform_id = 'pad63' ";
+        $sql = " select distinct platform_id,data_account as company_account,account_token as secret_key from c_platform_account_mapping where platform_id = 'pad63' and status = 1 ";
         $PlatInfo = DB::select($sql);
         $PlatInfo = Service::data($PlatInfo);
         if ($PlatInfo){
@@ -87,6 +87,13 @@ class DiankaiReportCommond extends Command
                     $api_data_i++;
                     if($api_data_i>3)
                         break;
+                }
+                //取数四次 取数结果仍为空
+                if($api_data_i ==4 && empty($ret)){
+                    $error_msg_1 = AD_PLATFORM.'广告平台'.$singleInfo['company_account'].'账号取数失败,错误信息:返回数据为空('.$result.')';
+                    DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg_1);
+                    continue;
+
                 }
                 //判断是否有数
                 if(isset($result_arr['success']) && $result_arr['success']===true && count($result_arr['data'])>0){
@@ -163,7 +170,7 @@ class DiankaiReportCommond extends Command
                     }
 
                 } else {
-                    $error_msg = AD_PLATFORM.'广告平台'.$company_account.'账号取数失败,错误信息:'.( isset($result_arr['msg']) ? $result_arr['msg']: '该账号无数据');
+                    $error_msg = AD_PLATFORM.'广告平台'.$company_account.'账号取数失败,错误信息:'.json_encode($result_arr);
                     DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
 
                     $error_msg_arr = [];
@@ -176,7 +183,7 @@ class DiankaiReportCommond extends Command
 
         }
         } catch (\Exception $e) {
-            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'渠道数据匹配失败：'.$e->getMessage();
+            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'广告平台程序失败，失败原因：'.$e->getMessage();
             DataImportImp::saveDataErrorLog(5,SOURCE_ID,AD_PLATFORM,2,$error_msg_info);
 
         }

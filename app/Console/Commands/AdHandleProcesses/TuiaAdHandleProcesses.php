@@ -102,8 +102,8 @@ class TuiaAdHandleProcesses extends Command
             `c_app_ad_platform`.`flow_type` 
             FROM
             `c_app`
-            LEFT JOIN `c_app_ad_platform` ON `c_app_ad_platform`.`app_id` = `c_app`.`id`
-            LEFT JOIN `c_app_ad_slot` ON `c_app_ad_slot`.`app_ad_platform_id` = `c_app_ad_platform`.`id`
+            LEFT JOIN `c_app_ad_platform` ON `c_app_ad_platform`.`app_id` = `c_app`.`id`  and `c_app_ad_platform`.`status` = 1
+            LEFT JOIN `c_app_ad_slot` ON `c_app_ad_slot`.`app_ad_platform_id` = `c_app_ad_platform`.`id`   and `c_app_ad_slot`.`status` = 1
 
             LEFT JOIN (
             SELECT
@@ -193,8 +193,10 @@ class TuiaAdHandleProcesses extends Command
                 }
 
             }
+            $err_name = (isset($json_info['slotid']) ?$v['slotid']:'Null').'#'.(isset($json_info['slotname']) ?$v['slotname']:'Null').'#Null#Null';
+
             if($num){
-                $error_log_arr['slot_id'][] = $v['slotid'].'('.addslashes(str_replace('\'\'','\'',$v['slotname'])).')';
+                $error_log_arr['slot_id'][] = $v['slotid'].'('.addslashes(str_replace('\'\'','\'',$err_name)).')';
             }
 
             $array[$k]['country_id'] = 64;
@@ -276,13 +278,16 @@ class TuiaAdHandleProcesses extends Command
         if ($error_log_arr){
             $error_msg_array = [];
             $error_msg_mail = [];
-            if (isset($error_log_arr['slot_id'])){
+            $error_log_arr = Service::shield_error($source_id,$error_log_arr);
+            if (isset($error_log_arr['slot_id']) && !empty($error_log_arr['slot_id'])){
                 $slot_id = implode(',',array_unique($error_log_arr['slot_id']));
                 $error_msg_array[] = '广告位id匹配失败,ID为:'.$slot_id;
                 $error_msg_mail[] = '广告位id匹配失败，ID为：'.$slot_id;
             }
+            if(!empty($error_msg_array)) {
 
-            DataImportImp::saveDataErrorLog(2,$source_id,$source_name,2,implode(';',$error_msg_array));
+                DataImportImp::saveDataErrorLog(2, $source_id, $source_name, 2, implode(';', $error_msg_array));
+            }
             DataImportImp::saveDataErrorMoneyLog($source_id,$dayid_date,$error_detail_arr);
 
             //CommonFunction::sendMail($error_msg_mail,$source_name.'广告平台数据处理error');

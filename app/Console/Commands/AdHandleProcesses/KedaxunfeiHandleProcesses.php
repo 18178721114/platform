@@ -92,8 +92,8 @@ class KedaxunfeiHandleProcesses extends Command
             `c_app_ad_platform`.`flow_type` 
             FROM
             `c_app`
-            LEFT JOIN `c_app_ad_platform` ON `c_app_ad_platform`.`app_id` = `c_app`.`id`
-            LEFT JOIN `c_app_ad_slot` ON `c_app_ad_slot`.`app_ad_platform_id` = `c_app_ad_platform`.`id`
+            LEFT JOIN `c_app_ad_platform` ON `c_app_ad_platform`.`app_id` = `c_app`.`id` and `c_app_ad_platform`.`status` = 1
+            LEFT JOIN `c_app_ad_slot` ON `c_app_ad_slot`.`app_ad_platform_id` = `c_app_ad_platform`.`id`  and `c_app_ad_slot`.`status` = 1
 
             LEFT JOIN (
             SELECT
@@ -178,8 +178,10 @@ class KedaxunfeiHandleProcesses extends Command
         		}
 
         	}
+            $err_name = (isset($json_info['adunit_id']) ?$json_info['adunit_id']:'Null').'#'.(isset($json_info['adunit_name']) ?$json_info['adunit_name']:'Null').'#'.(isset($json_info['appid']) ?$json_info['appid']:'Null').'#'.(isset($json_info['app_name']) ?$json_info['app_name']:'Null');
+
             if($num){
-                $error_log_arr['app_id'][] = $json_info['adunit_id'].'('.addslashes(str_replace('\'\'','\'',$json_info['adunit_name'])).')';
+                $error_log_arr['app_id'][] = $json_info['adunit_id'].'('.addslashes(str_replace('\'\'','\'',$err_name)).')';
             }
             $array[$k]['country_id'] = 16;
         	// foreach ($country_info as $country_k => $country_v) {
@@ -287,9 +289,11 @@ class KedaxunfeiHandleProcesses extends Command
         if ($error_log_arr){
             $error_msg_array = [];
             $error_msg_mail = [];
-            if (isset($error_log_arr['app_id'])){
+            $error_log_arr = Service::shield_error($source_id,$error_log_arr);
+
+            if (isset($error_log_arr['app_id']) && !empty($error_log_arr['app_id'])){
                 $app_id = implode(',',array_unique($error_log_arr['app_id']));
-                $error_msg_array[] = '应用id匹配失败,ID为:'.$app_id."</font>";
+                $error_msg_array[] = '应用id匹配失败,ID为:'.$app_id;
                 $error_msg_mail[] = '应用id匹配失败，ID为：'.$app_id;
             }
 
@@ -297,8 +301,10 @@ class KedaxunfeiHandleProcesses extends Command
             //     $country = implode(',',array_unique($error_log_arr['country']));
             //     $error_msg_array[] = '国家匹配失败，code为：<font color="red">'.$country."</font>";
             // }
+            if(!empty($error_msg_array)) {
 
-            DataImportImp::saveDataErrorLog(2,$source_id,'Kedaxunfei',2,implode(';',$error_msg_array));
+                DataImportImp::saveDataErrorLog(2, $source_id, 'Kedaxunfei', 2, implode(';', $error_msg_array));
+            }
             DataImportImp::saveDataErrorMoneyLog($source_id,$dayid,$error_detail_arr);
 
             //CommonFunction::sendMail($error_msg_mail,'Kedaxunfei广告平台数据处理error');

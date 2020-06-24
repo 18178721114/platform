@@ -70,8 +70,8 @@ class AdcolonyHandleProcesses extends Command
         $info = DataImportLogic::getChannelData('ad_data','erm_data',$map)->get();
         $info = Service::data($info);
         if(!$info){
-            $error_msg = $dayid.'号，'.$source_name.'广告平台数据处理程序获取原始数据为空';
-            DataImportImp::saveDataErrorLog(2,$source_id,$source_name,2,$error_msg);
+            //$error_msg = $dayid.'号，'.$source_name.'广告平台数据处理程序获取原始数据为空';
+            //DataImportImp::saveDataErrorLog(2,$source_id,$source_name,2,$error_msg);
             exit;
         }
 
@@ -181,7 +181,7 @@ class AdcolonyHandleProcesses extends Command
 
                     }
             }
-        	$err_name = (isset($json_info['zone_id']) ?$json_info['zone_id']:Null).'#'.(isset($json_info['zone_name']) ?$json_info['zone_name']:Null).'#'.(isset($json_info['app_id']) ?$json_info['app_id']:Null).'#'.(isset($json_info['app_name']) ?$json_info['app_name']:Null);
+        	$err_name = (isset($json_info['zone_id']) ?$json_info['zone_id']:'Null').'#'.(isset($json_info['zone_name']) ?$json_info['zone_name']:'Null').'#'.(isset($json_info['app_id']) ?$json_info['app_id']:'Null').'#'.(isset($json_info['app_name']) ?$json_info['app_name']:'Null');
             if ($num){
                 $error_log_arr['application'][] = $json_info['zone_id'].'('.$err_name.')';
             }
@@ -295,7 +295,7 @@ class AdcolonyHandleProcesses extends Command
         if ($error_log_arr){
             $error_msg_array = [];
             $error_msg_mail = [];
-            //$error_log_arr = Service::shield_error($source_id,$error_log_arr);
+            $error_log_arr = Service::shield_error($source_id,$error_log_arr);
 
 
             if (isset($error_log_arr['application']) && !empty($error_log_arr['application'])){
@@ -316,8 +316,9 @@ class AdcolonyHandleProcesses extends Command
 //            }
             if(!empty($error_msg_array)){
                 DataImportImp::saveDataErrorLog(2,$source_id,$source_name,2,implode(';',$error_msg_array));
-                DataImportImp::saveDataErrorMoneyLog($source_id,$dayid,$error_detail_arr);
             }
+            DataImportImp::saveDataErrorMoneyLog($source_id,$dayid,$error_detail_arr);
+
 
 
 

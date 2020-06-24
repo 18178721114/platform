@@ -79,7 +79,7 @@ class VungleCommond extends Command
         $date = $this->argument('dayid');
         $account = $this->argument('account');
 
-        $sql = " SELECT  data_account as company_account,account_api_key  as api_key from c_platform_account_mapping WHERE platform_id ='pad09' order by data_account desc ";
+        $sql = " SELECT  data_account as company_account,account_api_key  as api_key from c_platform_account_mapping WHERE platform_id ='pad09'  and status = 1order by data_account desc ";
         $plat_list = DB::select($sql);
         $plat_list = Service::data($plat_list);
         if (!$plat_list) return;
@@ -287,7 +287,7 @@ class VungleCommond extends Command
         }
         Artisan::call('VungleHandleProcesses' ,['dayid'=>$date]);
         } catch (\Exception $e) {
-            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'渠道数据匹配失败：'.$e->getMessage();
+            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'广告平台程序失败，失败原因：'.$e->getMessage();
             DataImportImp::saveDataErrorLog(5,SOURCE_ID,AD_PLATFORM,2,$error_msg_info);
 
         }

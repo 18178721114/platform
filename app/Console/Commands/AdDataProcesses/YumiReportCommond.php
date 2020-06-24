@@ -62,7 +62,7 @@ class YumiReportCommond extends Command
         FROM
         c_app_ad_platform
         WHERE
-        platform_id = '$source_id' and platform_app_id is not null";
+        platform_id = '$source_id' and platform_app_id is not null and status = 1";
         $app_info_list = DB::select($sql);
         $app_info_list = Service::data($app_info_list);
         $str ='';
@@ -177,7 +177,7 @@ else app_uuid end ) AS app_id,-- 玉米id
             Artisan::call('YumiHandleProcesses' ,['dayid'=>$dayid]);
         }
             } catch (\Exception $e) {
-        $error_msg_info = $dayid.'号,'.$source_name.'渠道数据匹配失败：'.$e->getMessage();
+        $error_msg_info = $dayid.'号,'.$source_name.'广告平台程序失败，失败原因：'.$e->getMessage();
         DataImportImp::saveDataErrorLog(5,$source_id,$source_name,2,$error_msg_info);
 
         }

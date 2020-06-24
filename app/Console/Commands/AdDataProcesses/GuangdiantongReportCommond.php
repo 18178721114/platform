@@ -64,7 +64,7 @@ class GuangdiantongReportCommond extends Command
 //        $PlatInfo = DataImportLogic::getConf(SOURCE_ID_CONF);
 //        $PlatInfo = Service::data($PlatInfo);
 
-        $sql = "SELECT  data_account as company_account,account_api_key  as appkey,account_user_id  as agid,account_app_id  as appid from c_platform_account_mapping WHERE platform_id ='pad10'";
+        $sql = "SELECT  data_account as company_account,account_api_key  as appkey,account_user_id  as agid,account_app_id  as appid from c_platform_account_mapping WHERE platform_id ='pad10' and status = 1";
         $PlatInfo = DB::select($sql);
         $PlatInfo = Service::data($PlatInfo);
 
@@ -198,7 +198,7 @@ class GuangdiantongReportCommond extends Command
         // 调用数据处理过程
             Artisan::call('GuangdiantongHandleProcesses',['dayid' => $dayid]);
         } catch (\Exception $e) {
-            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'渠道数据匹配失败：'.$e->getMessage();
+            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'广告平台程序失败，失败原因：'.$e->getMessage();
             DataImportImp::saveDataErrorLog(5,SOURCE_ID,AD_PLATFORM,2,$error_msg_info);
 
         }

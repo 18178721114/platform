@@ -67,7 +67,7 @@ class SmaatoCommond extends Command
 //        $PlatInfo = DataImportLogic::getConf(SOURCE_ID_CONF);
 //        $PlatInfo = Service::data($PlatInfo);
 
-        $sql = " SELECT  data_account as company_account,account_user_id  as client_id,account_token  as client_secret from c_platform_account_mapping WHERE platform_id ='pad21' ";
+        $sql = " SELECT  data_account as company_account,account_user_id  as client_id,account_token  as client_secret from c_platform_account_mapping WHERE platform_id ='pad21' and status = 1 ";
         $PlatInfo = DB::select($sql);
         $PlatInfo = Service::data($PlatInfo);
 
@@ -103,7 +103,7 @@ class SmaatoCommond extends Command
             }
         }
         } catch (\Exception $e) {
-            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'渠道数据匹配失败：'.$e->getMessage();
+            $error_msg_info = $date.'号,'.AD_PLATFORM.'广告平台程序失败，失败原因：'.$e->getMessage();
             DataImportImp::saveDataErrorLog(5,SOURCE_ID,AD_PLATFORM,2,$error_msg_info);
 
         }

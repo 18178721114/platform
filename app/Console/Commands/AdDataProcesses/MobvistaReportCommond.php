@@ -64,7 +64,7 @@ class MobvistaReportCommond extends Command
 //    	$info[0]['company_account'] ='weibo@zplay.com';
 //    	$info[0]['Skey'] ='acb64ce075c6bc47f4f51acd261fd28f';
 //    	$info[0]['Secret'] ='8cf6690b7d64407cfcec4d6493e2d90a';
-        $sql = " SELECT  data_account as company_account,account_api_key  as Skey,account_token  as Secret from c_platform_account_mapping WHERE platform_id ='pad50' ";
+        $sql = " SELECT  data_account as company_account,account_api_key  as Skey,account_token  as Secret from c_platform_account_mapping WHERE platform_id ='pad50' and status = 1 ";
         $info = DB::select($sql);
         $info = Service::data($info);
         if ($info){
@@ -175,7 +175,7 @@ class MobvistaReportCommond extends Command
             Artisan::call('MobvistaHandleProcesses' ,['dayid'=>$dayid]);
         }
         } catch (\Exception $e) {
-            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'渠道数据匹配失败：'.$e->getMessage();
+            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'广告平台程序失败，失败原因：'.$e->getMessage();
             DataImportImp::saveDataErrorLog(5,SOURCE_ID,AD_PLATFORM,2,$error_msg_info);
 
         }

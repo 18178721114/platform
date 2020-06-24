@@ -216,7 +216,7 @@ class YumiPolymerizationCommond extends Command
             Artisan::call('YumiPolymerizationHandleProcesses' ,['dayid'=>$dayid]);
         }
         } catch (\Exception $e) {
-            $error_msg_info = $dayid.'号,'.$source_name.'渠道数据匹配失败：'.$e->getMessage();
+            $error_msg_info = $dayid.'号,'.$source_name.'广告平台程序失败，失败原因：'.$e->getMessage();
             DataImportImp::saveDataErrorLog(5,$source_id,$source_name,2,$error_msg_info);
 
         }

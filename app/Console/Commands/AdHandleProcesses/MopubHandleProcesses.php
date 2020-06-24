@@ -94,8 +94,8 @@ class MopubHandleProcesses extends Command
             `c_app_ad_platform`.`flow_type` 
             FROM
             `c_app`
-            LEFT JOIN `c_app_ad_platform` ON `c_app_ad_platform`.`app_id` = `c_app`.`id`
-            LEFT JOIN `c_app_ad_slot` ON `c_app_ad_slot`.`app_ad_platform_id` = `c_app_ad_platform`.`id`
+            LEFT JOIN `c_app_ad_platform` ON `c_app_ad_platform`.`app_id` = `c_app`.`id`  and `c_app_ad_platform`.`status` = 1
+            LEFT JOIN `c_app_ad_slot` ON `c_app_ad_slot`.`app_ad_platform_id` = `c_app_ad_platform`.`id`   and `c_app_ad_slot`.`status` = 1
 
             LEFT JOIN (
             SELECT
@@ -167,7 +167,13 @@ class MopubHandleProcesses extends Command
         foreach ($info as $k => $v) {
 
         	$json_info = json_decode($v['json_data'],true);
-            if($json_info['order'] =='Network' or $json_info['order'] =='Marketplace' or $json_info['order'] =='iAd Global Segment'){
+        	if(isset($json_info['order']) ) {
+                if ($json_info['order'] != 'Network' or $json_info['order'] != 'Marketplace' or $json_info['order'] != 'iAd Global Segment') {
+                    continue;
+                }
+            }
+
+
              
                 foreach ($app_list as $app_k => $app_v) {
 
@@ -182,8 +188,10 @@ class MopubHandleProcesses extends Command
 
                         }
                 }
+                $err_name = (isset($json_info['adunit_id']) ?$json_info['adunit_id']:'Null').'#'.(isset($json_info['adunit']) ?$json_info['adunit']:'Null').'#'.(isset($json_info['app_id']) ?$json_info['app_id']:'Null').'#'.(isset($json_info['app']) ?$json_info['app']:'Null');
+
                 if ($num){
-                    $error_log_arr['application'][] = $json_info['app_id'].'('.$json_info['app'].')';
+                    $error_log_arr['application'][] = $json_info['app_id'].'('.$err_name.')';
                 }
 
                 foreach ($country_info as $country_k => $country_v) {
@@ -199,7 +207,7 @@ class MopubHandleProcesses extends Command
                 }
 
                 if ($num_country){
-                    $error_log_arr['country'][] = isset($json_info['country']) ? $json_info['country'] : '';
+                    $error_log_arr['country'][] = isset($json_info['country']) ? $json_info['country'].'('.$err_name.')' : '';
                 }
 
                 foreach ($AdType_info as $AdType_k => $AdType_v) {
@@ -214,7 +222,7 @@ class MopubHandleProcesses extends Command
                     }
                 }
                 if ($num_adtype){
-                    $error_log_arr['ad_type'][] = isset($json_info['adunit_format']) ? $json_info['adunit_format'].'('.$json_info['app'].')' : '' ;
+                    $error_log_arr['ad_type'][] = isset($json_info['adunit_format']) ? $json_info['adunit_format'].'('.$err_name.')' : '' ;
                 }
 
 
@@ -291,7 +299,7 @@ class MopubHandleProcesses extends Command
                 $array[$k]['create_time'] = date('Y-m-d H:i:s');
                 $array[$k]['update_time'] = date('Y-m-d H:i:s');
 
-            }
+
         	
         }
 
@@ -299,24 +307,28 @@ class MopubHandleProcesses extends Command
         if ($error_log_arr){
             $error_msg_array = [];
             $error_msg_mail = [];
-            if (isset($error_log_arr['application'])){
+            $error_log_arr = Service::shield_error($source_id,$error_log_arr);
+
+            if (isset($error_log_arr['application']) && !empty($error_log_arr['application'])){
                 $application = implode(',',array_unique($error_log_arr['application']));
-                $error_msg_array[] = '应用名称匹配失败,ID为:'.$application;
-                $error_msg_mail[] = '应用名称匹配失败，ID为：'.$application;
+                $error_msg_array[] = '应用id匹配失败,ID为:'.$application;
+                $error_msg_mail[] = '应用id匹配失败，ID为：'.$application;
             }
 
-            if (isset($error_log_arr['country'])){
+            if (isset($error_log_arr['country']) && !empty($error_log_arr['country'])){
                 $country = implode(',',array_unique($error_log_arr['country']));
                 $error_msg_array[] = '国家匹配失败,code为:'.$country;
                 $error_msg_mail[] = '国家匹配失败，code为：'.$country;
             }
-            if (isset($error_log_arr['ad_type'])){
+            if (isset($error_log_arr['ad_type']) && !empty($error_log_arr['ad_type'])){
                 $ad_type = implode(',',array_unique($error_log_arr['ad_type']));
                 $error_msg_array[] = '广告类型匹配失败,code为:'.$ad_type;
                 $error_msg_mail[] = '广告类型匹配失败，code为：'.$ad_type;
             }
+            if(!empty($error_msg_array)) {
 
-            DataImportImp::saveDataErrorLog(2,$source_id,$source_name,2,implode(';',$error_msg_array));
+                DataImportImp::saveDataErrorLog(2, $source_id, $source_name, 2, implode(';', $error_msg_array));
+            }
             DataImportImp::saveDataErrorMoneyLog($source_id,$dayid,$error_detail_arr);
 
             // 发送邮件

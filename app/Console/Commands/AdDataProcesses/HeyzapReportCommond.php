@@ -64,7 +64,7 @@ class HeyzapReportCommond extends Command
 //        $PlatInfo = DataImportLogic::getConf(SOURCE_ID_CONF);
 //        $PlatInfo = Service::data($PlatInfo);
 
-        $sql = "SELECT  data_account as company_username,account_api_key  as api_key from c_platform_account_mapping WHERE platform_id ='pad36'";
+        $sql = "SELECT  data_account as company_username,account_api_key  as api_key from c_platform_account_mapping WHERE platform_id ='pad36' and status = 1";
         $PlatInfo = DB::select($sql);
         $PlatInfo = Service::data($PlatInfo);
 
@@ -88,8 +88,8 @@ class HeyzapReportCommond extends Command
     		if(!empty($appInfoList['data'])){
     			foreach ($appInfoList['data'] as $appInfo){
     				$dataUrl = str_replace(array('_COMPANY_USERNAME_','_API_KEY_','_END_DATE_','_BEGIN_DATE_','_APP_ID_'),array($value['company_username'],$api_key,$dayid,$dayid,$appInfo['app_id']),env('HEYZAP_INFO'));
-    				$dataInfo = self::get_response($dataUrl);
-    				$dataInfo = json_decode($dataInfo,true);
+    				$dataInfo1 = self::get_response($dataUrl);
+    				$dataInfo = json_decode($dataInfo1,true);
 
                     // 数据获取重试
                     $api_data_i=1;
@@ -99,6 +99,13 @@ class HeyzapReportCommond extends Command
                         $api_data_i++;
                         if($api_data_i>3)
                             break;
+                    }
+                    //取数四次 取数结果仍为空
+                    if($api_data_i ==4 && empty($dataInfo)){
+                        $error_msg_1 = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:返回数据为空('.$dataInfo1.')';
+                        DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg_1);
+                        continue;
+
                     }
 
     				if(!empty($dataInfo['data'])){
@@ -189,7 +196,7 @@ class HeyzapReportCommond extends Command
         // todo 调用数据处理过程
             Artisan::call('HeyzapHandleProcesses',['dayid' => $dayid]);
         } catch (\Exception $e) {
-            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'渠道数据匹配失败：'.$e->getMessage();
+            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'广告平台程序失败，失败原因：'.$e->getMessage();
             DataImportImp::saveDataErrorLog(5,SOURCE_ID,AD_PLATFORM,2,$error_msg_info);
 
         }

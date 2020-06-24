@@ -66,6 +66,7 @@ class TiktokReportHandleProcesses extends Command
 
 
     public static function TiktokAdDataProcess($source_id,$platform_name,$dayid){
+        static $stactic_num = 0;
         //查询pgsql 的数据
         $map =[];
         $map['dayid'] = $dayid;
@@ -100,8 +101,8 @@ class TiktokReportHandleProcesses extends Command
             `c_app_ad_platform`.`flow_type` 
             FROM
             `c_app`
-            LEFT JOIN `c_app_ad_platform` ON `c_app_ad_platform`.`app_id` = `c_app`.`id`
-            LEFT JOIN `c_app_ad_slot` ON `c_app_ad_slot`.`app_ad_platform_id` = `c_app_ad_platform`.`id`
+            LEFT JOIN `c_app_ad_platform` ON `c_app_ad_platform`.`app_id` = `c_app`.`id`  and `c_app_ad_platform`.`status` = 1
+            LEFT JOIN `c_app_ad_slot` ON `c_app_ad_slot`.`app_ad_platform_id` = `c_app_ad_platform`.`id`  and `c_app_ad_slot`.`status` = 1
             LEFT JOIN `c_ad_type_corresponding` ON `c_ad_type_corresponding`.`ad_type_id` = `c_app_ad_slot`.`ad_type`
             LEFT JOIN (
             SELECT
@@ -177,6 +178,8 @@ class TiktokReportHandleProcesses extends Command
 
                     }
                 }
+                $err_name = (isset($json_info['ad_slot_id']) ?$json_info['ad_slot_id']:'Null').'#'.(isset($json_info['site_name']) ?$json_info['site_name']:'Null').'#'.(isset($json_info['appid']) ?$json_info['appid']:'Null').'#'.(isset($json_info['code_name']) ?$json_info['code_name']:'Null');
+
                 if($num){
                     if ($tiktok_app_id && $json_info['ad_slot_id'] && isset($json_info['ad_slot_type'])){
 
@@ -210,7 +213,7 @@ class TiktokReportHandleProcesses extends Command
 
 
                     }
-                    $error_log_arr['app_id'][] = $json_info['ad_slot_id'].'或'.$json_info['appid'];
+                    $error_log_arr['app_id'][] = $json_info['ad_slot_id'].'或'.$json_info['appid'].'('.$err_name.')';
                 }
                 //默认中国
                 $array[$k]['country_id'] = 64;
@@ -311,17 +314,21 @@ class TiktokReportHandleProcesses extends Command
             }
 
             if ($insert_generalize_ad_app) {
-                var_dump(count($insert_generalize_ad_app));
-                // 开启事物 保存数据
-                DB::beginTransaction();
-                $app_info = DB::table('c_app_ad_slot')->insert($insert_generalize_ad_app);
+                if($stactic_num ==1){
+                    //反更新没成功 走这里
+                }else {
+                    // 开启事物 保存数据
+                    DB::beginTransaction();
+                    $app_info = DB::table('c_app_ad_slot')->insert($insert_generalize_ad_app);
 //                var_dump($app_info);
-                if (!$app_info) { // 应用信息已经重复
-                    DB::rollBack();
-                } else {
-                    DB::commit();
-                    self::TiktokAdDataProcess($source_id,$platform_name,$dayid);
-                    exit;
+                    if (!$app_info) { // 应用信息已经重复
+                        DB::rollBack();
+                    } else {
+                        DB::commit();
+                        $stactic_num++;
+                        self::TiktokAdDataProcess($source_id, $platform_name, $dayid);
+                        exit;
+                    }
                 }
             }
         }
@@ -329,15 +336,18 @@ class TiktokReportHandleProcesses extends Command
         if ($error_log_arr){
             $error_msg_array = [];
             $error_msg_mail = [];
-            if (isset($error_log_arr['app_id'])){
+            $error_log_arr = Service::shield_error($source_id,$error_log_arr);
+
+            if (isset($error_log_arr['app_id']) && !empty($error_log_arr['app_id'])){
                 $app_id = implode(',',array_unique($error_log_arr['app_id']));
                 $error_msg_array[] = '广告位id匹配失败,ID为:'.$app_id;
                 $error_msg_mail[] = '广告位id匹配失败，ID为：'.$app_id;
             }
 
+            if(!empty($error_msg_array)) {
 
-
-            DataImportImp::saveDataErrorLog(2,$source_id,$platform_name,2,implode(';',$error_msg_array));
+                DataImportImp::saveDataErrorLog(2, $source_id, $platform_name, 2, implode(';', $error_msg_array));
+            }
             DataImportImp::saveDataErrorMoneyLog($source_id,$dayid,$error_detail_arr);
 
             //CommonFunction::sendMail($error_msg_mail,$platform_name.'渠道广告数据处理error');

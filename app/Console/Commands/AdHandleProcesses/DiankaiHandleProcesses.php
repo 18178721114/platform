@@ -94,8 +94,8 @@ class DiankaiHandleProcesses extends Command
             `c_app_ad_platform`.`flow_type` 
             FROM
             `c_app`
-            LEFT JOIN `c_app_ad_platform` ON `c_app_ad_platform`.`app_id` = `c_app`.`id`
-            LEFT JOIN `c_app_ad_slot` ON `c_app_ad_slot`.`app_ad_platform_id` = `c_app_ad_platform`.`id`
+            LEFT JOIN `c_app_ad_platform` ON `c_app_ad_platform`.`app_id` = `c_app`.`id` and `c_app_ad_platform`.`status` = 1
+            LEFT JOIN `c_app_ad_slot` ON `c_app_ad_slot`.`app_ad_platform_id` = `c_app_ad_platform`.`id`   and `c_app_ad_slot`.`status` = 1
 
             LEFT JOIN (
             SELECT
@@ -182,10 +182,12 @@ class DiankaiHandleProcesses extends Command
         		}
 
         	}
+            $err_name = 'Null#'.(isset($json_info['slot_name']) ?$json_info['slot_name']:'Null').'#'.(isset($json_info['app_id']) ?$json_info['app_id']:'Null').'#'.(isset($json_info['app_name']) ?$json_info['app_name']:'Null');
+
             if($num){
-                $error_log_arr['app_id'][] = $json_info['app_id'].'('.$v['account'].')';
+                $error_log_arr['app_id'][] = $json_info['app_id'].'('.$err_name.')';
             }
-            
+            $array[$k]['country_id'] =64;
 //        	foreach ($country_info as $country_k => $country_v) {
 //        		if($json_info['countryCode'] ==$country_v['name']){
 //        			$array[$k]['country_id'] = $country_v['c_country_id'];
@@ -213,7 +215,7 @@ class DiankaiHandleProcesses extends Command
                 }
             }
             if($num_adtype){
-                $error_log_arr['ad_type'][] = isset($json_info['slot_id_ad_type_name']) ? $json_info['slot_id_ad_type_name'] : '' ;
+                $error_log_arr['ad_type'][] = isset($json_info['slot_id_ad_type_name']) ? $json_info['slot_id_ad_type_name'].'('.$err_name.')' : '' ;
             }
         	if(($num+$num_country+$num_adtype)>0){
                 $error_detail_arr[$k]['platform_id'] = $source_id;
@@ -287,7 +289,9 @@ class DiankaiHandleProcesses extends Command
         if ($error_log_arr){
             $error_msg_array = [];
             $error_msg_mail = [];
-            if (isset($error_log_arr['app_id'])){
+            $error_log_arr = Service::shield_error($source_id,$error_log_arr);
+
+            if (isset($error_log_arr['app_id']) && !empty($error_log_arr['app_id'])){
                 $app_id = implode(',',array_unique($error_log_arr['app_id']));
                 $error_msg_array[] = '应用id匹配失败,ID为:'.$app_id;
                 $error_msg_mail[] = '应用id匹配失败，ID为：'.$app_id;
@@ -298,13 +302,15 @@ class DiankaiHandleProcesses extends Command
 //                $error_msg_array[] = '国家匹配失败,code为:'.$country;
 //                $error_msg_mail[] = '国家匹配失败，code为：'.$country;
 //            }
-//            if (isset($error_log_arr['ad_type'])){
-//                $ad_type = implode(',',array_unique($error_log_arr['ad_type']));
-//                $error_msg_array[] = '广告类型匹配失败,code为:'.$ad_type;
-//                $error_msg_mail[] = '广告类型匹配失败，code为：'.$ad_type;
-//            }
+            if (isset($error_log_arr['ad_type']) && !empty($error_log_arr['ad_type'])){
+                $ad_type = implode(',',array_unique($error_log_arr['ad_type']));
+                $error_msg_array[] = '广告类型匹配失败,code为:'.$ad_type;
+                $error_msg_mail[] = '广告类型匹配失败，code为：'.$ad_type;
+            }
 
-            DataImportImp::saveDataErrorLog(2,$source_id,$source_name,2,implode(';',$error_msg_array));
+            if(!empty($error_msg_array)) {
+                DataImportImp::saveDataErrorLog(2, $source_id, $source_name, 2, implode(';', $error_msg_array));
+            }
             DataImportImp::saveDataErrorMoneyLog($source_id,$dayid,$error_detail_arr);
 
             //CommonFunction::sendMail($error_msg_mail,$source_name.'广告平台数据处理error');

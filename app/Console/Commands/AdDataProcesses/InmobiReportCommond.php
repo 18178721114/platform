@@ -71,7 +71,7 @@ class InmobiReportCommond extends Command
 //        $info[2]['company_pass'] ='zplaygogogo1';
 //        $info[2]['secretKey'] ='b046c4fe1d6742faa40764ff39f82bf9';
 //
-        $sql = "SELECT  data_account as company_account,account_pass  as company_pass,account_token  as secretKey from c_platform_account_mapping WHERE platform_id ='pad02' ";
+        $sql = "SELECT  data_account as company_account,account_pass  as company_pass,account_token  as secretKey from c_platform_account_mapping WHERE platform_id ='pad02' and status = 1 ";
         $info = DB::select($sql);
         $info = Service::data($info);
         if (!$info) return;
@@ -143,7 +143,7 @@ class InmobiReportCommond extends Command
         }
             Artisan::call('InmobiHandleProcesses' ,['dayid'=>$dayid]);
         } catch (\Exception $e) {
-            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'渠道数据匹配失败：'.$e->getMessage();
+            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'广告平台程序失败，失败原因：'.$e->getMessage();
             DataImportImp::saveDataErrorLog(5,SOURCE_ID,AD_PLATFORM,2,$error_msg_info);
 
         }

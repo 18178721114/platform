@@ -66,7 +66,7 @@ class UnityReportCommond extends Command
 //        $info[2]['company_account'] ='noodlecake';
 //        $info[2]['SecretKey'] ='006c90593aea438ef12e1023c6544666e87da1e919a76d647ce7b3267e5aca12';
 
-        $sql = " SELECT  data_account as company_account,account_token  as SecretKey,account_user_id as organizationId from c_platform_account_mapping WHERE platform_id ='pad24' and account_user_id is not null ";
+        $sql = " SELECT  data_account as company_account,account_token  as SecretKey,account_user_id as organizationId from c_platform_account_mapping WHERE platform_id ='pad24' and account_user_id is not null and status = 1 ";
         $info = DB::select($sql);
         $info = Service::data($info);
 //        var_dump($info);
@@ -143,7 +143,7 @@ class UnityReportCommond extends Command
             Artisan::call('UnityHandleProcesses' ,['dayid'=>$dayid]);
         }
         } catch (\Exception $e) {
-            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'渠道数据匹配失败：'.$e->getMessage();
+            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'广告平台程序失败，失败原因：'.$e->getMessage();
             DataImportImp::saveDataErrorLog(5,SOURCE_ID,AD_PLATFORM,2,$error_msg_info);
 
         }

@@ -68,7 +68,7 @@ class KewanReportCommond extends Command
         $info[1]['company_username'] ='BBD48B13-B725-49B1-A3F9-BE6CBFA2189D';
         $info[1]['api_key'] ='B7FF4F07-9876-C910-1DCA-6240422D0230';
 
-         $sql = "SELECT  data_account as company_username,account_api_key  as api_key from c_platform_account_mapping WHERE platform_id ='pad69' ";
+         $sql = "SELECT  data_account as company_username,account_api_key  as api_key from c_platform_account_mapping WHERE platform_id ='pad69' and status = 1 ";
         $PlatInfo = DB::select($sql);
         $info = Service::data($PlatInfo);
         foreach ($info as $key => $value) {
@@ -208,7 +208,7 @@ class KewanReportCommond extends Command
         }
             Artisan::call('KewanHandleProcesses' ,['dayid'=>$dayid]);
         } catch (\Exception $e) {
-            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'渠道数据匹配失败：'.$e->getMessage();
+            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'广告平台程序失败，失败原因：'.$e->getMessage();
             DataImportImp::saveDataErrorLog(5,SOURCE_ID,AD_PLATFORM,2,$error_msg_info);
 
         }
