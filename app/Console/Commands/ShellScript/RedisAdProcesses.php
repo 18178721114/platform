@@ -71,6 +71,7 @@ class RedisAdProcesses extends Command
                 $str = Redis::lpop($ad_info);
 
                 if(strpos($str,'lishuyang@lishuyang') !=false){
+                    var_dump($str);
                     $plat_date = explode( 'lishuyang@lishuyang',$str);
                     $date_arr[$i] =$plat_date[1];
                     $platform_arr[$i] = $plat_date[0];
@@ -87,6 +88,7 @@ class RedisAdProcesses extends Command
                     }
 
                 }else{
+                    var_dump($str);
                     $insert_info =DB::insert($ad_sql.$str);
                     if(!$insert_info){
                         var_dump(2);
