@@ -47,10 +47,18 @@ class UserImp extends ApiBaseImp
         if(!$userInfo) {
             ApiResponseFactory::apiResponse([],[],1002);
         }
+        $dir = './storage/country';
+        if (!is_dir($dir)) {
+            mkdir($dir,0777,true);
+        }
+        $logFilename = $dir.'/'.'country.log';
+        //生成日志
+        file_put_contents( $logFilename,'通行证登陆时间记录:'.json_encode($possportUserinfo) . "\n\n",FILE_APPEND);
         $_SESSION['erm_data']['expireTime'] = strtotime($possportUserinfo['data']['expireTime']);
         $_SESSION['erm_data']['name'] = $userInfo[0]['name'];
         $_SESSION['erm_data']['guid'] = $userInfo[0]['id'];
         $_SESSION['erm_data']['email'] = $userInfo[0]['user_account'];
+        file_put_contents( $logFilename,'session登陆时间记录:'.json_encode($_SESSION) . "\n\n",FILE_APPEND);
         // 获取树形菜单
         $back_data=[
             'guid'=> $userInfo[0]['id'],

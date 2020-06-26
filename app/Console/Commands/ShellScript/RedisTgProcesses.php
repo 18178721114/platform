@@ -82,29 +82,30 @@ class RedisTgProcesses extends Command
         	 $ad_sql = "insert into ".MYSQL_TG_TABLE_NAME." (`date`,`app_id`,`channel_id`,`country_id`,`platform_id`,`agency_platform_id`,`data_platform_id`,`type`,`platform_account`,`data_account`,`cost_type`,`platform_app_id`,`platform_app_name`,`ad_id`,`ad_name`,`ad_type`,`tongji_type`,`impression`,`click`,`new`,`new_phone`,`new_pad`,`cost`,`cost_exc`,`device_type`,`remark`,`create_time`,`update_time`,`cost_usd`)values";
         	 for ($i=1; $i <=$tg_len ; $i++) { 
                 $str = Redis::lpop($tg_info);
+                if ($str) {
+                    if (strpos($str, 'lishuyang@lishuyang') != false) {
+                        $plat_date = explode('lishuyang@lishuyang', $str);
+                        $date_arr[$i] = $plat_date[1];
+                        $platform_arr[$i] = $plat_date[0];
+                        $sel_info = DB::table('zplay_tg_report_daily')->where(["platform_id" => $plat_date[0], "date" => $plat_date[1]])->count();
+                        var_dump($plat_date[0] . '-' . $plat_date[1] . '-' . '数据条数' . $sel_info);
 
-                if(strpos($str,'lishuyang@lishuyang') !=false){
-                    $plat_date = explode( 'lishuyang@lishuyang',$str);
-                    $date_arr[$i] =$plat_date[1];
-                    $platform_arr[$i] = $plat_date[0];
-                    $sel_info = DB::table('zplay_tg_report_daily')->where(["platform_id" => $plat_date[0], "date" => $plat_date[1]])->count();
-                    var_dump($plat_date[0].'-'.$plat_date[1].'-'.'数据条数'.$sel_info);
+                        if ($sel_info) {
+                            var_dump('delete');
+                            $del_sql = "delete  from zplay_tg_report_daily where platform_id = '$plat_date[0]' and date ='$plat_date[1]'";
+                            $del_info = DB::delete($del_sql);
+                            if (!$del_info) {
+                                //var_dump(1);
+                                DB::rollBack();
+                            }
+                        }
 
-                    if($sel_info){
-                        var_dump('delete');
-                        $del_sql = "delete  from zplay_tg_report_daily where platform_id = '$plat_date[0]' and date ='$plat_date[1]'" ;
-                        $del_info =DB::delete($del_sql);
-                        if(!$del_info){
-                            //var_dump(1);
+                    } else {
+                        $insert_info = DB::insert($ad_sql . $str);
+                        if (!$insert_info) {
+                            //var_dump(2);
                             DB::rollBack();
                         }
-                    }
-
-                }else{
-                    $insert_info =DB::insert($ad_sql.$str);
-                    if(!$insert_info){
-                        //var_dump(2);
-                        DB::rollBack();
                     }
                 }
         	 }
