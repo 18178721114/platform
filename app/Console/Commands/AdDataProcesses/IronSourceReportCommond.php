@@ -120,13 +120,12 @@ class IronSourceReportCommond extends Command
                         $data_info_list = $sData['data'];
                         unset($sData['data']);
                         foreach ($data_info_list as $key => $data_value) {
-                            $sData['appName'] = addslashes($sData['appName']);
-
+                            $sData['app_name'] = addslashes($sData['appName']);
                             $json_data = array_merge($sData,$data_value);
-
+                            unset($json_data['appName']);
                             $one_data['type'] = 2;
                             $one_data['app_id'] = $sData['appKey'];
-                            $one_data['app_name'] = $sData['appName'];
+                            $one_data['app_name'] = $sData['app_name'];
                             $one_data['account'] = $user_name;
                             $one_data['source_id'] = 'pad05';
                             $one_data['json_data'] = str_replace('\'', '\'\'', json_encode($json_data));
