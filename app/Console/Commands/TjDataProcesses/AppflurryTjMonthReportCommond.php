@@ -57,91 +57,86 @@ class AppflurryTjMonthReportCommond extends Command
         $etime = $this->argument('etime') ? $this->argument('etime') : date("Y-m-01",strtotime('+1 month'));
         var_dump($stime,$etime);
         var_dump(date('Y-m-d H:i:s'));
+        try {
+            $tj_platform_list = [['account' => 'zplay', 'header' => ["Authorization:Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6ImZsdXJyeS56dXVsLnByb2Qua2V5c3RvcmUua2V5LjEifQ.eyJpc3MiOiJodHRwczovL3p1dWwuZmx1cnJ5LmNvbTo0NDMvdG9rZW4iLCJpYXQiOjE0ODIxMzA4MTMsImV4cCI6MzMwMzkwMzk2MTMsInN1YiI6IjM3NzY2NiIsImF1ZCI6IjQiLCJ0eXBlIjo0LCJqdGkiOiIzODkifQ.jXz4-hV98brkCpu-OMzJ9kQIyeyBKvI6zTLy_e0o880"]], ['account' => 'noodlecake', 'header' => ["Authorization:Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6ImZsdXJyeS56dXVsLnByb2Qua2V5c3RvcmUua2V5LjIifQ.eyJpc3MiOiJodHRwczovL3p1dWwuZmx1cnJ5LmNvbTo0NDMvdG9rZW4iLCJpYXQiOjE1MDUyNDM5MDIsImV4cCI6MzMwNjIxNTI3MDIsInN1YiI6IjQwMzg0MCIsImF1ZCI6IjQiLCJ0eXBlIjo0LCJqdGkiOiIyMDcyIn0.9CmVS2sZnlzH7vsNwOSlzx3dDJZ4x5C3uCGM7ga_o_A"]]];
 
-        $tj_platform_list = [
-            [
-                'account' => 'zplay',
-                'header' => [
-                    "Authorization:Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6ImZsdXJyeS56dXVsLnByb2Qua2V5c3RvcmUua2V5LjEifQ.eyJpc3MiOiJodHRwczovL3p1dWwuZmx1cnJ5LmNvbTo0NDMvdG9rZW4iLCJpYXQiOjE0ODIxMzA4MTMsImV4cCI6MzMwMzkwMzk2MTMsInN1YiI6IjM3NzY2NiIsImF1ZCI6IjQiLCJ0eXBlIjo0LCJqdGkiOiIzODkifQ.jXz4-hV98brkCpu-OMzJ9kQIyeyBKvI6zTLy_e0o880"
-                ]
-            ],
-            [
-                'account' => 'noodlecake',
-                'header' => [
-                    "Authorization:Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6ImZsdXJyeS56dXVsLnByb2Qua2V5c3RvcmUua2V5LjIifQ.eyJpc3MiOiJodHRwczovL3p1dWwuZmx1cnJ5LmNvbTo0NDMvdG9rZW4iLCJpYXQiOjE1MDUyNDM5MDIsImV4cCI6MzMwNjIxNTI3MDIsInN1YiI6IjQwMzg0MCIsImF1ZCI6IjQiLCJ0eXBlIjo0LCJqdGkiOiIyMDcyIn0.9CmVS2sZnlzH7vsNwOSlzx3dDJZ4x5C3uCGM7ga_o_A"
-                ]
-            ]
-        ];
+            foreach ($tj_platform_list as $tj_platform_info) {
+                $account = $tj_platform_info['account'];
+                $header = $tj_platform_info['header'];
 
-        foreach ($tj_platform_list as $tj_platform_info){
-            $account = $tj_platform_info['account'];
-            $header = $tj_platform_info['header'];
+                $sql = " select distinct api_key,statistic_app_name from c_app_statistic where statistic_type = 1 and api_key <> '' and api_key <> '空' ";
+                $app_list = DB::select($sql);
+                $app_list = Service::data($app_list);
+                if ($app_list) {
+                    foreach ($app_list as $app_info) {
+                        $api_key = $app_info['api_key'];
+                        $url = "https://api-metrics.flurry.com/public/v1/data/appUsage/month/app?metrics=sessions,activeDevices,newDevices,timeSpent&dateTime={$stime}/{$etime}&filters=app|apiKey-in[$api_key]";
+                        $result = self::zplay_curl($url, 'get', array(), $header, 'https');
 
-            $sql = " select distinct api_key,statistic_app_name from c_app_statistic where statistic_type = 1 and api_key <> '' and api_key <> '空' ";
-            $app_list = DB::select($sql);
-            $app_list = Service::data($app_list);
-            if ($app_list){
-                foreach ($app_list as $app_info){
-                    $api_key = $app_info['api_key'];
-                    $url = "https://api-metrics.flurry.com/public/v1/data/appUsage/month/app?metrics=sessions,activeDevices,newDevices,timeSpent&dateTime={$stime}/{$etime}&filters=app|apiKey-in[$api_key]";
-                    $result = self::zplay_curl($url,'get',array(),$header,'https');
+                        if (isset($result['rows'])) {
 
-                    if(isset($result['rows'])){
+                            DB::delete("delete from flurry_month where dateTime between '{$stime}' and '{$etime}' and account = '{$account}' and app_key = '{$api_key}' ");
 
-                        DB::delete("delete from flurry_month where dateTime between '{$stime}' and '{$etime}' and account = '{$account}' and app_key = '{$api_key}' ");
+                            $array = [];
+                            var_dump(count($result['rows']));
+                            foreach ($result['rows'] as $singleInfo) {
+                                $flurry_data = [];
+                                $flurry_data['account'] = $account;
+                                $flurry_data['dateTime'] = isset($singleInfo['dateTime']) ? $singleInfo['dateTime'] : '';
+                                $flurry_data['app_name'] = isset($singleInfo['app|name']) ? $singleInfo['app|name'] : '';
+                                $flurry_data['app_key'] = $api_key;
+                                $flurry_data['version'] = isset($singleInfo['appVersion|name']) ? $singleInfo['appVersion|name'] : '';
+                                $flurry_data['country'] = isset($singleInfo['country|name']) ? $singleInfo['country|name'] : '';
+                                $flurry_data['region_name'] = isset($singleInfo['region|name']) ? $singleInfo['region|name'] : '';
+                                $flurry_data['sessions'] = isset($singleInfo['sessions']) ? $singleInfo['sessions'] : '';
+                                $flurry_data['active_devices'] = isset($singleInfo['activeDevices']) ? $singleInfo['activeDevices'] : '';
+                                $flurry_data['new_devices'] = isset($singleInfo['newDevices']) ? $singleInfo['newDevices'] : '';
+                                $flurry_data['time_spent'] = isset($singleInfo['timeSpent']) ? $singleInfo['timeSpent'] : '';
+                                $flurry_data['update_time'] = now();
+                                $array[] = $flurry_data;
 
-                        $array = [];
-                        var_dump(count($result['rows']));
-                        foreach ($result['rows'] as $singleInfo){
-                            $flurry_data = [];
-                            $flurry_data['account'] = $account;
-                            $flurry_data['dateTime'] = isset($singleInfo['dateTime']) ? $singleInfo['dateTime'] : '';
-                            $flurry_data['app_name'] = isset($singleInfo['app|name']) ? $singleInfo['app|name'] : '';
-                            $flurry_data['app_key'] = $api_key;
-                            $flurry_data['version'] = isset($singleInfo['appVersion|name']) ? $singleInfo['appVersion|name'] : '';
-                            $flurry_data['country'] = isset($singleInfo['country|name']) ? $singleInfo['country|name'] : '';
-                            $flurry_data['region_name'] = isset($singleInfo['region|name']) ? $singleInfo['region|name'] : '';
-                            $flurry_data['sessions'] = isset($singleInfo['sessions']) ? $singleInfo['sessions'] : '';
-                            $flurry_data['active_devices'] = isset($singleInfo['activeDevices']) ? $singleInfo['activeDevices'] : '';
-                            $flurry_data['new_devices'] = isset($singleInfo['newDevices']) ? $singleInfo['newDevices'] : '';
-                            $flurry_data['time_spent'] = isset($singleInfo['timeSpent']) ? $singleInfo['timeSpent'] : '';
-                            $flurry_data['update_time'] = now();
-                            $array[] = $flurry_data;
-
-                        }
-
-                        if ($array){
-                            var_dump(count($array));
-                            //拆分批次
-                            $step = array();
-                            $i = 0;
-                            $account_total = 0;
-                            foreach ($array as $kkkk => $insert_data_info) {
-                                if ($kkkk % 1000 == 0) $i++;
-                                if ($insert_data_info) {
-                                    $account_total++;
-                                    $step[$i][] = $insert_data_info;
-                                }
                             }
 
-                            $is_success = [];
-                            if ($step) {
-                                foreach ($step as $k => $v) {
-                                    $result = DataImportLogic::insertAdReportInfo('flurry_month',$v);
-                                    if (!$result) {
-                                        $is_success[] = $k;
+                            if ($array) {
+                                var_dump(count($array));
+                                //拆分批次
+                                $step = array();
+                                $i = 0;
+                                $account_total = 0;
+                                foreach ($array as $kkkk => $insert_data_info) {
+                                    if ($kkkk % 1000 == 0) $i++;
+                                    if ($insert_data_info) {
+                                        $account_total++;
+                                        $step[$i][] = $insert_data_info;
+                                    }
+                                }
+
+                                $is_success = [];
+                                if ($step) {
+                                    foreach ($step as $k => $v) {
+                                        $result = DataImportLogic::insertAdReportInfo('flurry_month', $v);
+                                        if (!$result) {
+                                            $is_success[] = $k;
+                                        }
                                     }
                                 }
                             }
-                        }
 
+                        }
                     }
+
                 }
 
             }
-
+            var_dump(date('Y-m-d H:i:s'));
+        }catch (\Exception $e) {
+            // 异常报错
+            $message = "{$stime}号, " . AD_PLATFORM . "统计平台程序报错,报错原因:".$e->getMessage();
+            DataImportImp::saveDataErrorLog(5, SOURCE_ID, AD_PLATFORM, 1, $message);
+            $error_msg_arr[] = $message;
+//            CommonFunction::sendMail($error_msg_arr, '统计平台程序error');
+            exit;
         }
-        var_dump(date('Y-m-d H:i:s'));
         // todo flurry 月活处理过程
         Artisan::call('FlurryTjMonthHandleProcesses' ,['dayid'=>$stime]);
 
