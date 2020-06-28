@@ -59,7 +59,7 @@ class IronSourceTgReportCommond extends Command
         define('SOURCE_ID', 'ptg03'); // todo 这个需要根据平台信息表确定平台ID
 
         try {
-            $sql = " select distinct platform_id,data_account as company_account,account_token as SecretKey from c_platform_account_mapping where platform_id = 'ptg03' ";
+            $sql = " select distinct platform_id,data_account as company_account,account_token as SecretKey from c_platform_account_mapping where platform_id = 'ptg03' and status = 1 ";
             $info = DB::select($sql);
             $info = Service::data($info);
             if (!$info) {

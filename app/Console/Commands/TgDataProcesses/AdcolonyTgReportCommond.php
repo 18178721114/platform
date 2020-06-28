@@ -61,7 +61,7 @@ class AdcolonyTgReportCommond extends Command
 
         try {
             //这里面要写新测试平台里的数据配置 从数据库里取数据
-            $sql = " select distinct a.platform_id,a.data_account as company_account,a.account_api_key as apiKey from c_platform_account_mapping a where a.platform_id = 'ptg63' ";
+            $sql = " select distinct a.platform_id,a.data_account as company_account,a.account_api_key as apiKey from c_platform_account_mapping a where a.platform_id = 'ptg63' and status = 1";
             $info = DB::select($sql);
             $info = Service::data($info);
             if (!$info) {

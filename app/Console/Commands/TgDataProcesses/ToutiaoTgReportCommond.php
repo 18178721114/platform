@@ -59,7 +59,7 @@ class ToutiaoTgReportCommond extends Command
         define('SOURCE_ID', 'ptg66'); // todo 这个需要根据平台信息表确定平台ID
 
         try {
-            $toutiao_app_list = DB::select("select distinct platform_id,data_account as username,account_app_id as app_id,account_token as secret,account_user_id as advertiser_id from c_platform_account_mapping   where platform_id = 'ptg66' and  account_user_id is not null and account_token is not null and account_app_id is not null");
+            $toutiao_app_list = DB::select("select distinct platform_id,data_account as username,account_app_id as app_id,account_token as secret,account_user_id as advertiser_id from c_platform_account_mapping   where platform_id = 'ptg66' and  account_user_id is not null and account_token is not null and account_app_id is not null and status = 1 ");
             $toutiao_app_list = Service::data($toutiao_app_list);
             if (!$toutiao_app_list) {
                 // 无配置报错提醒

@@ -59,7 +59,7 @@ class VungleTgReportCommond extends Command
         //ini_set('memory_limit', '200M');
 
         try {
-            $sql = "  select distinct a.platform_id,a.data_account as company_account,b.application_id,a.account_api_key as api_key from c_platform_account_mapping a left join c_generalize b on b.platform_id = a.platform_id and a.account = b.data_account where a.platform_id = 'ptg37' and b.application_id != '' ";
+            $sql = "  select distinct a.platform_id,a.data_account as company_account,b.application_id,a.account_api_key as api_key from c_platform_account_mapping a left join c_generalize b on b.platform_id = a.platform_id and a.account = b.data_account where a.platform_id = 'ptg37' and b.application_id != '' and a.status = 1 ";
             $info = DB::select($sql);
             $info = Service::data($info);
             if (!$info) {

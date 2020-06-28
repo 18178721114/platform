@@ -65,7 +65,7 @@ class ChartboostTgReportCommond extends Command
     public static function getChartBoostData($dayid){
 
         try {
-            $sql = " select distinct platform_id,data_account as company_account,account_user_id as userId,account_token as userSignature from c_platform_account_mapping where platform_id = 'ptg25' ";
+            $sql = " select distinct platform_id,data_account as company_account,account_user_id as userId,account_token as userSignature from c_platform_account_mapping where platform_id = 'ptg25' and status = 1 ";
             $info = DB::select($sql);
             $info = Service::data($info);
             if (!$info) {

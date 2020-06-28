@@ -59,7 +59,7 @@ class ApplovinTgReportCommond extends Command
         define('SOURCE_ID', 'ptg21'); // todo 这个需要根据平台信息表确定平台ID
 
         try {
-            $sql = " select distinct platform_id,data_account as company_account,account_api_key as api_key from c_platform_account_mapping where platform_id = 'ptg21';";
+            $sql = " select distinct platform_id,data_account as company_account,account_api_key as api_key from c_platform_account_mapping where platform_id = 'ptg21' and status = 1 ";
             $info = DB::select($sql);
             $info = Service::data($info);
             if (!$info) {
