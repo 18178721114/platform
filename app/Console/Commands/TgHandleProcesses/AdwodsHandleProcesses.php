@@ -58,7 +58,7 @@ class AdwodsHandleProcesses extends Command
         set_time_limit(0);
 //        define('MYSQL_TABLE_NAME','zplay_tg_report_daily');
         $source_id = 'ptg40';
-        $source_name = 'AdWords';
+        $source_name = 'Adwords';
 
         $dayid = $this->argument('dayid') ? $this->argument('dayid'):date('Y-m-d',strtotime('-1 day'));
         var_dump($source_name.'-'.$source_id.'-'.$dayid);
