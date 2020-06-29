@@ -79,8 +79,8 @@ class MediaTgHandleProcesses extends Command
         $info = DataImportLogic::getChannelData('tg_data','erm_data',$map)->get();
         $info = Service::data($info);
         if(!$info){
-//            $error_msg = $dayid.'号，'.$source_name.'推广平台数据处理程序获取原始数据为空';
-//            DataImportImp::saveDataErrorLog(2,$source_id,$source_name,4,$error_msg);
+            $error_msg = $dayid.'号，'.$source_name.'推广平台数据处理程序获取原始数据为空';
+            DataImportImp::saveDataErrorLog(2,$source_id,$source_name,4,$error_msg);
             exit;
         }
 
@@ -88,8 +88,8 @@ class MediaTgHandleProcesses extends Command
         $sql = "SELECT  distinct
                 c_app.id,c_app.app_id,c_generalize.platform_id,c_generalize.data_account,c_generalize.application_id,c_generalize.application_name,c_generalize.agency_platform_id,c_generalize_ad_app.campaign_id,c_generalize_ad_app.campaign_name,c_generalize_ad_app.ad_group_id,c_platform.currency_type_id,cpp.currency_type_id as ageccy_currency_type_id
                 FROM c_app 
-                LEFT JOIN c_generalize ON c_app.id = c_generalize.app_id 
-                LEFT JOIN c_generalize_ad_app ON c_generalize.id = c_generalize_ad_app.generalize_id 
+                LEFT JOIN c_generalize ON c_app.id = c_generalize.app_id  and c_generalize.generalize_status = 1
+                LEFT JOIN c_generalize_ad_app ON c_generalize.id = c_generalize_ad_app.generalize_id and  c_generalize_ad_app.status = 1
                 LEFT JOIN c_platform ON c_generalize.platform_id = c_platform.platform_id 
                 LEFT JOIN c_platform as cpp ON c_generalize.agency_platform_id = cpp.platform_id 
                 WHERE 
@@ -131,6 +131,7 @@ class MediaTgHandleProcesses extends Command
         try {
             foreach ($info as $k => $v) {
                 $json_info = json_decode($v['json_data'],true);
+                $err_name = (isset($json_info['campaign_id']) ? $json_info['campaign_id'] : 'Null') . '#' . (isset($json_info['campaign_name']) ? addslashes($json_info['campaign_name']) : 'Null') . '#' . (isset($json_info['app_id']) ? $json_info['app_id'] : 'Null') . '#' . (isset($json_info['app_name']) ?$json_info['app_name'] : 'Null');
                 foreach ($app_list as $app_k => $app_v) {
                     if(isset($json_info['app_id']) && ($json_info['app_id'] == $app_v['application_id']) && ($app_v['data_account'] ==$json_info['account']) ){
                         $array[$k]['app_id'] = $app_v['app_id'];
@@ -162,7 +163,7 @@ class MediaTgHandleProcesses extends Command
                 }
 
                 if ($num){
-                    $error_log_arr['campaign_id'][] = $json_info['application_id'].'('.$json_info['account'].')';
+                    $error_log_arr['campaign_id'][] = $json_info['application_id'].'('.$err_name.')';
                 }
 
 
@@ -237,6 +238,8 @@ class MediaTgHandleProcesses extends Command
         if ($error_log_arr){
             $error_msg_array = [];
             $error_msg_mail = [];
+            $error_log_arr = Service::shield_error($source_id,$error_log_arr);
+
             if (isset($error_log_arr['campaign_id'])){
                 $campaign_id = implode(',',array_unique($error_log_arr['campaign_id']));
                 $error_msg_array[] = '应用id匹配失败,ID为:'.$campaign_id;
@@ -244,23 +247,17 @@ class MediaTgHandleProcesses extends Command
             }
 
 
-
-            DataImportImp::saveDataErrorLog(2,$source_id,$source_name,4,implode(';',$error_msg_array));
+            if(!empty($error_msg_array)) {
+                DataImportImp::saveDataErrorLog(2, $source_id, $source_name, 4, implode(';', $error_msg_array));
+                // 发送邮件
+//                CommonFunction::sendMail($error_msg_mail,$source_name.'推广平台数据处理error');
+            }
             DataImportImp::saveDataErrorMoneyLog($source_id,$dayid,$error_detail_arr);
-            // 发送邮件
-//            CommonFunction::sendMail($error_msg_mail,$source_name.'推广平台数据处理error');
+
         }
 
         // 保存正确数据
         if ($array) {
-
-//            $plat_str =$source_id.'lishuyang@lishuyang'.$dayid;
-//            Redis::rpush(env('REDIS_TG_KEYS'), $plat_str);
-                        //拆分批次
-
-
-            //$ad_sql = "insert into ".MYSQL_AD_TABLE_NAME." (`date`,`app_id`,`channel_id`,`country_id`,`platform_id`,`agency_platform_id`,`data_platform_id`,`type`,`platform_account`,`data_account`,`cost_type`,`platform_app_id`,`platform_app_name`,`ad_id`,`ad_name`,`ad_type`,`tongji_type`,`impression`,`click`,`new`,`new_phone`,`new_pad`,`cost`,`cost_exc`,`device_type`,`remark`,`create_time`,`update_time`)values";
-
             $time = date('Y-m-d H:i:s');
             foreach ($dayid as $key => $value) {
                 $sql_str ='';

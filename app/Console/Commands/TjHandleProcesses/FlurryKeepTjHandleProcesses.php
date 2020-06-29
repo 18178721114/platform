@@ -61,20 +61,20 @@ class FlurryKeepTjHandleProcesses extends Command
 
         $stime = $this->argument('stime') ? $this->argument('stime') : date('Y-m-d',strtotime('-1 day'));
         $etime = $this->argument('etime') ? $this->argument('etime') : date('Y-m-d',strtotime('-1 day'));
+        try {
+            //查询pgsql 的数据
+            $flurry_sql = "select * from scrapy_flurry_retention_detail where dnu > 0 and dayid between '$stime' and '$etime'";
+            $info = DB::select($flurry_sql);
+            $info = Service::data($info);
 
-        //查询pgsql 的数据
-        $flurry_sql = "select * from scrapy_flurry_retention_detail where dnu > 0 and dayid between '$stime' and '$etime'";
-        $info = DB::select($flurry_sql);
-        $info = Service::data($info);
-
-        if(!$info){
+            if (!$info) {
 //            $error_msg = $stime.'号-'.$etime.'号，'.$source_name.'统计留存数据处理程序获取原始数据为空';
 //            DataImportImp::saveDataErrorLog(2,$source_id,$source_name,1,$error_msg);
-            exit;
-        }
+                exit;
+            }
 
-        //获取匹配应用的数据
-        $sql = "SELECT DISTINCT
+            //获取匹配应用的数据
+            $sql = "SELECT DISTINCT
         c_app.id,
         c_app.app_id,
         c_app_statistic.api_key,
@@ -92,148 +92,156 @@ class FlurryKeepTjHandleProcesses extends Command
         WHERE
         c_app_statistic.statistic_type = 1";
 
-        $app_list = DB::select($sql);
-        $app_list = Service::data($app_list);
-        if(!$app_list){
-            $error_msg = $source_name.'统计留存数据处理程序应用数据查询为空';
-            DataImportImp::saveDataErrorLog(2,$source_id,$source_name,1,$error_msg);
-            exit;
-        }
-
-        //获取对照表国家信息
-        $country_map =[];
-        $country_info = CommonLogic::getCountryList($country_map)->get();
-        $country_info = Service::data($country_info);
-        if(!$country_info){
-            $error_msg = $source_name.'统计留存数据处理程序国家信息数据查询为空';
-            DataImportImp::saveDataErrorLog(2,$source_id,$source_name,1,$error_msg);
-            exit;
-        }
-
-        $array = [];
-        $num = 0;
-        $num_country = 0;
-        $error_log_arr = [];
-        $error_detail_arr = [];
-        foreach ($info as $k => $v) {
-        	foreach ($app_list as $app_k => $app_v) {
-        		if(($v['app_name'] == $app_v['statistic_app_name']) ){
-        			$array[$k]['app_id'] = $app_v['app_id'];
-                    $array[$k]['ad_status'] = $app_v['ad_status'];
-                    $array[$k]['channel_id'] =$app_v['channel_id'];
-                    $num = 0;
-        			break;
-        		}else{
-        			//广告位配置未配置
-        			$num++;
-
-        		}
-        	}
-
-        	if ($num){
-                //var_dump($json_info['campaign_id']);
-                $error_log_arr['campaign_id'][] = $v['app_name'];
+            $app_list = DB::select($sql);
+            $app_list = Service::data($app_list);
+            if (!$app_list) {
+                $error_msg = $source_name . '统计留存数据处理程序应用数据查询为空';
+                DataImportImp::saveDataErrorLog(2, $source_id, $source_name, 1, $error_msg);
+                exit;
             }
 
-        	if(($num+$num_country)>0){
-
-                $error_detail_arr[$k]['platform_id'] = $source_id;
-                $error_detail_arr[$k]['platform_name'] = $source_name;
-                $error_detail_arr[$k]['platform_type'] =1;
-                $error_detail_arr[$k]['err_date'] = $v['dayid'];
-                $error_detail_arr[$k]['first_level_id'] = $v['app_name'];
-                $error_detail_arr[$k]['first_level_name'] = '';
-                $error_detail_arr[$k]['second_level_id'] = '';
-                $error_detail_arr[$k]['second_level_name'] = '';
-                $error_detail_arr[$k]['money'] = 0; // 流水原币
-                $error_detail_arr[$k]['account'] = isset($v['account']) ? $v['account'] : '';
-                $error_detail_arr[$k]['create_time'] = date('Y-m-d H:i:s');
-                $error_detail_arr[$k]['td_err_type'] = 3;
-
-        		unset($array[$k]);
-        		//插入错误数据
-        		continue;
-        	}
-
-            $array[$k]['account'] = $v['account'];
-        	$array[$k]['date'] = $v['dayid'];
-        	$array[$k]['keep_id'] = $v['id'];
-        	$array[$k]['platform_id'] = $source_id;
-        	$array[$k]['create_time'] = date('Y-m-d H:i:s');
-        }
-
-        // 保存错误信息
-        if ($error_log_arr){
-            $error_msg_array = [];
-            $error_msg_mail = [];
-            if (isset($error_log_arr['campaign_id'])){
-                $campaign_id = implode(',',array_unique($error_log_arr['campaign_id']));
-                $error_msg_array[] = '应用ID匹配失败,ID为:'.$campaign_id;
-                $error_msg_mail[] = '应用ID匹配失败，ID为：'.$campaign_id;
-            }
-            // if (isset($error_log_arr['country'])){
-            //     $country = implode(',',array_unique($error_log_arr['country']));
-            //     $error_msg_array[] = '国家匹配失败，ID为：<font color="red">'.$country."</font>";
-            //     $error_msg_mail[] = '国家匹配失败，ID为：'.$country;
-            // }
-
-            DataImportImp::saveDataErrorLog(2,$source_id,$source_name,1,implode(';',$error_msg_array));
-            DataImportImp::saveDataErrorMoneyLog($source_id,$stime,$error_detail_arr,3);
-            // 发送邮件
-//            CommonFunction::sendMail($error_msg_mail,$source_name.'统计留存数据数据处理error');
-        }
-
-        // 保存正确数据
-
-        if ($array) {
-            DB::beginTransaction();
-            $map_delete = [];
-            $map_delete['platform_id'] = $source_id;
-            $map_delete['between'] = ['date',[$stime,$etime]];
-
-            DataImportLogic::deleteMysqlHistoryData('zplay_keep_tj_report_daily', $map_delete);
-            //拆分批次
-            $step = array();
-            $i = 0;
-            foreach ($array as $kkkk => $insert_data_info) {
-                if ($kkkk % 1000 == 0) $i++;
-                if ($insert_data_info) {
-                    $step[$i][] = $insert_data_info;
-                }
+            //获取对照表国家信息
+            $country_map = [];
+            $country_info = CommonLogic::getCountryList($country_map)->get();
+            $country_info = Service::data($country_info);
+            if (!$country_info) {
+                $error_msg = $source_name . '统计留存数据处理程序国家信息数据查询为空';
+                DataImportImp::saveDataErrorLog(2, $source_id, $source_name, 1, $error_msg);
+                exit;
             }
 
-            $is_success = [];
-            if ($step) {
-                foreach ($step as $k => $v) {
-                    $result = DataImportLogic::insertAdReportInfo('zplay_keep_tj_report_daily', $v);
-                    if (!$result) {
-                        DB::rollBack();
-                        $is_success[] = $k;
+            $array = [];
+            $num = 0;
+            $num_country = 0;
+            $error_log_arr = [];
+            $error_detail_arr = [];
+            foreach ($info as $k => $v) {
+                foreach ($app_list as $app_k => $app_v) {
+                    if (($v['app_name'] == $app_v['statistic_app_name'])) {
+                        $array[$k]['app_id'] = $app_v['app_id'];
+                        $array[$k]['ad_status'] = $app_v['ad_status'];
+                        $array[$k]['channel_id'] = $app_v['channel_id'];
+                        $num = 0;
+                        break;
+                    } else {
+                        //广告位配置未配置
+                        $num++;
+
                     }
                 }
-                echo '处理成功';
-            }
-            DB::commit();
-            // 调用存储过程更新总表数据
-//            DB::update("call tj_summary('$source_id')");
-            Artisan::call('TjSummaryProcesses',['platform_id'=>$source_id]);
 
-            //           // 查询广告数据
-            // $report_map = [];
-            // $report_map['platform_id'] = $source_id;
-            // $report_map['date'] = $dayid;
-            // $group_by = ['platform_id','date','account'];
-            // $report_list = PlatformLogic::getAdReportSum(MYSQL_TABLE_NAME,$report_map)->select(DB::raw("sum(new_user) as cost"),'platform_id','date','account')->groupBy($group_by)->get();
-            // $report_list = Service::data($report_list);
-            // if ($report_list){
-            //     // 保存广告平台
-            //     foreach ($report_list as $value){
-            //         PlatformImp::add_platform_status($source_id,$value['account'],$value['cost'],$dayid);
-            //     }
-                
-            // }
-        }else{
-            echo '暂无匹配成功数据';
+                if ($num) {
+                    //var_dump($json_info['campaign_id']);
+                    $error_log_arr['campaign_id'][] = $v['app_name'];
+                }
+
+                if (($num + $num_country) > 0) {
+
+                    $error_detail_arr[$k]['platform_id'] = $source_id;
+                    $error_detail_arr[$k]['platform_name'] = $source_name;
+                    $error_detail_arr[$k]['platform_type'] = 1;
+                    $error_detail_arr[$k]['err_date'] = $v['dayid'];
+                    $error_detail_arr[$k]['first_level_id'] = $v['app_name'];
+                    $error_detail_arr[$k]['first_level_name'] = '';
+                    $error_detail_arr[$k]['second_level_id'] = '';
+                    $error_detail_arr[$k]['second_level_name'] = '';
+                    $error_detail_arr[$k]['money'] = 0; // 流水原币
+                    $error_detail_arr[$k]['account'] = isset($v['account']) ? $v['account'] : '';
+                    $error_detail_arr[$k]['create_time'] = date('Y-m-d H:i:s');
+                    $error_detail_arr[$k]['td_err_type'] = 3;
+
+                    unset($array[$k]);
+                    //插入错误数据
+                    continue;
+                }
+
+                $array[$k]['account'] = $v['account'];
+                $array[$k]['date'] = $v['dayid'];
+                $array[$k]['keep_id'] = $v['id'];
+                $array[$k]['platform_id'] = $source_id;
+                $array[$k]['create_time'] = date('Y-m-d H:i:s');
+            }
+
+            // 保存错误信息
+            if ($error_log_arr) {
+                $error_msg_array = [];
+                $error_msg_mail = [];
+                if (isset($error_log_arr['campaign_id'])) {
+                    $campaign_id = implode(',', array_unique($error_log_arr['campaign_id']));
+                    $error_msg_array[] = '应用ID匹配失败,ID为:' . $campaign_id;
+                    $error_msg_mail[] = '应用ID匹配失败，ID为：' . $campaign_id;
+                }
+                // if (isset($error_log_arr['country'])){
+                //     $country = implode(',',array_unique($error_log_arr['country']));
+                //     $error_msg_array[] = '国家匹配失败，ID为：<font color="red">'.$country."</font>";
+                //     $error_msg_mail[] = '国家匹配失败，ID为：'.$country;
+                // }
+
+                DataImportImp::saveDataErrorLog(2, $source_id, $source_name, 1, implode(';', $error_msg_array));
+                DataImportImp::saveDataErrorMoneyLog($source_id, $stime, $error_detail_arr, 3);
+                // 发送邮件
+//            CommonFunction::sendMail($error_msg_mail,$source_name.'统计留存数据数据处理error');
+            }
+
+            // 保存正确数据
+
+            if ($array) {
+                DB::beginTransaction();
+                $map_delete = [];
+                $map_delete['platform_id'] = $source_id;
+                $map_delete['between'] = ['date', [$stime, $etime]];
+
+                DataImportLogic::deleteMysqlHistoryData('zplay_keep_tj_report_daily', $map_delete);
+                //拆分批次
+                $step = array();
+                $i = 0;
+                foreach ($array as $kkkk => $insert_data_info) {
+                    if ($kkkk % 1000 == 0) $i++;
+                    if ($insert_data_info) {
+                        $step[$i][] = $insert_data_info;
+                    }
+                }
+
+                $is_success = [];
+                if ($step) {
+                    foreach ($step as $k => $v) {
+                        $result = DataImportLogic::insertAdReportInfo('zplay_keep_tj_report_daily', $v);
+                        if (!$result) {
+                            DB::rollBack();
+                            $is_success[] = $k;
+                        }
+                    }
+                    echo '处理成功';
+                }
+                DB::commit();
+                // 调用存储过程更新总表数据
+//            DB::update("call tj_summary('$source_id')");
+                Artisan::call('TjSummaryProcesses', ['platform_id' => $source_id]);
+
+                //           // 查询广告数据
+                // $report_map = [];
+                // $report_map['platform_id'] = $source_id;
+                // $report_map['date'] = $dayid;
+                // $group_by = ['platform_id','date','account'];
+                // $report_list = PlatformLogic::getAdReportSum(MYSQL_TABLE_NAME,$report_map)->select(DB::raw("sum(new_user) as cost"),'platform_id','date','account')->groupBy($group_by)->get();
+                // $report_list = Service::data($report_list);
+                // if ($report_list){
+                //     // 保存广告平台
+                //     foreach ($report_list as $value){
+                //         PlatformImp::add_platform_status($source_id,$value['account'],$value['cost'],$dayid);
+                //     }
+
+                // }
+            } else {
+                echo '暂无匹配成功数据';
+            }
+        }catch (\Exception $e) {
+            // 异常报错
+            $message = "{$stime}号, " . $source_name . "统计平台程序报错,报错原因:".$e->getMessage();
+            DataImportImp::saveDataErrorLog(5, $source_id, $source_name, 1, $message);
+            $error_msg_arr[] = $message;
+//            CommonFunction::sendMail($error_msg_arr, '统计平台程序error');
+            exit;
         }
     }
 

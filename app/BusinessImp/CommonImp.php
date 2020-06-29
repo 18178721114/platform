@@ -499,12 +499,17 @@ class CommonImp extends ApiBaseImp
     public static function getCountryList($params)
     {
         $search = isset($params['search']) ? $params['search'] : ''; // 搜索条件
+        $language = isset($params['language']) ? $params['language'] : 'cn'; // 中英文  en 英文  cn 中文
         $map = []; // 查询条件
         if ($search){
             $map['like'] = ['china_name','like', $search];
         }
-        $fields = ["id as id", "china_name as value"]; // 查询字段
-        $map['type'] =2; 
+        if ($language == 'cn'){
+            $fields = ["id as id", "china_name as value"]; // 查询字段
+        }elseif($language == 'en'){
+            $fields = ["id as id", "full_name as value"]; // 查询字段
+        }
+        $map['type'] =2;
         $method_list = CommonLogic::getTgCountryList($map, $fields)->orderby('sort','desc')->get()->toArray();
         if (!$method_list) ApiResponseFactory::apiResponse([],[],1000);
         ApiResponseFactory::apiResponse(['table_list' => $method_list],[]);

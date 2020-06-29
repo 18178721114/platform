@@ -75,6 +75,7 @@ class JinritoutiaoTgHandleProcesses extends Command
     }
 
     private static function ToutiaoDataProcess($dayid,$source_id,$source_name){
+        static $toutiao_num = 0;
         //查询pgsql 的数据
         $map =[];
         $map['dayid'] = $dayid;
@@ -86,8 +87,8 @@ class JinritoutiaoTgHandleProcesses extends Command
         $info = Service::data($info);
 
         if(!$info){
-//            $error_msg = $dayid.'号，'.$source_name.'推广平台数据处理程序获取原始数据为空';
-//            DataImportImp::saveDataErrorLog(2,$source_id,$source_name,4,$error_msg);
+            $error_msg = $dayid.'号，'.$source_name.'推广平台数据处理程序获取原始数据为空';
+            DataImportImp::saveDataErrorLog(2,$source_id,$source_name,4,$error_msg);
             exit;
         }
 
@@ -95,8 +96,8 @@ class JinritoutiaoTgHandleProcesses extends Command
         $sql = "SELECT  distinct
                 c_app.id,c_app.app_id,c_generalize.platform_id,c_generalize.data_account,c_generalize.application_id,c_generalize.application_name,c_generalize.agency_platform_id,c_generalize_ad_app.campaign_id,c_generalize_ad_app.campaign_name,c_generalize_ad_app.ad_group_id,c_platform.currency_type_id,cpp.currency_type_id as ageccy_currency_type_id
                 FROM c_app 
-                LEFT JOIN c_generalize ON c_app.id = c_generalize.app_id 
-                LEFT JOIN c_generalize_ad_app ON c_generalize.id = c_generalize_ad_app.generalize_id 
+                LEFT JOIN c_generalize ON c_app.id = c_generalize.app_id and c_generalize.generalize_status = 1
+                LEFT JOIN c_generalize_ad_app ON c_generalize.id = c_generalize_ad_app.generalize_id and  c_generalize_ad_app.status = 1
                 LEFT JOIN c_platform ON c_generalize.platform_id = c_platform.platform_id 
                 LEFT JOIN c_platform as cpp ON c_generalize.agency_platform_id = cpp.platform_id 
                 WHERE 
@@ -138,6 +139,7 @@ class JinritoutiaoTgHandleProcesses extends Command
         foreach ($info as $k => $v) {
             $third_app_account = $v['account'];
             $json_info = json_decode($v['json_data'],true, 512 , JSON_BIGINT_AS_STRING);
+            $err_name = (isset($json_info['campaign_id']) ? $json_info['campaign_id'] : 'Null') . '#' . (isset($json_info['campaign_name']) ? addslashes($json_info['campaign_name']) : 'Null') . '#' . (isset($json_info['advertiser_id']) ? $json_info['advertiser_id'] : 'Null') . '#' . (isset($json_info['app_name']) ?$json_info['app_name'] : 'Null');
             foreach ($app_list as $app_k => $app_v) {
                 if(isset($json_info['campaign_id']) && ($json_info['campaign_id'] == $app_v['campaign_id'])){
                     $array[$k]['app_id'] = $app_v['app_id'];
@@ -181,7 +183,7 @@ class JinritoutiaoTgHandleProcesses extends Command
 
                     }
                 }
-                $error_log_arr['campaign_id'][] = $json_info['campaign_id'].'('.$third_app_account.'/'.$json_info['advertiser_id'].')';
+                $error_log_arr['campaign_id'][] = $json_info['campaign_id'].'('.$err_name.')';
             }
 
             // todo 匹配国家用
@@ -304,19 +306,22 @@ class JinritoutiaoTgHandleProcesses extends Command
 
 
             if ($insert_generalize_ad_app){
-//                var_dump($insert_generalize_ad_app);
-                // 开启事物 保存数据
-                DB::beginTransaction();
-                $app_info = DB::table('c_generalize_ad_app')->insert($insert_generalize_ad_app);
-//                var_dump($app_info);
-                if (!$app_info){ // 应用信息已经重复
-                    DB::rollBack();
-                }else{
-                    DB::commit();
-                    self::ToutiaoDataProcess($dayid,$source_id,$source_name);
-                    exit;
+                var_dump($toutiao_num);
+                if ($toutiao_num == 1) {
+                    var_dump('反更新有问题：'.json_encode($insert_generalize_ad_app));
+                }else {
+                    // 开启事物 保存数据
+                    DB::beginTransaction();
+                    $app_info = DB::table('c_generalize_ad_app')->insert($insert_generalize_ad_app);
+                    if (!$app_info) { // 应用信息已经重复
+                        DB::rollBack();
+                    } else {
+                        DB::commit();
+                        $toutiao_num ++;
+                        self::ToutiaoDataProcess($dayid, $source_id, $source_name);
+                        exit;
+                    }
                 }
-
             }
         }
 
@@ -324,16 +329,21 @@ class JinritoutiaoTgHandleProcesses extends Command
         if ($error_log_arr){
             $error_msg_array = [];
             $error_msg_mail = [];
+            $error_log_arr = Service::shield_error($source_id,$error_log_arr);
+
             if (isset($error_log_arr['campaign_id'])){
                 $campaign_id = implode(',',array_unique($error_log_arr['campaign_id']));
                 $error_msg_array[] = 'campaign_id匹配失败,ID为:'.$campaign_id;
                 $error_msg_mail[] = 'campaign_id匹配失败，ID为：'.$campaign_id;
             }
 
-            DataImportImp::saveDataErrorLog(2,$source_id,$source_name,4,implode(';',$error_msg_array));
+            if(!empty($error_msg_array)) {
+                DataImportImp::saveDataErrorLog(2, $source_id, $source_name, 4, implode(';', $error_msg_array));
+                // 发送邮件
+//                CommonFunction::sendMail($error_msg_mail,$source_name.'推广平台数据处理error');
+            }
             DataImportImp::saveDataErrorMoneyLog($source_id,$dayid,$error_detail_arr);
-            // 发送邮件
-//            CommonFunction::sendMail($error_msg_mail,$source_name.'推广平台数据处理error');
+
         }
 
         // 保存正确数据
