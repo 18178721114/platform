@@ -317,6 +317,7 @@ class DataOperationImp extends ApiBaseImp
         $currency_type_id = isset($params['currency_type_id']) ? $params['currency_type_id'] : 60;
 
         $is_show = isset($params['is_show']) ? $params['is_show'] : 2 ; // 1 展示 2 不展示
+        $language = isset($params['language']) ? $params['language'] : 'cn'; // 中英文  en 英文  cn 中文
 
         $basic_tg_table = 'zplay_basic_publish_report_total';
         if ($is_show == 1){
@@ -385,6 +386,13 @@ class DataOperationImp extends ApiBaseImp
             $group_by .= ',b.country_id';
         }
 
+        $new_select = '';
+        if ($language == 'cn'){
+            $new_select .= " c.china_name as china_name, ";
+        }elseif($language == 'en'){
+            $new_select .= " c.full_name as china_name, ";
+        }
+
         if ($is_show == 1) {
             $sql = "select 
             date,
@@ -393,7 +401,7 @@ class DataOperationImp extends ApiBaseImp
             app.app_name,
             app.release_region_id,
             app.os_id,
-            c.china_name,
+            {$new_select}
             b.country_id,
             sum(new) as new,
             sum(active) as active,
@@ -499,7 +507,11 @@ class DataOperationImp extends ApiBaseImp
             // 分国家展示
             if ($is_show == 1) {
                 $array[$key]['country_id'] = $value['country_id'];
-                $array[$key]['country'] = $value['china_name'] ? $value['china_name'] : '未知国家';
+                if ($language == 'cn') {
+                    $array[$key]['country'] = $value['china_name'] ? $value['china_name'] : '未知国家';
+                }elseif($language == 'en'){
+                    $array[$key]['country'] = $value['china_name'] ? $value['china_name'] : 'Unkonw';
+                }
             }else{
                 $array[$key]['keep_day7_rate'] = $value['new'] ? round(($value['keep_day7'] * 100) / $value['new'], 2) . "%" : "0.00%"; // 7日留存
                 $array[$key]['keep_day2_rate'] = $value['new'] ? round(($value['keep_day2'] * 100) / $value['new'], 2) . "%" : "0.00%"; // 次日留存
@@ -532,7 +544,7 @@ class DataOperationImp extends ApiBaseImp
             app.app_name,
             app.release_region_id,
             app.os_id,
-            c.china_name,
+            {$new_select}
             b.country_id,
             sum(new) as new,
             sum(active) as active,

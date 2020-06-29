@@ -108,6 +108,7 @@ class DeveloperImp extends ApiBaseImp
         unset($params['customer_name']);
         unset($params['user_company_id']);
         unset($params['user_account']);
+        unset($params['language']);
 
         $pinyin = new Pinyin(); // 默认
         // 判断 编辑? 还是 创建?
