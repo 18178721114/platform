@@ -69,12 +69,12 @@ class HeyzapReportCommond extends Command
         $PlatInfo = Service::data($PlatInfo);
 
         if (!$PlatInfo){
-            $message = "{$dayid},".AD_PLATFORM."广告平台取数失败,失败原因:取数配置信息为空" ;
-            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$message);
-
-            $error_msg_arr = [];
-            $error_msg_arr[] = $message;
-            CommonFunction::sendMail($error_msg_arr,AD_PLATFORM.'广告平台取数error');
+//            $message = "{$dayid},".AD_PLATFORM."广告平台取数失败,失败原因:取数配置信息为空" ;
+//            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$message);
+//
+//            $error_msg_arr = [];
+//            $error_msg_arr[] = $message;
+//            CommonFunction::sendMail($error_msg_arr,AD_PLATFORM.'广告平台取数error');
             exit;
         }
 
@@ -83,8 +83,8 @@ class HeyzapReportCommond extends Command
 //            $key_list = json_decode($value['key_list'],true);
             $api_key = $value['api_key'];
     		$url = str_replace(array('_COMPANY_USERNAME_','_API_KEY_'),array($value['company_username'],$api_key),env('HEYZAP_APP'));
-    		$appInfoList =self::get_response($url);
-    		$appInfoList = json_decode($appInfoList,true);
+    		$appInfoList1 =self::get_response($url);
+    		$appInfoList = json_decode($appInfoList1,true);
     		if(!empty($appInfoList['data'])){
     			foreach ($appInfoList['data'] as $appInfo){
     				$dataUrl = str_replace(array('_COMPANY_USERNAME_','_API_KEY_','_END_DATE_','_BEGIN_DATE_','_APP_ID_'),array($value['company_username'],$api_key,$dayid,$dayid,$appInfo['app_id']),env('HEYZAP_INFO'));
@@ -100,6 +100,7 @@ class HeyzapReportCommond extends Command
                         if($api_data_i>3)
                             break;
                     }
+
                     //取数四次 取数结果仍为空
                     if($api_data_i ==4 && empty($dataInfo)){
                         $error_msg_1 = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:返回数据为空('.$dataInfo1.')';
@@ -172,11 +173,11 @@ class HeyzapReportCommond extends Command
                         }
     				}else{
     					if(count($dataInfo['data']) ==0){
-//                            $error_msg = AD_PLATFORM.'广告平台'.$value['company_username'].'账号'.'获取应用id为：'.$appInfo['app_id'].'数据为空'. PHP_EOL;
-//                            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
+                            $error_msg = AD_PLATFORM.'广告平台'.$value['company_username'].'账号'.'获取应用id为：'.json_encode($dataInfo).'数据为空'. PHP_EOL;
+                            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
 
     					}else{
-                            $error_msg =  AD_PLATFORM.'广告平台'.$value['company_username'].'账号'.'获取应用id为：'.$appInfo['app_id'].'数据失败'. PHP_EOL;
+                            $error_msg =  AD_PLATFORM.'广告平台'.$value['company_username'].'账号'.'获取应用id为：'.json_encode($dataInfo).'数据失败'. PHP_EOL;
                             DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
 
                             $error_msg_arr = [];
@@ -187,7 +188,7 @@ class HeyzapReportCommond extends Command
     				}
     			}
     		}else {
-                $error_msg = AD_PLATFORM.'广告平台'.$value['company_username'].'账号获取应用数据失败,错误信息:'.$appInfoList['message'];
+                $error_msg = AD_PLATFORM.'广告平台'.$value['company_username'].'账号获取应用数据失败,错误信息:'.json_encode($appInfoList1);
                 DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
     		}
     	}

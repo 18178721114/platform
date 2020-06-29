@@ -68,13 +68,12 @@ class ApplovinReportCommond extends Command
         $PlatInfo = Service::data($PlatInfo);
 
         if (!$PlatInfo){
-            $message = "{$dayid}," . AD_PLATFORM . "广告平台取数失败,失败原因:取数配置信息为空" ;
-            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$message);
+//            $message = "{$dayid}," . AD_PLATFORM . "广告平台取数失败,失败原因:取数配置信息为空" ;
+//            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$message);
             exit;
         }
 
     	foreach ($PlatInfo as $key => $value) {
-    	    if($value['company_account'] != 'noodlecake') continue;
 
             $api_key = $value['api_key'];
         	//获取应用信息
@@ -93,7 +92,7 @@ class ApplovinReportCommond extends Command
             }
             //取数四次 取数结果仍为空
             if($api_data_i ==4 && empty($ret) ){
-                $error_msg_1 = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:返回数据为空('.$info.')';
+                $error_msg_1 = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:返回数据为空('.json_encode($info).')';
                 DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg_1);
                 continue;
 
@@ -155,7 +154,7 @@ class ApplovinReportCommond extends Command
 
 		    } else {
 
-                $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:'.json_encode($ret);
+                $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:('.json_encode($ret).')';
                 DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
                 $error_msg_arr[] = $error_msg;
                 CommonFunction::sendMail($error_msg_arr,AD_PLATFORM.'广告平台取数error');

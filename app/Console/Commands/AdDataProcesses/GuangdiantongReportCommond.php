@@ -69,12 +69,12 @@ class GuangdiantongReportCommond extends Command
         $PlatInfo = Service::data($PlatInfo);
 
         if (!$PlatInfo){
-            $message = "{$dayid}, " . AD_PLATFORM . "广告平台取数失败,失败原因:取数配置信息为空" ;
-            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$message);
-
-            $error_msg_arr = [];
-            $error_msg_arr[] = $message;
-            CommonFunction::sendMail($error_msg_arr,AD_PLATFORM.'广告平台取数error');
+//            $message = "{$dayid}, " . AD_PLATFORM . "广告平台取数失败,失败原因:取数配置信息为空" ;
+//            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$message);
+//
+//            $error_msg_arr = [];
+//            $error_msg_arr[] = $message;
+//            CommonFunction::sendMail($error_msg_arr,AD_PLATFORM.'广告平台取数error');
             exit;
         }
 
@@ -103,8 +103,8 @@ class GuangdiantongReportCommond extends Command
     		$url =env('GUANGDIANTONG_URL').'gdt_tx_service.php';
     		self::zplay_curl($url, 'post', $post_data);
     		$info_url =env('GUANGDIANTONG_URL').$value['company_account'].'.txt';
-    		$content = self::get_response($info_url);
-    		$content = json_decode($content, true);
+    		$content1 = self::get_response($info_url);
+    		$content = json_decode($content1, true);
 
             // 数据获取重试
             $api_data_i=1;
@@ -128,11 +128,18 @@ class GuangdiantongReportCommond extends Command
                 $url =env('GUANGDIANTONG_URL').'gdt_tx_service.php';
                 self::zplay_curl($url, 'post', $post_data);
                 $info_url =env('GUANGDIANTONG_URL').$value['company_account'].'.txt';
-                $content = self::get_response($info_url);
-                $content = json_decode($content, true);
+                $content1 = self::get_response($info_url);
+                $content = json_decode($content1, true);
                 $api_data_i++;
                 if($api_data_i>3)
                     break;
+            }
+
+            if($api_data_i ==4 && empty($content)){
+                $error_msg_1 = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:返回数据为空('.json_encode($content).')';
+                DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg_1);
+                continue;
+
             }
 
          	//获取应用信息
@@ -185,7 +192,7 @@ class GuangdiantongReportCommond extends Command
 
 		    } else {
 
-                $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:'.$content['msg'];
+                $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:('.json_encode($content).')';
                 DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
 
                 $error_msg_arr = [];

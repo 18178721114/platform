@@ -115,6 +115,13 @@ class PangolinReportCommond extends Command
                     if($api_data_i>3)
                         break;
                 }
+
+                if($api_data_i ==4 && empty($result)){
+                    $error_msg_1 = AD_PLATFORM.'广告平台'.$company_account.'账号取数失败,错误信息:返回数据为空('.$result.')';
+                    DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg_1);
+                    continue;
+
+                }
                 //判断是否有数
                 if(isset($result_arr['code']) && $result_arr['code'] == 100 ){
                     if (count($result_arr['data'])>0) {
@@ -171,7 +178,7 @@ class PangolinReportCommond extends Command
                     }
 
                 } else {
-                    $error_msg = AD_PLATFORM.'广告平台'.$company_account.'账号取数失败,错误信息:'.( isset($result_arr['message']) ? $result_arr['message']: '暂无数据');
+                    $error_msg = AD_PLATFORM.'广告平台'.$company_account.'账号取数失败,错误信息:'.json_encode($result_arr);
                     DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
 
                     $error_msg_arr = [];

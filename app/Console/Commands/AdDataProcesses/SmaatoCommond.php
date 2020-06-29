@@ -72,12 +72,12 @@ class SmaatoCommond extends Command
         $PlatInfo = Service::data($PlatInfo);
 
         if (!$PlatInfo){
-            $message = "{$date}, " . AD_PLATFORM . " 广告平台取数失败,失败原因:取数配置信息为空" ;
-            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$message);
-
-            $error_msg_arr = [];
-            $error_msg_arr[] = $message;
-            CommonFunction::sendMail($error_msg_arr,AD_PLATFORM.'广告平台取数error');
+//            $message = "{$date}, " . AD_PLATFORM . " 广告平台取数失败,失败原因:取数配置信息为空" ;
+//            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$message);
+//
+//            $error_msg_arr = [];
+//            $error_msg_arr[] = $message;
+//            CommonFunction::sendMail($error_msg_arr,AD_PLATFORM.'广告平台取数error');
             exit;
         }
 
@@ -168,7 +168,7 @@ class SmaatoCommond extends Command
 
         if(!$data || isset($data['message'])){
 
-            $error_msg = AD_PLATFORM.'广告平台'.$account.'账号取数失败,错误信息:'. (isset($data['message']) ? $data['message'] : '未知');
+            $error_msg = AD_PLATFORM.'广告平台'.$account.'账号取数失败,错误信息:'.json_encode($data);
             DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
 
             $error_msg_arr = [];

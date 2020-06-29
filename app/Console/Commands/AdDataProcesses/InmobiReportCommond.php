@@ -127,12 +127,7 @@ class InmobiReportCommond extends Command
                    
                 }
             } else {
-                $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:';
-                if (isset($data['errorList']) && $data['errorList']){
-                    $error_msg .= $data['errorList'][0]['message'];
-                }else{
-                    $error_msg .= '未知';
-                }
+                $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:('.json_encode($data).')';
                 DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
 
                 $error_msg_arr = [];

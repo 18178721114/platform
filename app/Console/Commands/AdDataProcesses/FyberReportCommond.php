@@ -69,10 +69,10 @@ class FyberReportCommond extends Command
         $PlatInfo = Service::data($PlatInfo);
 
         if (!$PlatInfo){
-            $message = "{$dayid}, " . AD_PLATFORM . " 广告平台取数失败,失败原因:取数配置信息为空" ;
-            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$message);
-            $error_msg_arr[] = $message;
-            CommonFunction::sendMail($error_msg_arr,'广告平台取数error');
+//            $message = "{$dayid}, " . AD_PLATFORM . " 广告平台取数失败,失败原因:取数配置信息为空" ;
+//            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$message);
+//            $error_msg_arr[] = $message;
+//            CommonFunction::sendMail($error_msg_arr,'广告平台取数error');
             exit;
         }
 
@@ -95,6 +95,14 @@ class FyberReportCommond extends Command
                 $api_data_i++;
                 if($api_data_i>3)
                     break;
+            }
+
+            //取数四次 取数结果仍为空
+            if($api_data_i ==4 && empty($ret)){
+                $error_msg_1 = AD_PLATFORM.'广告平台'.$username.'账号取数失败,错误信息:返回数据为空('.$datalist.')';
+                DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg_1);
+                continue;
+
             }
 
             if(isset($ret['data'])){
@@ -149,12 +157,12 @@ class FyberReportCommond extends Command
                         }
                     }
                 }else{
-                    $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'暂无数据';
+                    $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'暂无数据('.json_encode($ret).')';
                     DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
                 }
 
             }else{
-                $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:'.(isset($ret['error']) ? $ret['error'] : '未知错误');
+                $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:('.json_encode($ret).')';
                 DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
 
                 $error_msg_arr[] = $error_msg;

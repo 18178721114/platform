@@ -79,7 +79,7 @@ class VungleCommond extends Command
         $date = $this->argument('dayid');
         $account = $this->argument('account');
 
-        $sql = " SELECT  data_account as company_account,account_api_key  as api_key from c_platform_account_mapping WHERE platform_id ='pad09'  and status = 1order by data_account desc ";
+        $sql = " SELECT  data_account as company_account,account_api_key  as api_key from c_platform_account_mapping WHERE platform_id ='pad09'  and status = 1 order by data_account desc ";
         $plat_list = DB::select($sql);
         $plat_list = Service::data($plat_list);
         if (!$plat_list) return;
@@ -108,14 +108,14 @@ class VungleCommond extends Command
 
                     $url = "https://report.api.vungle.com/ext/pub/reports/performance?dimensions=date,application,country,platform,placement&aggregates=views,completes,clicks,revenue,ecpm&start={$date}&end={$date}";
 
-                    $message = "account: $account; " . "url: $url";
-                    self::saveLog(AD_PLATFORM, $message);
+//                    $message = "account: $account; " . "url: $url";
+//                    self::saveLog(AD_PLATFORM, $message);
 
                     $data = self::getContent2($url, $headers,$account);
 
                     if (!$data) {
 
-                        $error_msg = AD_PLATFORM.'广告平台'.$account.'账号取数失败,错误信息:未知';
+                        $error_msg = AD_PLATFORM.'广告平台'.$account.'账号取数失败,错误信息:'.json_encode($data);
                         DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
 
                         $error_msg_arr = [];
@@ -207,7 +207,7 @@ class VungleCommond extends Command
                     $data = self::getContent2($url, $headers,$account);
 
                     if (!$data) {
-                        $error_msg = AD_PLATFORM.'平台'.$account.'账号取数失败,错误信息:未知';
+                        $error_msg = AD_PLATFORM.'平台'.$account.'账号取数失败,错误信息:'.json_encode($data);
                         DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
 
                         $error_msg_arr = [];
@@ -287,7 +287,7 @@ class VungleCommond extends Command
         }
         Artisan::call('VungleHandleProcesses' ,['dayid'=>$date]);
         } catch (\Exception $e) {
-            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'广告平台程序失败，失败原因：'.$e->getMessage();
+            $error_msg_info = $date.'号,'.AD_PLATFORM.'广告平台程序失败，失败原因：'.$e->getMessage();
             DataImportImp::saveDataErrorLog(5,SOURCE_ID,AD_PLATFORM,2,$error_msg_info);
 
         }

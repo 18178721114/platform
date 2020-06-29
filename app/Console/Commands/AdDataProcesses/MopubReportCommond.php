@@ -69,10 +69,10 @@ class MopubReportCommond extends Command
         $PlatInfo = Service::data($PlatInfo);
 
         if (!$PlatInfo){
-            $message = "{$dayid}, " . AD_PLATFORM . " 广告平台取数失败,失败原因:取数配置信息为空" ;
-            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$message);
-            $error_msg_arr[] = $message;
-            CommonFunction::sendMail($error_msg_arr,'广告平台取数error');
+//            $message = "{$dayid}, " . AD_PLATFORM . " 广告平台取数失败,失败原因:取数配置信息为空" ;
+//            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$message);
+//            $error_msg_arr[] = $message;
+//            CommonFunction::sendMail($error_msg_arr,'广告平台取数error');
             exit;
         }
     	foreach ($PlatInfo as $key => $value) {
@@ -86,8 +86,14 @@ class MopubReportCommond extends Command
             while(!$datalist){
                 $datalist = self::get_response($url);
                 $i++;
-                if($i>6)
+                if($i>3)
                     break;
+            }
+            if($i ==4 && empty($datalist)){
+                $error_msg_1 = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:返回数据为空('.json_encode($datalist).')';
+                DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg_1);
+                continue;
+
             }
             $data = self::parse_csv($datalist);
 
@@ -177,7 +183,7 @@ class MopubReportCommond extends Command
         $error_msg = json_encode($error_msg);
         $addr = $ini_array['graylog_addr']['addr'];
         $exec = "curl -X POST {$addr} -p0 -d '{$error_msg}'";
-        var_dump($exec);
+        //var_dump($exec);
         exec($exec,$return);
         return $return;
 

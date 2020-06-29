@@ -84,6 +84,12 @@ class KedaxunfeiReportCommond extends Command
                     if($api_data_i>3)
                         break;
                 }
+                if($api_data_i ==4 && empty($data)){
+                    $error_msg_1 = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:返回数据为空('.json_encode($data).')';
+                    DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg_1);
+                    continue;
+
+                }
 
                 if (!$data['msg']) {
                     //删除数据库里原来数据
@@ -135,7 +141,7 @@ class KedaxunfeiReportCommond extends Command
                     }
 
                 } else {
-                    $error_msg = AD_PLATFORM . '广告平台' . $value['company_account'] . '账号取数失败,错误信息:' . $data['msg'];
+                    $error_msg = AD_PLATFORM . '广告平台' . $value['company_account'] . '账号取数失败,错误信息:' .json_encode($data);
                     DataImportImp::saveDataErrorLog(1, SOURCE_ID, AD_PLATFORM, 2, $error_msg);
 
                     $error_msg_arr = [];

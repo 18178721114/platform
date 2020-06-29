@@ -89,8 +89,8 @@ class DiankaiReportCommond extends Command
                         break;
                 }
                 //取数四次 取数结果仍为空
-                if($api_data_i ==4 && empty($ret)){
-                    $error_msg_1 = AD_PLATFORM.'广告平台'.$singleInfo['company_account'].'账号取数失败,错误信息:返回数据为空('.$result.')';
+                if($api_data_i ==4 && empty($result_arr)){
+                    $error_msg_1 = AD_PLATFORM.'广告平台'.$singleInfo['company_account'].'账号取数失败,错误信息:返回数据为空('.json_encode($result).')';
                     DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg_1);
                     continue;
 
@@ -170,7 +170,7 @@ class DiankaiReportCommond extends Command
                     }
 
                 } else {
-                    $error_msg = AD_PLATFORM.'广告平台'.$company_account.'账号取数失败,错误信息:'.json_encode($result_arr);
+                    $error_msg = AD_PLATFORM.'广告平台'.$company_account.'账号取数失败,错误信息:('.json_encode($result_arr).')';
                     DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
 
                     $error_msg_arr = [];

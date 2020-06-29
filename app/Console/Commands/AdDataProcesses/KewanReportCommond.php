@@ -63,10 +63,10 @@ class KewanReportCommond extends Command
         define('SOURCE_ID', 'pad69'); // todo 这个需要根据平台信息表确定平台ID
         try{
         //这里面要写新测试平台里的数据配置 从数据库里取数据
-        $info[0]['company_username'] ='8C8F7D4B-B2A5-F9FC-1371-CB271911B84E';
-        $info[0]['api_key'] ='5392FE33-1AD4-A98F-B4FE-527718366B27';
-        $info[1]['company_username'] ='BBD48B13-B725-49B1-A3F9-BE6CBFA2189D';
-        $info[1]['api_key'] ='B7FF4F07-9876-C910-1DCA-6240422D0230';
+//        $info[0]['company_username'] ='8C8F7D4B-B2A5-F9FC-1371-CB271911B84E';
+//        $info[0]['api_key'] ='5392FE33-1AD4-A98F-B4FE-527718366B27';
+//        $info[1]['company_username'] ='BBD48B13-B725-49B1-A3F9-BE6CBFA2189D';
+//        $info[1]['api_key'] ='B7FF4F07-9876-C910-1DCA-6240422D0230';
 
          $sql = "SELECT  data_account as company_username,account_api_key  as api_key from c_platform_account_mapping WHERE platform_id ='pad69' and status = 1 ";
         $PlatInfo = DB::select($sql);
@@ -91,8 +91,8 @@ class KewanReportCommond extends Command
             $url = env('KEWAN_URL')."/developer/{$value['company_username']}/apps";
             $url .= '?' . http_build_query($params, null, '&');
             //echo $url;
-            $appInfoList = self::get_response($url);
-            $appInfoList = json_decode($appInfoList,true);
+            $appInfoList1 = self::get_response($url);
+            $appInfoList = json_decode($appInfoList1,true);
 
             // 数据获取重试
             $api_data_i=1;
@@ -114,11 +114,17 @@ class KewanReportCommond extends Command
                 $url = env('KEWAN_URL')."/developer/{$value['company_username']}/apps";
                 $url .= '?' . http_build_query($params, null, '&');
                 //echo $url;
-                $appInfoList = self::get_response($url);
-                $appInfoList = json_decode($appInfoList,true);
+                $appInfoList1 = self::get_response($url);
+                $appInfoList = json_decode($appInfoList1,true);
                 $api_data_i++;
                 if($api_data_i>3)
                     break;
+            }
+            if($api_data_i ==4 && empty($appInfoList)){
+                $error_msg_1 = AD_PLATFORM.'广告平台'.$value['company_username'].'账号取数失败,错误信息:返回数据为空('.json_encode($appInfoList1).')';
+                DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg_1);
+                continue;
+
             }
 
             //获取应用信息
@@ -187,7 +193,7 @@ class KewanReportCommond extends Command
 
                         if(count($dataInfo['data']['list']) ==0){
 
-                            $error_msg = AD_PLATFORM.'广告平台'.$value['company_username'].'账号下应用'.$appInfo['app_id'].'数据为空';
+                            $error_msg = AD_PLATFORM.'广告平台'.$value['company_username'].'账号下应用'.json_encode($dataInfo).'数据为空';
                             DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
                         }else{
                             $error_msg = AD_PLATFORM.'广告平台'.$value['company_username'].'账号下应用'.$appInfo['app_id'].'取数失败,错误信息:'.$dataInfo['error'];
@@ -202,7 +208,7 @@ class KewanReportCommond extends Command
                 }
 
             }else {
-                $error_msg = AD_PLATFORM.'广告平台'.$value['company_username'].'账号取数失败,错误信息:'.$appInfoList['error'];
+                $error_msg = AD_PLATFORM.'广告平台'.$value['company_username'].'账号取数失败,错误信息:'.$appInfoList1;
                 DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
             }
         }

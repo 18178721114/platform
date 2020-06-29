@@ -94,8 +94,8 @@ class MobvistaReportCommond extends Command
                     $url = env('MOBVISTA_URL');
                     $url .= "?" . $str . "&sign=" . $signature;
                     //var_dump($url);
-                    $result = self::get_response($url);
-                    $result = json_decode($result, true);
+                    $result1 = self::get_response($url);
+                    $result = json_decode($result1, true);
 
                     // 数据获取重试
                     $api_data_i=1;
@@ -112,11 +112,17 @@ class MobvistaReportCommond extends Command
                         $url = env('MOBVISTA_URL');
                         $url .= "?" . $str . "&sign=" . $signature;
                         //var_dump($url);
-                        $result = self::get_response($url);
-                        $result = json_decode($result, true);
+                        $result1 = self::get_response($url);
+                        $result = json_decode($result1, true);
                         $api_data_i++;
                         if($api_data_i>3)
                             break;
+                    }
+                    if($api_data_i ==4 && empty($result)){
+                        $error_msg_1 = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:返回数据为空('.$result1.')';
+                        DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg_1);
+                        continue;
+
                     }
 
                     if ($result['code'] == 'ok') {
@@ -162,7 +168,7 @@ class MobvistaReportCommond extends Command
                         }
                     } else {
 
-                        $error_msg = AD_PLATFORM . '广告平台' . $value['company_account'] . '账号取数失败,错误信息:' . $result['code'];
+                        $error_msg = AD_PLATFORM . '广告平台' . $value['company_account'] . '账号取数失败,错误信息:' . json_encode($result);
                         DataImportImp::saveDataErrorLog(1, SOURCE_ID, AD_PLATFORM, 2, $error_msg);
 
                         $error_msg_arr = [];

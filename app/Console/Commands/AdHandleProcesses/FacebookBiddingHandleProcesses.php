@@ -67,6 +67,8 @@ class FacebookBiddingHandleProcesses extends Command
         $map['type'] = 3;
         $map['source_id'] = $source_id;
         $map[] =['income','<>',0] ;
+        $map['like'][] = ["json_data->delivery_method",'like','standard'];
+
         $info = DataImportLogic::getChannelData('ad_data','erm_data',$map)->get();
         $info = Service::data($info);
         var_dump(count($info));
@@ -156,6 +158,10 @@ class FacebookBiddingHandleProcesses extends Command
         $error_detail_arr = [];//报错的 详细数据信息
         foreach ($info as $k => $v) {
         	$json_info = json_decode($v['json_data'],true);
+            $delivery_method = isset($json_info['delivery_method']) ? $json_info['delivery_method'] : '';
+            if ($delivery_method != 'standard'){
+                continue;
+            }
         	foreach ($app_list as $app_k => $app_v) {
         		if($json_info['placement'] == $app_v['ad_slot_id'] && ($json_info['appid'] == $app_v['platform_app_id'] || $json_info['appid'] == $app_v['publisher_id']) ){
         			$array[$k]['app_id'] = $app_v['app_id'];
