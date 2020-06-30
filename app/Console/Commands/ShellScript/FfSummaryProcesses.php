@@ -52,34 +52,36 @@ class FfSummaryProcesses extends Command
         $begin_date = $this->argument('begin_date') ? $this->argument('begin_date'):date('Y-m-d',strtotime('-1 day'));
         $end_date = $this->argument('end_date') ? $this->argument('end_date'):date('Y-m-d',strtotime('-1 day'));
         $platform_id = $this->argument('platform_id') ? $this->argument('platform_id'):'';
-        if($platform_id){
-            $where_platform = "  and platform_id = '$platform_id'";
-        }
 
-        DB::beginTransaction();
-        $sel_sql = "select count(1) as count  FROM
+        try {
+            if ($platform_id) {
+                $where_platform = "  and platform_id = '$platform_id'";
+            }
+
+            DB::beginTransaction();
+            $sel_sql = "select count(1) as count  FROM
         zplay_basic_report_daily
         WHERE
          plat_type = 'ff' and 
-         date_time >= '$begin_date'  and   date_time <= '$end_date' ".$where_platform;
-        $sel_info = DB::select($sel_sql);
-        $sel_info = Service::data($sel_info);
-        if($sel_info[0]['count'] !=0){
-            $del_sql ="DELETE
+         date_time >= '$begin_date'  and   date_time <= '$end_date' " . $where_platform;
+            $sel_info = DB::select($sel_sql);
+            $sel_info = Service::data($sel_info);
+            if ($sel_info[0]['count'] != 0) {
+                $del_sql = "DELETE
             FROM
                 zplay_basic_report_daily
             WHERE
                 plat_type = 'ff'
             AND date_time >= '$begin_date'
-            AND date_time <= '$end_date' ".$where_platform;
-            $update_info =DB::delete($del_sql);
+            AND date_time <= '$end_date' " . $where_platform;
+                $update_info = DB::delete($del_sql);
 
-            if(!$update_info){
-                DB::rollBack();
+                if (!$update_info) {
+                    DB::rollBack();
+                }
             }
-        }
 
-        $insert_sql ="INSERT INTO zplay_basic_report_daily (
+            $insert_sql = "INSERT INTO zplay_basic_report_daily (
             game_creator,
             os_id,
             game_category_id,
@@ -158,13 +160,13 @@ ff.earning_fix !=0 and ff.income_fix !=0 and
             ff.platform_account,
             ff.platform_id,
             ff.publisher_id";
-        $insert_info_1 = DB::insert($insert_sql);
+            $insert_info_1 = DB::insert($insert_sql);
 
-        if(!$insert_info_1){
-            //var_dump(3);
-            DB::rollBack();
-        }
-        $update_sql= "UPDATE zplay_basic_report_daily usd,
+            if (!$insert_info_1) {
+                //var_dump(3);
+                DB::rollBack();
+            }
+            $update_sql = "UPDATE zplay_basic_report_daily usd,
         c_currency_ex cur
         SET usd.earning_usd_ff = usd.earning_fix_ff / cur.currency_ex
         WHERE
@@ -172,12 +174,12 @@ ff.earning_fix !=0 and ff.income_fix !=0 and
         AND cur.`currency_id` = 60
         AND usd.earning_usd_ff = usd.earning_fix_ff
         AND usd.`plat_type` = 'ff' and usd.date_time >= '$begin_date'  and   usd.date_time <= '$end_date' $where_platform";
-        $update_sql_res =DB::update($update_sql);
+            $update_sql_res = DB::update($update_sql);
 //        if (!$update_sql_res){
 //            DB::rollBack();
 //        }
 
-        $update_sql_1= "UPDATE zplay_basic_report_daily usd,
+            $update_sql_1 = "UPDATE zplay_basic_report_daily usd,
         c_currency_ex cur
         SET usd.income_usd_ff = usd.income_fix_ff / cur.currency_ex
         WHERE
@@ -185,13 +187,23 @@ ff.earning_fix !=0 and ff.income_fix !=0 and
         AND cur.`currency_id` = 60
         AND usd.income_usd_ff = usd.income_fix_ff
         AND usd.`plat_type` = 'ff' and usd.date_time >= '$begin_date'  and   usd.date_time <= '$end_date' $where_platform";
-        $update_sql_1_res =DB::update($update_sql_1);
+            $update_sql_1_res = DB::update($update_sql_1);
 //        if (!$update_sql_1_res){
 //            DB::rollBack();
 //        }
 
-        DB::commit();
-
-
+            DB::commit();
+        }catch (\Exception $e) {
+            // 异常报错
+            if (!$platform_id){
+                $platform_id = 'pff-002';
+            }
+            $source_name = 'FfSummary';
+            $message = "{$end_date}号, " . $source_name . "程序报错,报错原因:".$e->getMessage();
+            DataImportImp::saveDataErrorLog(5, $platform_id, $source_name, 3, $message);
+            $error_msg_arr[] = $message;
+//            CommonFunction::sendMail($error_msg_arr, '计费平台程序error');
+            exit;
+        }
     }
 }
