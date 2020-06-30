@@ -331,7 +331,7 @@ class JinritoutiaoTgHandleProcesses extends Command
             $error_msg_mail = [];
             $error_log_arr = Service::shield_error($source_id,$error_log_arr);
 
-            if (isset($error_log_arr['campaign_id'])){
+            if (isset($error_log_arr['campaign_id']) && !empty($error_log_arr['campaign_id'])){
                 $campaign_id = implode(',',array_unique($error_log_arr['campaign_id']));
                 $error_msg_array[] = 'campaign_id匹配失败,ID为:'.$campaign_id;
                 $error_msg_mail[] = 'campaign_id匹配失败，ID为：'.$campaign_id;

@@ -268,19 +268,19 @@ class UnityTgHandleProcesses extends Command
             $error_msg_mail = [];
             $error_log_arr = Service::shield_error($source_id,$error_log_arr);
 
-            if (isset($error_log_arr['target_store_id'])){
+            if (isset($error_log_arr['target_store_id']) && !empty($error_log_arr['target_store_id'])){
                 $target_store_id = implode(',',array_unique($error_log_arr['target_store_id']));
                 $error_msg_array[] = 'target_store_id匹配失败,ID为:'.$target_store_id;
                 $error_msg_mail[] = 'target_store_id匹配失败，ID为：'.$target_store_id;
             }
 
-            if (isset($error_log_arr['ad_type'])){
+            if (isset($error_log_arr['ad_type']) && !empty($error_log_arr['ad_type'])){
                 $ad_type = implode(',',array_unique($error_log_arr['ad_type']));
                 $error_msg_array[] = '广告类型匹配失败,ID为:'.$ad_type;
                 $error_msg_mail[] = '广告类型匹配失败，ID为：'.$ad_type;
             }
 
-            if (isset($error_log_arr['country'])){
+            if (isset($error_log_arr['country']) && !empty($error_log_arr['country'])){
                 $country = implode(',',array_unique($error_log_arr['country']));
                 $error_msg_array[] = '国家匹配失败,code为:'.$country;
                 $error_msg_mail[] = '国家匹配失败，code为：'.$country;
