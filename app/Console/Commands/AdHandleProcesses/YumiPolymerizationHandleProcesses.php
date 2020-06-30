@@ -399,20 +399,20 @@ class YumiPolymerizationHandleProcesses extends Command
             //DB::update("call ad_summary_channel('$dayid','$dayid','$source_id')");
 
             // 查询广告数据
-            $report_map = [];
-            $report_map['platform_id'] = $source_id;
-            $report_map['date'] = $dayid;
-            $map_delete['statistics'] = 2;
-            $group_by = ['platform_id','date','data_account'];
-            $report_list = PlatformLogic::getAdReportSum('zplay_ad_report_daily',$report_map)->select(DB::raw("sum(earning) as cost"),'platform_id','date','data_account')->groupBy($group_by)->get();
-            $report_list = Service::data($report_list);
-            if ($report_list){
-                // 保存广告平台
-                foreach ($report_list as $value){
-                    $value['data_account']=' ';
-                    PlatformImp::add_platform_status($source_id,$value['data_account'],$value['cost'],$dayid);
-                }
-            }
+//            $report_map = [];
+//            $report_map['platform_id'] = $source_id;
+//            $report_map['date'] = $dayid;
+//            $map_delete['statistics'] = 2;
+//            $group_by = ['platform_id','date','data_account'];
+//            $report_list = PlatformLogic::getAdReportSum('zplay_ad_report_daily',$report_map)->select(DB::raw("sum(earning) as cost"),'platform_id','date','data_account')->groupBy($group_by)->get();
+//            $report_list = Service::data($report_list);
+//            if ($report_list){
+//                // 保存广告平台
+//                foreach ($report_list as $value){
+//                    $value['data_account']=' ';
+//                    PlatformImp::add_platform_status($source_id,$value['data_account'],$value['cost'],$dayid);
+//                }
+//            }
             //echo '处理完成';
 
         }else{
