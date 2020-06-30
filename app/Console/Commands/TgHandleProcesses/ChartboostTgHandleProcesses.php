@@ -279,7 +279,7 @@ class ChartboostTgHandleProcesses extends Command
             $insert_generalize_ad_app = [];
             foreach ($new_campaign_ids as $package_name => $offer_id){
 //                var_dump($offer_id);
-                $mintegral_conf_info = DB::table('c_generalize')->select(['id','platform_id','application_id'])->where(['platform_id'=> $source_id, 'application_id' => $package_name])->first();
+                $mintegral_conf_info = DB::table('c_generalize')->select(['id','platform_id','application_id'])->where(['platform_id'=> $source_id, 'application_id' => $package_name,'generalize_status' => 1])->first();
                 $mintegral_conf_info = Service::data($mintegral_conf_info);
                 if ($mintegral_conf_info){
                     if ($offer_id){

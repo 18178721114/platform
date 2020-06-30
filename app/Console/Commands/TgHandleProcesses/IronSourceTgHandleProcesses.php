@@ -191,7 +191,7 @@ class IronSourceTgHandleProcesses extends Command
                         $analysis_app_id = $campaign_name_list[$arr_len-2];
 
                         if ( $analysis_app_id){
-                            $app_info_sql = "select cg.`id`,cg.`platform_id`,ca.`app_name`,ca.`app_id`,cg.`data_account` from c_generalize cg left join c_app ca on cg.app_id = ca.id where cg.`platform_id` = '{$source_id}' and ca.`app_id` = '{$analysis_app_id}'  limit 1";
+                            $app_info_sql = "select cg.`id`,cg.`platform_id`,ca.`app_name`,ca.`app_id`,cg.`data_account` from c_generalize cg left join c_app ca on cg.app_id = ca.id where cg.`platform_id` = '{$source_id}' and ca.`app_id` = '{$analysis_app_id}' and cg.generalize_status = 1 limit 1";
 //                            var_dump($app_info_sql);
                             $app_info_detail = DB::select($app_info_sql);
                             $app_info_detail = Service::data($app_info_detail);

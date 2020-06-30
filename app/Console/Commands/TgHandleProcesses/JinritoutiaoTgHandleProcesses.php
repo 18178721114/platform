@@ -268,7 +268,7 @@ class JinritoutiaoTgHandleProcesses extends Command
                     $offer_id = array_unique($offer_id);
 //                    var_dump(111,$offer_id);
                     $package_name = strval($package_name);
-                    $mintegral_conf_info = DB::table('c_generalize')->select(['id','platform_id','application_id'])->where(['platform_id'=> $source_id, 'application_id' => $package_name])->first();
+                    $mintegral_conf_info = DB::table('c_generalize')->select(['id','platform_id','application_id'])->where(['platform_id'=> $source_id, 'application_id' => $package_name, 'generalize_status' => 1])->first();
 //                    var_dump($mintegral_conf_info);
                     $mintegral_conf_info = Service::data($mintegral_conf_info);
 //                    var_dump($mintegral_conf_info);

@@ -188,7 +188,7 @@ class FacebookTgHandleProcesses extends Command
                     }
 
                     if ($app_os_id && $third_app_id) {
-                        $app_info_sql = "select cg.`id`,cg.`platform_id`,cg.`application_id`,ca.`os_id`,ca.`app_name` from c_generalize cg left join c_app ca on cg.app_id = ca.id where cg.`platform_id` = '{$source_id}' and cg.`application_id` = '{$third_app_id}' and ca.`os_id` = {$app_os_id} limit 1";
+                        $app_info_sql = "select cg.`id`,cg.`platform_id`,cg.`application_id`,ca.`os_id`,ca.`app_name` from c_generalize cg left join c_app ca on cg.app_id = ca.id where cg.`platform_id` = '{$source_id}' and cg.`application_id` = '{$third_app_id}' and cg.generalize_status = 1 and ca.`os_id` = {$app_os_id} limit 1";
 //                    var_dump($app_info_sql);
                         $app_info_detail = DB::select($app_info_sql);
                         $app_info_detail = Service::data($app_info_detail);
