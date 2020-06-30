@@ -253,7 +253,7 @@ class RedisTgProcesses extends Command
             $message = date("Y-m-d")."号,Redis推广程序报错,报错原因:".$e->getMessage();
             DataImportImp::saveDataErrorLog(5, 'ptg-001', 'Redis推广', 4, $message);
             $error_msg_arr[] = $message;
-            CommonFunction::sendMail($error_msg_arr, '广告平台程序error');
+            CommonFunction::sendMail($error_msg_arr, '推广平台程序error');
             exit;
         }
     }
