@@ -56,7 +56,7 @@ class AppStoreHandleProcesses extends Command
     	echo '<pre>';
         set_time_limit(0);
         $source_id = 'pff03';
-        $billing_name ='AppStore';
+        $billing_name ='iOS';
         //临时表
         $mysql_table_name = 'zplay_ff_report_daily_temporary';
         //最终表
@@ -71,7 +71,7 @@ class AppStoreHandleProcesses extends Command
         $info = Service::data($info);
         var_dump(count($info));
         if(!$info){
-//            $error_msg = $dayid.'号，AppStore计费平台数据处理程序获取原始数据为空';
+//            $error_msg = $dayid.'号，iOS计费平台数据处理程序获取原始数据为空';
 //            echo $error_msg;
 //            DataImportImp::saveDataErrorLog(2,$source_id,$billing_name,3,$error_msg);
             exit;
@@ -103,7 +103,7 @@ class AppStoreHandleProcesses extends Command
         $app_list = DB::select($sql);
         $app_list = Service::data($app_list);
         if(!$app_list){
-        	$error_msg = 'AppStore计费平台数据处理程序应用数据查询为空';
+        	$error_msg = 'iOS计费平台数据处理程序应用数据查询为空';
             DataImportImp::saveDataErrorLog(2,$source_id,$billing_name,3,$error_msg);
             exit;
         }
@@ -120,7 +120,7 @@ class AppStoreHandleProcesses extends Command
         $divide = DB::select($sql);
         $divide = Service::data($divide);
         if(!$divide){
-            $error_msg = 'AppStore计费平台数据处理程序平台数据查询为空';
+            $error_msg = 'iOS计费平台数据处理程序平台数据查询为空';
             DataImportImp::saveDataErrorLog(2,$source_id,$billing_name,3,$error_msg);
             exit;
         }
@@ -143,7 +143,7 @@ class AppStoreHandleProcesses extends Command
         // $c_currency_type_info = CommonLogic::getCurrencyEXList($c_currency_type_map)->first();
         // $c_currency_info = Service::data($c_currency_type_info);
         // if(!$c_currency_info){
-        //     $error_msg = 'AppStore计费平台数据处理程序汇率类型查询为空';
+        //     $error_msg = 'iOS计费平台数据处理程序汇率类型查询为空';
         //     DataImportImp::saveDataErrorLog(2,$source_id,$billing_name,3,$error_msg);
         //     exit;
         // }
@@ -159,7 +159,7 @@ class AppStoreHandleProcesses extends Command
         $country_info = CommonLogic::getCountryList($country_map)->get();
         $country_info = Service::data($country_info);
         if(!$country_info){
-            $error_msg = 'AppStore计费平台数据处理程序国家信息数据查询为空';
+            $error_msg = 'iOS计费平台数据处理程序国家信息数据查询为空';
             DataImportImp::saveDataErrorLog(2,$source_id,$billing_name,3,$error_msg);
             exit;
         }
