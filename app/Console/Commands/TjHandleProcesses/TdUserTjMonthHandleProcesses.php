@@ -119,7 +119,7 @@ class TdUserTjMonthHandleProcesses extends Command
                 }
 
                 if ($num) {
-                    $error_log_arr['campaign_id'][] = $v['app_name'] . '/' . $v['channel_name'] . '/' . $v['version_id'];
+                    $error_log_arr['campaign_id'][] = $v['app_name'] . '#' . $v['platformid'];
                 }
 
 
@@ -144,15 +144,19 @@ class TdUserTjMonthHandleProcesses extends Command
             if ($error_log_arr) {
                 $error_msg_array = [];
                 $error_msg_mail = [];
+                $error_log_arr = Service::shield_error($source_id,$error_log_arr);
+
                 if (isset($error_log_arr['campaign_id'])) {
                     $campaign_id = implode(',', array_unique($error_log_arr['campaign_id']));
                     $error_msg_array[] = '应用ID匹配失败,ID为:' . $campaign_id;
                     $error_msg_mail[] = '应用ID匹配失败，ID为：' . $campaign_id;
                 }
 
-                DataImportImp::saveDataErrorLog(2, $source_id, $source_name, 1, implode(';', $error_msg_array));
-                // 发送邮件
-//            CommonFunction::sendMail($error_msg_mail,$source_name.'统计省份数据处理error');
+                if(!empty($error_msg_array)) {
+                    DataImportImp::saveDataErrorLog(2, $source_id, $source_name, 1, implode(';', $error_msg_array));
+                    // 发送邮件
+//                    CommonFunction::sendMail($error_msg_mail, $source_name . '统计省份数据处理error');
+                }
             }
 
             // 保存正确数据
