@@ -92,25 +92,26 @@ class VungleCommond extends Command
 
                     $message = "account: $account; " . "url: $url";
                     self::saveLog(AD_PLATFORM, $message);
-                    $content = CurlRequest::get_response_header($url,$headers);
-
+                    $content = CurlRequest::post_response_header($url,$headers);
+                    //$content = CurlRequest::curlRequest($url,'POST',$headers);
+                    $data = json_decode($content, true);
                     // 数据获取重试
                     $api_data_i=1;
-                    while(!$content){
-                        $content = CurlRequest::get_response_header($url,$headers);
+                    while(!$data){
+                        $content = CurlRequest::post_response_header($url,$headers);
                         $api_data_i++;
                         if($api_data_i>3)
                             break;
                     }
 
                     //取数四次 取数结果仍为空
-                    if($api_data_i ==4 && empty($content)){
+                    if($api_data_i ==4 && empty($data)){
                         $error_msg_1 = AD_PLATFORM.'广告平台'.$account.'账号取数失败,错误信息:返回数据为空('.$content.')';
                         DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg_1);
                         continue;
 
                     }
-                    $data = json_decode($content, true);
+
 //
 
 
