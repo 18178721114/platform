@@ -277,16 +277,11 @@ class TjSummaryProcesses extends Command
 
         }catch (\Exception $e) {
             // 异常报错
-            if ($platform_id == 'ptj01'){
-                $source_name = 'Flurry';
-            }elseif($platform_id == 'ptj02'){
-                $source_name = 'TalkingData';
-            }else{
-                $platform_id = 'ptj-000';
-                $source_name = '统计平台';
+            if (!$platform_id){
+                $platform_id = 'ptj-002';
             }
-
-            $message = "{$end_date}号, " . $source_name . "统计平台程序报错,报错原因:".$e->getMessage();
+            $source_name = 'TjSummary';
+            $message = "{$end_date}号, " . $source_name . "程序报错,报错原因:".$e->getMessage();
             DataImportImp::saveDataErrorLog(5, $platform_id, $source_name, 1, $message);
             $error_msg_arr[] = $message;
 //            CommonFunction::sendMail($error_msg_arr, '统计平台程序error');
