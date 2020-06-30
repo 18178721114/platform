@@ -58,90 +58,116 @@ class AdcolonyTgReportCommond extends Command
         define('TABLE_NAME', 'erm_data');
         define('SOURCE_ID', 'ptg63'); // todo 这个需要根据平台信息表确定平台ID
         $sdayid = date('mdY',strtotime($dayid));
-        //这里面要写新测试平台里的数据配置 从数据库里取数据
-//        $sql = " select distinct a.platform_id,a.data_account as company_account,b.application_id,b.api_key as apiKey from c_platform_account_mapping a left join c_generalize b on b.platform_id = a.platform_id and a.account = b.data_account where a.platform_id = 'ptg63' and b.application_id != '' ";
-        $sql = " select distinct a.platform_id,a.data_account as company_account,a.account_api_key as apiKey from c_platform_account_mapping a where a.platform_id = 'ptg63' ";
-        $info = DB::select($sql);
-        $info = Service::data($info);
-        if (!$info) return;
 
-    	foreach ($info as $key => $value) {
-            $url = "http://clients.adcolony.com/api/v2/advertiser_summary?user_credentials={$value['apiKey']}&date={$sdayid}&end_date={$sdayid}&format=json&group_by=ad_group&date_group=day&group_by=creative&group_by=country";
-            //var_dump($url);
-    		$info  =self::get_response($url);
-    		$ret = json_decode($info,true);
-
-            // 数据获取重试
-            $api_data_i=1;
-            while(!$ret){
-                $info  =self::get_response($url);
-                $ret = json_decode($info,true);
-                $api_data_i++;
-                if($api_data_i>3)
-                    break;
+        try {
+            //这里面要写新测试平台里的数据配置 从数据库里取数据
+            $sql = " select distinct a.platform_id,a.data_account as company_account,a.account_api_key as apiKey from c_platform_account_mapping a where a.platform_id = 'ptg63' and status = 1";
+            $info = DB::select($sql);
+            $info = Service::data($info);
+            if (!$info) {
+                // 无配置报错提醒
+                $message = "{$dayid}号, " . AD_PLATFORM . " 推广平台取数失败,失败原因:取数配置信息为空";
+                DataImportImp::saveDataErrorLog(1, SOURCE_ID, AD_PLATFORM, 4, $message);
+                $error_msg_arr[] = $message;
+                CommonFunction::sendMail($error_msg_arr, '推广平台取数error');
+                exit;
             }
 
-		    if ($ret['status'] == 'success') {//成功取到数
-    			//删除数据库里原来数据
-		    	$map['dayid'] = $dayid;
-		    	$map['source_id'] = SOURCE_ID;
-		    	$map['account'] = $value['company_account'];
-                $count = DataImportLogic::getChannelData('tg_data','erm_data',$map)->count();
-                if($count>0){
+            $all_data_err = [];
+            foreach ($info as $key => $value) {
+                $url = "http://clients.adcolony.com/api/v2/advertiser_summary?user_credentials={$value['apiKey']}&date={$sdayid}&end_date={$sdayid}&format=json&group_by=ad_group&date_group=day&group_by=creative&group_by=country";
+                //var_dump($url);
+                $info = self::get_response($url);
+                $ret = json_decode($info, true);
 
-            	//删除数据
-		    	     DataImportLogic::deleteHistoryData('tg_data','erm_data',$map);
+                // 数据获取重试
+                $api_data_i = 1;
+                while (!$ret) {
+                    $info = self::get_response($url);
+                    $ret = json_decode($info, true);
+                    $api_data_i++;
+                    if ($api_data_i > 3) break;
                 }
-		    	$index =0;
-                $insert_data =[];
-                $step =[];
-		    	foreach ($ret['results'] as $v){
+                if (isset($ret['status']) && $ret['status'] == 'success') {
+                    // 接口成功，是否有无数据
+                    if ($ret['results']) {
+                        // 成功取到数
+                        //删除数据库里原来数据
+                        $map['dayid'] = $dayid;
+                        $map['source_id'] = SOURCE_ID;
+                        $map['account'] = $value['company_account'];
+                        $count = DataImportLogic::getChannelData('tg_data', 'erm_data', $map)->count();
+                        if ($count > 0) {
+                            //删除数据
+                            DataImportLogic::deleteHistoryData('tg_data', 'erm_data', $map);
+                        }
+                        $index = 0;
+                        $insert_data = [];
+                        $step = [];
+                        foreach ($ret['results'] as $v) {
 
-		    	    $v['campaign_name'] = addslashes($v['campaign_name']);
-		    	    $v['creative_name'] = addslashes($v['creative_name']);
-		    	    $v['group_name'] = addslashes($v['group_name']);
+                            $v['campaign_name'] = addslashes($v['campaign_name']);
+                            $v['creative_name'] = addslashes($v['creative_name']);
+                            $v['group_name'] = addslashes($v['group_name']);
 
-		    		$insert_data[$index]['app_id'] = $v['store_id'];
-                    $insert_data[$index]['account'] = $value['company_account'];
-                    $insert_data[$index]['type'] = 2;
-                    $insert_data[$index]['source_id'] = SOURCE_ID;
-                    $insert_data[$index]['dayid'] = $dayid;
-                    $insert_data[$index]['json_data'] =str_replace('\'','\'\'',json_encode($v));
-                    $insert_data[$index]['create_time'] = date("Y-m-d H:i:s");
-                    $insert_data[$index]['year'] = date("Y",strtotime($dayid));
-                    $insert_data[$index]['month'] = date("m",strtotime($dayid));
-                    $insert_data[$index]['campaign_id'] = $v['campaign_id'];
-                    $insert_data[$index]['campaign_name'] = str_replace('\'','\'\'',$v['campaign_name']);
-                    $insert_data[$index]['cost'] = $v['spend'] ? $v['spend'] : 0;
-                    $index++;
+                            $insert_data[$index]['app_id'] = $v['store_id'];
+                            $insert_data[$index]['account'] = $value['company_account'];
+                            $insert_data[$index]['type'] = 2;
+                            $insert_data[$index]['source_id'] = SOURCE_ID;
+                            $insert_data[$index]['dayid'] = $dayid;
+                            $insert_data[$index]['json_data'] = str_replace('\'', '\'\'', json_encode($v));
+                            $insert_data[$index]['create_time'] = date("Y-m-d H:i:s");
+                            $insert_data[$index]['year'] = date("Y", strtotime($dayid));
+                            $insert_data[$index]['month'] = date("m", strtotime($dayid));
+                            $insert_data[$index]['campaign_id'] = $v['campaign_id'];
+                            $insert_data[$index]['campaign_name'] = str_replace('\'', '\'\'', $v['campaign_name']);
+                            $insert_data[$index]['cost'] = $v['spend'] ? $v['spend'] : 0;
+                            $index++;
+                        }
+                        $i = 0;
+                        foreach ($insert_data as $kkkk => $insert_data_info) {
+                            if ($kkkk % 2000 == 0) $i++;
+                            if ($insert_data_info) {
+                                $step[$i][] = $insert_data_info;
+                            }
+                        }
+
+                        if ($step) {
+                            foreach ($step as $k => $v) {
+                                $result = DataImportLogic::insertChannelData('tg_data', 'erm_data', $v);
+                            }
+                        }
+                    }else{
+                        // 无数据报错
+                        $all_data_err[] = $value['company_account'].'账号取数失败,错误信息:暂无数据,'.json_encode($ret);
+                    }
+                } else {
+                    // 取数错误报错
+                    $all_data_err[] = $value['company_account'] . '账号取数失败,错误信息:' . (isset($ret['result']) ? $ret['result'] : '无数据,接口未返回任何信息');
                 }
-                $i = 0;
-		    	foreach ($insert_data as $kkkk => $insert_data_info) {
-		    		if ($kkkk % 2000 == 0) $i++;
-		    		if ($insert_data_info) {
-		    			$step[$i][] = $insert_data_info;
-		    		}
-		    	}
 
-		    	if ($step) {
-		    		foreach ($step as $k => $v) {
-		    			$result = DataImportLogic::insertChannelData('tg_data','erm_data',$v); 
-		    			if (!$result) {
-		    				 echo 'mysql_error'. PHP_EOL;
-		    			}
-		    		}
-		    	}
-		    } else {
+            }
 
-                $error_msg = AD_PLATFORM.'推广平台'.$value['company_account'].'账号下应用取数失败,错误信息:'.(isset($ret['result'] ) ? $ret['result'] : '未知错误');
-                DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,4,$error_msg);
-                $error_msg_arr[] = $error_msg;
-                CommonFunction::sendMail($error_msg_arr,AD_PLATFORM.'推广平台取数error');
+            if ($all_data_err){
+                $error_application_str = implode(',',$all_data_err);
+                $message = "{$dayid}号,". AD_PLATFORM . " 推广平台取数失败信息:".$error_application_str ;
+                DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,4,$message);
+                $error_msg_arr[] = $message;
+                CommonFunction::sendMail($error_msg_arr, '推广平台取数error');
+            }
 
-		    }
+            Artisan::call('AdcolonyTgHandleProcesses',['dayid'=>$dayid]);
 
-    	}
-        Artisan::call('AdcolonyTgHandleProcesses',['dayid'=>$dayid]);
+        } catch (\Exception $e) {
+            // 异常报错
+            $message = "{$dayid}号, " . AD_PLATFORM . " 推广平台程序报错,报错原因:".$e->getMessage();
+            DataImportImp::saveDataErrorLog(5, SOURCE_ID, AD_PLATFORM, 4, $message);
+            $error_msg_arr[] = $message;
+            CommonFunction::sendMail($error_msg_arr, '推广平台程序error');
+            exit;
+
+        }
+
     		
     }
     public static function get_response($url, $headers='')

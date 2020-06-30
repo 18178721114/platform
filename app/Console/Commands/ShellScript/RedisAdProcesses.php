@@ -54,103 +54,102 @@ class RedisAdProcesses extends Command
     	define('MYSQL_AD_TABLE_NAME','zplay_ad_report_daily');
         $ad_info = env('REDIS_AD_KEYS');
 
-        //获取广告数据长度
-        $ad_len = Redis::llen($ad_info);
+        try {
+            //获取广告数据长度
+            $ad_len = Redis::llen($ad_info);
 
-        if($ad_len>0){
+            if ($ad_len > 0) {
 
-            DB::beginTransaction();
-            $be_time = time();
-            var_dump($be_time);
+                DB::beginTransaction();
+                $be_time = time();
+                var_dump($be_time);
 
-            $date_arr = [];
-            $platform_arr = [];
+                $date_arr = [];
+                $platform_arr = [];
 
-            $ad_sql = "insert into ".MYSQL_AD_TABLE_NAME." (`date`,`app_id`,`version`,`channel_id`,`country_id`,`data_platform_id`,`data_account`,`platform_id`,`ad_type`,`statistics`,`platform_app_id`,`platform_app_name`,`ad_unit_id`,`ad_unit_name`,`round`,`all_request`,`success_requests`,`fail_requests`,`impression_port`,`impression_begin`,`impression`,`click`,`download`,`activate`,`reward`,`earning`,`earning_exc`,`earning_flowing`,`earning_fix`,`flow_type`,`remark`,`create_time`,`update_time`,`earning_usd`,`earning_exc_usd`)values";
-             for ($i=1; $i <=$ad_len ; $i++) {
-                $str = Redis::lpop($ad_info);
-                if ($str) {
-                    if (strpos($str, 'lishuyang@lishuyang') != false) {
-                        $plat_date = explode('lishuyang@lishuyang', $str);
-                        $date_arr[$i] = $plat_date[1];
-                        $platform_arr[$i] = $plat_date[0];
-                        $sel_info = DB::table('zplay_ad_report_daily')->where(["platform_id" => $plat_date[0], "date" => $plat_date[1]])->count();
-                        var_dump($plat_date[0] . '-' . $plat_date[1] . '-' . '数据条数' . $sel_info);
+                $ad_sql = "insert into " . MYSQL_AD_TABLE_NAME . " (`date`,`app_id`,`version`,`channel_id`,`country_id`,`data_platform_id`,`data_account`,`platform_id`,`ad_type`,`statistics`,`platform_app_id`,`platform_app_name`,`ad_unit_id`,`ad_unit_name`,`round`,`all_request`,`success_requests`,`fail_requests`,`impression_port`,`impression_begin`,`impression`,`click`,`download`,`activate`,`reward`,`earning`,`earning_exc`,`earning_flowing`,`earning_fix`,`flow_type`,`remark`,`create_time`,`update_time`,`earning_usd`,`earning_exc_usd`)values";
+                for ($i = 1; $i <= $ad_len; $i++) {
+                    $str = Redis::lpop($ad_info);
+                    if ($str) {
+                        if (strpos($str, 'lishuyang@lishuyang') != false) {
+                            $plat_date = explode('lishuyang@lishuyang', $str);
+                            $date_arr[$i] = $plat_date[1];
+                            $platform_arr[$i] = $plat_date[0];
+                            $sel_info = DB::table('zplay_ad_report_daily')->where(["platform_id" => $plat_date[0], "date" => $plat_date[1]])->count();
+                            var_dump($plat_date[0] . '-' . $plat_date[1] . '-' . '数据条数' . $sel_info);
 
-                        if ($sel_info) {
-                            $del_sql = "delete  from zplay_ad_report_daily where platform_id = '$plat_date[0]' and date ='$plat_date[1]' and data_platform_id <> 'pad262' ";
-                            $del_info = DB::delete($del_sql);
-                            if (!$del_info) {
-                                var_dump(1);
+                            if ($sel_info) {
+                                $del_sql = "delete  from zplay_ad_report_daily where platform_id = '$plat_date[0]' and date ='$plat_date[1]' and data_platform_id <> 'pad262' ";
+                                $del_info = DB::delete($del_sql);
+                                if (!$del_info) {
+                                    var_dump(1);
+                                    DB::rollBack();
+                                }
+                            }
+
+                        } else {
+                            $insert_info = DB::insert($ad_sql . $str);
+                            if (!$insert_info) {
+                                var_dump(2);
                                 DB::rollBack();
                             }
                         }
-
-                    } else {
-                        $insert_info = DB::insert($ad_sql . $str);
-                        if (!$insert_info) {
-                            var_dump(2);
-                            DB::rollBack();
-                        }
                     }
                 }
-             }
-            DB::commit();
-            /**************************处理到显示数据的表格******************************/
-            DB::beginTransaction();
-        	$platform_date = array_unique($date_arr);
-            $platform_id = array_unique($platform_arr);
-            sort($platform_date);
-        	if(count($platform_date) >1){
+                DB::commit();
+                /**************************处理到显示数据的表格******************************/
+                DB::beginTransaction();
+                $platform_date = array_unique($date_arr);
+                $platform_id = array_unique($platform_arr);
+                sort($platform_date);
+                if (count($platform_date) > 1) {
 
-        		$end = count($platform_date)-1;
-                $begin_date = $platform_date[0];
-                $end_date = $platform_date[$end];
+                    $end = count($platform_date) - 1;
+                    $begin_date = $platform_date[0];
+                    $end_date = $platform_date[$end];
 
 
-        	}else{
-        	 	$begin_date = $platform_date[0];
-                $end_date = $platform_date[0];
-        	}
-        	$platform_str = '';
-        	foreach ($platform_id as  $v){
-                $platform_str .= "'".$v."',";
-            }
-            $platform_str = rtrim($platform_str,",");
-        	//var_dump($platform_str);die;
+                } else {
+                    $begin_date = $platform_date[0];
+                    $end_date = $platform_date[0];
+                }
+                $platform_str = '';
+                foreach ($platform_id as $v) {
+                    $platform_str .= "'" . $v . "',";
+                }
+                $platform_str = rtrim($platform_str, ",");
+                //var_dump($platform_str);die;
 
-            $sel_sql = "select count(1) as count  FROM
+                $sel_sql = "select count(1) as count  FROM
                 zplay_basic_report_daily
             WHERE
                 plat_type = 'ad'
             AND date_time >= '$begin_date'  and   date_time <= '$end_date' and platform_id in ($platform_str)";
-            $sel_info = DB::select($sel_sql);
-            $sel_info = Service::data($sel_info);
-            if($sel_info[0]['count'] !=0){
+                $sel_info = DB::select($sel_sql);
+                $sel_info = Service::data($sel_info);
+                if ($sel_info[0]['count'] != 0) {
 
-                $basic_del_sql ="   DELETE
+                    $basic_del_sql = "   DELETE
                 FROM
                     zplay_basic_report_daily
                 WHERE
                     plat_type = 'ad'
-                AND date_time >= '$begin_date'  and   date_time <= '$end_date' and platform_id in ($platform_str)" ;
-                $update_info =DB::delete($basic_del_sql);
+                AND date_time >= '$begin_date'  and   date_time <= '$end_date' and platform_id in ($platform_str)";
+                    $update_info = DB::delete($basic_del_sql);
 
-                if(!$update_info){
-                    var_dump(3);
-                    DB::rollBack();
+                    if (!$update_info) {
+                        var_dump(3);
+                        DB::rollBack();
+                    }
+
                 }
 
-            }
 
-
-
-
-            // 更新 没有请求数 有成功请求数
+                // 更新 没有请求数 有成功请求数
 //            $basic_update_sql = "UPDATE zplay_ad_report_daily  set all_request =success_requests WHERE  (all_request is NULL or all_request = 0) and `success_requests` > 0 and date >= '$begin_date'  and   date <= '$end_date' ";
 //            DB::update($basic_update_sql);
 
-            $basic_insert_sql ="INSERT INTO zplay_basic_report_daily (
+                $basic_insert_sql = "INSERT INTO zplay_basic_report_daily (
                 game_creator,
                 os_id,
                 game_category_id,
@@ -212,8 +211,8 @@ class RedisAdProcesses extends Command
                 ad.flow_type,
                 ad.statistics";
                 $insert_info_1 = DB::insert($basic_insert_sql);
-                if(!$insert_info_1){
-                    var_dump(4); 
+                if (!$insert_info_1) {
+                    var_dump(4);
                     DB::rollBack();
                 }
 
@@ -245,15 +244,19 @@ class RedisAdProcesses extends Command
 //                    DB::rollBack();
 //                }
 
+<<<<<<< HEAD
                 $sql = "select sum(earning) as cost,platform_id,date,data_account from  ".MYSQL_AD_TABLE_NAME." where date between '$begin_date' and '$end_date' and statistics = 0 group by  platform_id,date,data_account";
+=======
+                $sql = "select sum(earning) as cost,platform_id,date,data_account from  " . MYSQL_AD_TABLE_NAME . " where date between '$begin_date' and '$end_date' group by  platform_id,date,data_account";
+>>>>>>> 61281de561d33f9ebad0c64ae32fb9d52f53ba5f
                 $report_list = DB::select($sql);
                 $report_list = Service::data($report_list);
-                if ($report_list){
-                // 保存广告平台
-                    foreach ($report_list as $value){
-                        if ($value['data_account']){
-                            $info = PlatformImp::add_platform_status($value['platform_id'],$value['data_account'],$value['cost'],$value['date']);
-                            if(!$info){
+                if ($report_list) {
+                    // 保存广告平台
+                    foreach ($report_list as $value) {
+                        if ($value['data_account']) {
+                            $info = PlatformImp::add_platform_status($value['platform_id'], $value['data_account'], $value['cost'], $value['date']);
+                            if (!$info) {
                                 DB::rollBack();
                             }
 
@@ -264,18 +267,15 @@ class RedisAdProcesses extends Command
                 DB::commit();
                 $en_time = time();
                 var_dump($en_time);
-                var_dump($be_time-$en_time);
-
-
-
-
+                var_dump($be_time - $en_time);
+            }
+        }catch (\Exception $e) {
+            // 异常报错
+            $message = date("Y-m-d")."号,Redis广告程序报错,报错原因:".$e->getMessage();
+            DataImportImp::saveDataErrorLog(5, 'pad-001', 'Redis广告', 2, $message);
+            $error_msg_arr[] = $message;
+            CommonFunction::sendMail($error_msg_arr, '广告平台程序error');
+            exit;
         }
-
-
-        
-
-
-        //var_dump($info);die;
-        //echo '处理完成';
     }
 }

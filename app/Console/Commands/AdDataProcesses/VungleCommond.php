@@ -111,7 +111,7 @@ class VungleCommond extends Command
 
                     }
                     $data = json_decode($content, true);
-//                   
+//
 
 
                     if ($data){

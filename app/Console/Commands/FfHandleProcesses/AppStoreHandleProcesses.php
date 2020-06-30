@@ -53,6 +53,7 @@ class AppStoreHandleProcesses extends Command
      */
     public function handle()
     {
+
         try {
             echo '<pre>';
             set_time_limit(0);
@@ -101,6 +102,7 @@ class AppStoreHandleProcesses extends Command
             `c_app`.os_id = 1
             AND  `c_billing`.`pay_platform_id` ='$source_id'
         )";
+
             $app_list = DB::select($sql);
             $app_list = Service::data($app_list);
             if (!$app_list) {
@@ -108,6 +110,7 @@ class AppStoreHandleProcesses extends Command
                 DataImportImp::saveDataErrorLog(2, $source_id, $billing_name, 3, $error_msg);
                 exit;
             }
+
 
             $sql = "        SELECT
         `c_platform`.`bad_account_rate`,c_platform.currency_type_id,c_platform.platform_id, c_divide.*
@@ -125,6 +128,7 @@ class AppStoreHandleProcesses extends Command
                 DataImportImp::saveDataErrorLog(2, $source_id, $billing_name, 3, $error_msg);
                 exit;
             }
+
 
 
             //获取对照表国家信息
