@@ -244,11 +244,9 @@ class RedisAdProcesses extends Command
 //                    DB::rollBack();
 //                }
 
-<<<<<<< HEAD
+
                 $sql = "select sum(earning) as cost,platform_id,date,data_account from  ".MYSQL_AD_TABLE_NAME." where date between '$begin_date' and '$end_date' and statistics = 0 group by  platform_id,date,data_account";
-=======
-                $sql = "select sum(earning) as cost,platform_id,date,data_account from  " . MYSQL_AD_TABLE_NAME . " where date between '$begin_date' and '$end_date' group by  platform_id,date,data_account";
->>>>>>> 61281de561d33f9ebad0c64ae32fb9d52f53ba5f
+
                 $report_list = DB::select($sql);
                 $report_list = Service::data($report_list);
                 if ($report_list) {
