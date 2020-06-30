@@ -146,7 +146,7 @@ class FlurryTjMonthHandleProcesses extends Command
 
                 if ($num) {
                     //var_dump($json_info['campaign_id']);
-                    $error_log_arr['campaign_id'][] = $v['app_name'] . '--' . $v['version'];
+                    $error_log_arr['campaign_id'][] = $v['app_name'];
                 }
 
 //            // todo 匹配国家用
@@ -203,6 +203,8 @@ class FlurryTjMonthHandleProcesses extends Command
             if ($error_log_arr) {
                 $error_msg_array = [];
                 $error_msg_mail = [];
+                $error_log_arr = Service::shield_error($source_id,$error_log_arr);
+
                 if (isset($error_log_arr['campaign_id'])) {
                     $campaign_id = implode(',', array_unique($error_log_arr['campaign_id']));
                     $error_msg_array[] = '应用ID匹配失败,ID为:' . $campaign_id;
@@ -214,10 +216,12 @@ class FlurryTjMonthHandleProcesses extends Command
                     $error_msg_mail[] = '国家匹配失败，ID为：' . $country;
                 }
 
-                DataImportImp::saveDataErrorLog(2, $source_id, $source_name, 1, implode(';', $error_msg_array));
+                if(!empty($error_msg_array)) {
+                    DataImportImp::saveDataErrorLog(2, $source_id, $source_name, 1, implode(';', $error_msg_array));
+                    // 发送邮件
+//                    CommonFunction::sendMail($error_msg_mail, $source_name . '统计用户数据处理error');
+                }
                 DataImportImp::saveDataErrorMoneyLog($source_id, $dayid, $error_detail_arr, 1);
-                // 发送邮件
-//            CommonFunction::sendMail($error_msg_mail,$source_name.'统计用户数据处理error');
             }
 
             var_dump(count($array));
