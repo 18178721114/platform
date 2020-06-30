@@ -57,7 +57,7 @@ class FlurryTjHandleProcesses extends Command
         set_time_limit(0);
 //        define('MYSQL_TABLE_NAME','zplay_user_tj_report_daily');
         $source_id = 'ptj01';
-        $source_name = 'flurry';
+        $source_name = 'Flurry';
 
         $dayid = $this->argument('dayid') ? $this->argument('dayid'):date('Y-m-d',strtotime('-1 day'));
 

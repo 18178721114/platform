@@ -56,7 +56,7 @@ class FlurryTjMonthHandleProcesses extends Command
     {
         set_time_limit(0);
         $source_id = 'ptj01';
-        $source_name = 'flurry月活';
+        $source_name = 'Flurry月活';
 
         $dayid = $this->argument('dayid') ? $this->argument('dayid'):date('Y-m-01',time());
         try {
