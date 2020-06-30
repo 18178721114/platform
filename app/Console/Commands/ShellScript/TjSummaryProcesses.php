@@ -52,35 +52,38 @@ class TjSummaryProcesses extends Command
         $begin_date = $this->argument('begin_date') ? $this->argument('begin_date'):date('Y-m-d',strtotime('-35 day'));
         $end_date = $this->argument('end_date') ? $this->argument('end_date'):date('Y-m-d',strtotime('-1 day'));
         $platform_id = $this->argument('platform_id') ? $this->argument('platform_id'):'';
-        if($platform_id){
-            $where_del_platform = "  and platform_id = '$platform_id'";
-            $where_platform = "  and tj.platform_id = '$platform_id'";
-        }
 
-        DB::beginTransaction();
-        $sel_sql = "select count(1) as count  FROM
+        try {
+
+            if ($platform_id) {
+                $where_del_platform = "  and platform_id = '$platform_id'";
+                $where_platform = "  and tj.platform_id = '$platform_id'";
+            }
+
+            DB::beginTransaction();
+            $sel_sql = "select count(1) as count  FROM
         zplay_basic_report_daily tj
         WHERE
          plat_type = 'tj' and 
-         date_time >= '$begin_date'  and   date_time <= '$end_date' ".$where_platform;
-        $sel_info = DB::select($sel_sql);
-        $sel_info = Service::data($sel_info);
-        if($sel_info[0]['count'] !=0){
-            $del_sql ="DELETE
+         date_time >= '$begin_date'  and   date_time <= '$end_date' " . $where_platform;
+            $sel_info = DB::select($sel_sql);
+            $sel_info = Service::data($sel_info);
+            if ($sel_info[0]['count'] != 0) {
+                $del_sql = "DELETE
             FROM
                 zplay_basic_report_daily
             WHERE
                 plat_type = 'tj'
             AND date_time >= '$begin_date'
-            AND date_time <= '$end_date' ".$where_del_platform;
-            $update_info =DB::delete($del_sql);
+            AND date_time <= '$end_date' " . $where_del_platform;
+                $update_info = DB::delete($del_sql);
 
-            if(!$update_info){
-                DB::rollBack();
+                if (!$update_info) {
+                    DB::rollBack();
+                }
             }
-        }
 
-        $insert_sql ="INSERT INTO zplay_basic_report_daily (
+            $insert_sql = "INSERT INTO zplay_basic_report_daily (
         date_time,
         game_creator,
         os_id,
@@ -139,16 +142,16 @@ class TjSummaryProcesses extends Command
         tj.ad_status,
         tj.type,
         province_id";
-        $insert_info_1 = DB::insert($insert_sql);
+            $insert_info_1 = DB::insert($insert_sql);
 
-        if(!$insert_info_1){
-            //var_dump(3);
-            DB::rollBack();
-        }
+            if (!$insert_info_1) {
+                //var_dump(3);
+                DB::rollBack();
+            }
 
 
-        //td的留存
-        $insert_sql_td ="INSERT INTO zplay_basic_report_daily (
+            //td的留存
+            $insert_sql_td = "INSERT INTO zplay_basic_report_daily (
         date_time,
         game_creator,
         os_id,
@@ -202,14 +205,14 @@ class TjSummaryProcesses extends Command
         tj.account,
         tj.channel_id,
         tj.platform_id";
-        $insert_info_td = DB::insert($insert_sql_td);
+            $insert_info_td = DB::insert($insert_sql_td);
 
-        if(!$insert_info_td){
-            //var_dump(3);
-            DB::rollBack();
-        }
-        //flurry的留存
-        $insert_sql_flurry ="INSERT INTO zplay_basic_report_daily (
+            if (!$insert_info_td) {
+                //var_dump(3);
+                DB::rollBack();
+            }
+            //flurry的留存
+            $insert_sql_flurry = "INSERT INTO zplay_basic_report_daily (
 	  date_time,
 		game_creator,
 		os_id,
@@ -263,15 +266,32 @@ class TjSummaryProcesses extends Command
 		tj.account,
 		tj.channel_id,
 		tj.platform_id;";
-        $insert_sql_flurry = DB::insert($insert_sql_flurry);
+            $insert_sql_flurry = DB::insert($insert_sql_flurry);
 
-        if(!$insert_sql_flurry){
-            //var_dump(3);
-            DB::rollBack();
+            if (!$insert_sql_flurry) {
+                //var_dump(3);
+                DB::rollBack();
+            }
+
+            DB::commit();
+
+        }catch (\Exception $e) {
+            // 异常报错
+            if ($platform_id == 'ptj01'){
+                $source_name = 'Flurry';
+            }elseif($platform_id == 'ptj02'){
+                $source_name = 'TalkingData';
+            }else{
+                $platform_id = 'ptj-000';
+                $source_name = '统计平台';
+            }
+
+            $message = "{$end_date}号, " . $source_name . "统计平台程序报错,报错原因:".$e->getMessage();
+            DataImportImp::saveDataErrorLog(5, $platform_id, $source_name, 1, $message);
+            $error_msg_arr[] = $message;
+//            CommonFunction::sendMail($error_msg_arr, '统计平台程序error');
+            exit;
         }
-
-        DB::commit();
-
 
     }
 }

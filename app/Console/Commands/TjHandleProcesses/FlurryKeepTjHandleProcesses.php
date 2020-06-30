@@ -57,7 +57,7 @@ class FlurryKeepTjHandleProcesses extends Command
         set_time_limit(0);
 //        define('MYSQL_TABLE_NAME','zplay_keep_tj_report_daily');
         $source_id = 'ptj01';
-        $source_name = 'flurry留存';
+        $source_name = 'Flurry留存';
 
         $stime = $this->argument('stime') ? $this->argument('stime') : date('Y-m-d',strtotime('-1 day'));
         $etime = $this->argument('etime') ? $this->argument('etime') : date('Y-m-d',strtotime('-1 day'));
