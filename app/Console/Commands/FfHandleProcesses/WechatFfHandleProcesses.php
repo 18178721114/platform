@@ -153,7 +153,7 @@ class WechatFfHandleProcesses extends Command
                     }
                 }
                 if($num_channel){
-                    $error_log_arr['channel_id'][]=$json_info['channelid'];
+                    $error_log_arr['channel_id'][]=$json_info['channelid'].'('.$json_info['appid'].')';
                 }
 
                 $array[$k]['province_id'] =335;
@@ -174,7 +174,7 @@ class WechatFfHandleProcesses extends Command
                 }
 
                 if($num_country){
-                    $error_log_arr['country'][] = isset($json_info['position']) ? $json_info['position'].'/'.$json_info['country'] : 'Unknown Region' ;
+                    $error_log_arr['country'][] = (isset($json_info['position']) ? $json_info['position'].'/'.$json_info['country'] : 'Unknown Region').'('.$json_info['appid'].')';
                 }
 
             	if(($num+$num_country+$num_channel)>0){
