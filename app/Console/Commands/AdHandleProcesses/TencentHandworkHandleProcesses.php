@@ -185,8 +185,10 @@ class TencentHandworkHandleProcesses extends Command
             			
             		}
             	}
+                $err_name = (isset($json_info['广告位ID']) ?$json_info['广告位ID']:'Null').'#'.(isset($json_info['广告位名称']) ?$json_info['广告位名称']:'Null').'#'.(isset($json_info['应用ID']) ?$json_info['应用ID']:'Null').'#'.(isset($json_info['媒体名称']) ?$json_info['媒体名称']:'Null');
+
                 if($num){
-                    $error_log_arr['app_id'][] = $json_info['媒体名称'];
+                    $error_log_arr['app_id'][] = $json_info['媒体名称'].'('.$err_name.')';
                 }
                 foreach ($AdType_info as $AdType_k => $AdType_v) {
                     if($json_info['广告类型'] == $AdType_v['name'] ){
@@ -200,7 +202,7 @@ class TencentHandworkHandleProcesses extends Command
                     }
                 }
                 if ($num_adtype){
-                    $error_log_arr['ad_type'][] = isset($json_info['广告类型']) ? $json_info['广告类型'] : '' ;
+                    $error_log_arr['ad_type'][] = isset($json_info['广告类型']) ? $json_info['广告类型'].'('.$err_name.')' : '' ;
                 }
                 //默认中国
                 $array[$k]['country_id'] = 64;

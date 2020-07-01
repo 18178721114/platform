@@ -173,8 +173,10 @@ class HuaweiHandworkHandleProcesses extends Command
             			
             		}
             	}
+                $err_name = (isset($json_info['广告位ID']) ?$json_info['广告位ID']:'Null').'#'.(isset($json_info['广告位']) ?$json_info['广告位']:'Null').'#'.(isset($json_info['应用ID']) ?$json_info['应用ID']:'Null').'#'.(isset($json_info['应用名称']) ?$json_info['应用名称']:'Null');
+
                 if($num){
-                    $error_log_arr['app_id'][] = $json_info['应用名称'];
+                    $error_log_arr['app_id'][] = $json_info['应用名称'].'('.$err_name.')';
                 }
                 //默认中国
                 $array[$k]['country_id'] = 64;

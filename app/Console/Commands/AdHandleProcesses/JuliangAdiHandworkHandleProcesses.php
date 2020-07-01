@@ -167,8 +167,10 @@ class JuliangAdiHandworkHandleProcesses extends Command
             			
             		}
             	}
+                $err_name = (isset($json_info['广告位ID']) ?$json_info['广告位ID']:'Null').'#'.(isset($json_info['广告位']) ?$json_info['广告位']:'Null').'#'.(isset($json_info['应用ID']) ?$json_info['应用ID']:'Null').'#'.(isset($json_info['游戏名称']) ?$json_info['游戏名称']:'Null');
+
                 if($num){
-                    $error_log_arr['app_id'][] = $json_info['应用ID'];
+                    $error_log_arr['app_id'][] = $json_info['应用ID'].'('.$err_name.')';
                 }
 //                 foreach ($AdType_info as $AdType_k => $AdType_v) {
 //                 	if($json_info['形式'] == $AdType_v['name'] ){
