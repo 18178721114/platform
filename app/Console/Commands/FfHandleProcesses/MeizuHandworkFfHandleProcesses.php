@@ -149,7 +149,7 @@ class MeizuHandworkFfHandleProcesses extends Command
 
             	}
                 if($num){
-                    $error_log_arr['app_id'][]=$json_info['APPID'];
+                    $error_log_arr['app_id'][]=$json_info['APPID'].'('.(isset($json_info['app_name'])?$json_info['app_name'] : $json_info['游戏名称']).')';
                 }
                 $array[$k]['country_id'] = 64;
             	if(($num)>0){
