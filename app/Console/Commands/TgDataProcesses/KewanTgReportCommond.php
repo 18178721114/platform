@@ -46,6 +46,9 @@ class KewanTgReportCommond extends Command
      */
     public function handle()
     {
+        // 业务停止 取消取数
+        exit;
+
         header('content-type:text/html;charset=utf-8');
         // 入口方法
         $dayid = $this->argument('dayid')?$this->argument('dayid'):date('Y-m-d',strtotime('-1 day'));

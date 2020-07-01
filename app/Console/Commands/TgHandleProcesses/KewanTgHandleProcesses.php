@@ -54,6 +54,9 @@ class KewanTgHandleProcesses extends Command
      */
     public function handle()
     {
+        // 业务停止 取消取数
+        exit;
+
         set_time_limit(0);
 //        define('MYSQL_TABLE_NAME','zplay_tg_report_daily');
         $source_id = 'ptg74';
