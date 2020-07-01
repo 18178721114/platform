@@ -202,7 +202,7 @@ class TiktokTgReportCommond extends Command
 
             self::getReportData($final_insert_arr, $data_account, $dayid);
         }else{
-            $error_msg = AD_PLATFORM.'推广平台'.'获取报表列表数据失败,错误信息:';
+            $error_msg = AD_PLATFORM.'推广平台campaign_id为'.$campaign_id.'的报表数据失败,错误信息:';
             if (key_exists('code',$data_arr) && $data_arr['code'] == 0){
                 $error_msg .= '暂无数据';
             }elseif(key_exists('code',$data_arr) && $data_arr['code'] != 0){
