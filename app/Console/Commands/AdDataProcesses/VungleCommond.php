@@ -68,7 +68,7 @@ class VungleCommond extends Command
         $account_key = [];
         foreach ($plat_list as $plat_key=> $plat_value){
             $account_id = $plat_value['company_account'];
-            if($account_id != 'weibo@zplay.cn') continue;
+            //if($account_id != 'weibo@zplay.cn') continue;
 //            $param_key = json_decode($plat_value['param_key'],true);
             $api_key = $plat_value['api_key'];
             $account_key[$account_id] = $api_key;
