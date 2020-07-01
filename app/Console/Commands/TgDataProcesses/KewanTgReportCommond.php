@@ -58,6 +58,8 @@ class KewanTgReportCommond extends Command
         define('TABLE_NAME', 'erm_data');
         define('SOURCE_ID', 'ptg74'); // todo 这个需要根据平台信息表确定平台ID
 
+
+
         try {
             //这里面要写新测试平台里的数据配置 从数据库里取数据
             $info[0]['company_username'] = '717F4ECD-D04A-2DE8-706A-5641D412C940';
@@ -174,16 +176,16 @@ class KewanTgReportCommond extends Command
 
 
                                 } else {
-                                    $all_data_err[] = $value['company_username'] . '账号下应用' . $appInfo['app_id'] . '广告位' . $ad_v['ad_id'] . '数据为空,错误信息' . $ad_stats_data['error'];
+                                    $all_data_err[] = $value['company_username'] . '账号下应用' . $appInfo['app_id'] . '广告位' . $ad_v['ad_id'] . '数据为空,错误信息' . (isset($ad_stats_data['error']) ? $ad_stats_data['error'] : '无数据，接口未返回任何信息');
                                 }
                             }
 
                         } else {
-                            $all_data_err[] = $value['company_username'] . '账号下应用' . $appInfo['app_id'] . '取数失败,错误信息:' . $dataInfo['error'];
+                            $all_data_err[] = $value['company_username'] . '账号下应用' . $appInfo['app_id'] . '取数失败,错误信息:' . (isset($dataInfo['error']) ? $dataInfo['error'] : '无数据，接口未返回任何信息');
                         }
                     }
                 } else {
-                    $all_data_err[] =  $value['company_username'] . '账号取数失败,错误信息:' . $appInfoList['error'];
+                    $all_data_err[] =  $value['company_username'] . '账号获取apps列表失败,错误信息:' .(isset($appInfoList['error']) ?  $appInfoList['error'] : '无数据，接口未返回任何信息');
                 }
             }
 
