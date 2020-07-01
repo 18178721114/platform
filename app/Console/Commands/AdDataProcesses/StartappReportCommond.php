@@ -95,6 +95,13 @@ class StartappReportCommond extends Command
                 if($api_data_i>3)
                     break;
             }
+            //取数四次 取数结果仍为空
+            if($api_data_i ==4 && empty($ret)){
+                $error_msg_1 = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:返回数据为空('.$datalist.')';
+                DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg_1);
+                continue;
+
+            }
 
             if(isset($ret['data'])){
                 if ($ret['data']){
@@ -144,12 +151,12 @@ class StartappReportCommond extends Command
                         }
                     }
                 }else{
-                    $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'返回数据为空'.json_encode($ret);
+                    $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'返回数据为空'.json_encode($datalist);
                     DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
                 }
 
             }else{
-                $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:'.json_encode($ret);
+                $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:'.json_encode($datalist);
                 DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
 
                 $error_msg_arr[] = $error_msg;

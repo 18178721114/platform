@@ -157,12 +157,12 @@ class FyberReportCommond extends Command
                         }
                     }
                 }else{
-                    $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'暂无数据('.json_encode($ret).')';
+                    $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'暂无数据('.json_encode($datalist).')';
                     DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
                 }
 
             }else{
-                $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:('.json_encode($ret).')';
+                $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:('.json_encode($datalist).')';
                 DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
 
                 $error_msg_arr[] = $error_msg;

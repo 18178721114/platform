@@ -170,7 +170,7 @@ class DiankaiReportCommond extends Command
                     }
 
                 } else {
-                    $error_msg = AD_PLATFORM.'广告平台'.$company_account.'账号取数失败,错误信息:('.json_encode($result_arr).')';
+                    $error_msg = AD_PLATFORM.'广告平台'.$company_account.'账号取数失败,错误信息:('.json_encode($result).')';
                     DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
 
                     $error_msg_arr = [];
