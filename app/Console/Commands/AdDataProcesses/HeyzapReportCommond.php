@@ -47,6 +47,7 @@ class HeyzapReportCommond extends Command
      */
     public function handle()
     {
+        die;
         set_time_limit(0);
         //ini_set('memory_limit','100M');
         header('content-type:text/html;charset=utf-8');

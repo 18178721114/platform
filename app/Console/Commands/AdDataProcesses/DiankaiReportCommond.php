@@ -47,6 +47,7 @@ class DiankaiReportCommond extends Command
      */
     public function handle()
     {
+        die;
         set_time_limit(0);
         // 入口方法
         $dayid = $this->argument('dayid')?$this->argument('dayid'):date('Y-m-d',strtotime('-1 day'));

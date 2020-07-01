@@ -48,6 +48,7 @@ class KewanReportCommond extends Command
      */
     public function handle()
     {
+        die;
         set_time_limit(0);
         echo '<pre>';
         // 入口方法

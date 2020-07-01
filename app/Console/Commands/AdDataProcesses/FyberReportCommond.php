@@ -47,6 +47,7 @@ class FyberReportCommond extends Command
      */
     public function handle()
     {
+        die;
         set_time_limit(0);
         header('content-type:text/html;charset=utf-8');
         // 入口方法
