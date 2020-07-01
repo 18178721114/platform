@@ -99,7 +99,7 @@ class FyberReportCommond extends Command
 
             //取数四次 取数结果仍为空
             if($api_data_i ==4 && empty($ret)){
-                $error_msg_1 = AD_PLATFORM.'广告平台'.$username.'账号取数失败,错误信息:返回数据为空('.$datalist.')';
+                $error_msg_1 = AD_PLATFORM.'广告平台'.$username.'账号取数失败,错误信息:返回数据为空('.json_encode($datalist).')';
                 DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg_1);
                 continue;
 
