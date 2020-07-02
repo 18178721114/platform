@@ -232,7 +232,7 @@ class GoolePlayHandleProcesses extends Command
 
 
                                     if (!$ex_info) {
-                                        $error_msg = 'goolePlay计费平台数据处理程序汇率数据查询为空2' . $json_info['currency_of_sale'];
+                                        $error_msg = 'googlePlay计费平台数据处理程序汇率数据查询为空2' . $json_info['currency_of_sale'];
                                         DataImportImp::saveDataErrorLog(2, $source_id, $billing_name, 3, $error_msg);
                                     }
                                     $num_currency = 0;
@@ -258,8 +258,10 @@ class GoolePlayHandleProcesses extends Command
                             break;
                         }
                     }
+                    $err_name = (isset($json_info['sku_id']) ?$json_info['sku_id']:'Null').'#'.(isset($json_info['product_title']) ?$json_info['product_title']:'Null').'#'.(isset($json_info['parent_identifier']) ?$json_info['parent_identifier']:'Null').'#'.(isset($json_info['product_id']) ?$json_info['product_id']:'Null');
+
                     if ($num) {
-                        $error_log_arr['app_id'][] = $json_info['product_id'] . '或' . $json_info['sku_id'];
+                        $error_log_arr['app_id'][] = $json_info['product_id'] . '或' . $json_info['sku_id'].'('.$err_name.')';
                     }
                 }
                 $array[$k]['country_id'] = 16;
@@ -281,7 +283,7 @@ class GoolePlayHandleProcesses extends Command
                     }
                 }
                 if ($num_country) {
-                    $error_log_arr['country'][] = isset($json_info['country_of_buyer']) ? $json_info['country_of_buyer'] : 'Unknown Region';
+                    $error_log_arr['country'][] = isset($json_info['country_of_buyer']) ? $json_info['country_of_buyer'].'('.$err_name.')' : 'Unknown Region';
                 }
 
                 // foreach ($c_currency_type_info as $currency_k => $currency_v) {
@@ -310,7 +312,7 @@ class GoolePlayHandleProcesses extends Command
 
                 // }
                 if ($num_currency) {
-                    $error_log_arr['currency'][] = $json_info['currency_of_sale'];
+                    $error_log_arr['currency'][] = $json_info['currency_of_sale'].'('.$err_name.')';
                 }
                 //
                 if (($num + $num_country + $num_currency) > 0) {

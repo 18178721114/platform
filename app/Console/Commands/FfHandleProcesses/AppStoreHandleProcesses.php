@@ -334,11 +334,12 @@ class AppStoreHandleProcesses extends Command
                     $array[$k]['income_publisher'] = $json_info['developer_proceeds'] * $ex_info['currency_ex'] * $json_info['units'];
                     $array[$k]['income_fix'] = $json_info['developer_proceeds'] * $ex_info['currency_ex'] * $json_info['units'];
                     $array[$k]['times'] = $json_info['product_type_identifier'];
+                    $err_name = (isset($json_info['sku']) ?$json_info['sku']:'Null').'#Null#'.(isset($json_info['parent_identifier']) ?$json_info['parent_identifier']:'Null').'#'.(isset($json_info['code_name']) ?$json_info['code_name']:'Null');
                     if ($num) {
                         if ($json_info['parent_identifier'] == ' ') {
                             $error_log_arr['app_id'][] = $json_info['sku'];
                         } else {
-                            $error_log_arr['app_id'][] = $json_info['parent_identifier'] . '或' . $json_info['sku'];
+                            $error_log_arr['app_id'][] = $json_info['parent_identifier'] . '或' . $json_info['sku'].'('.$err_name.')';
                         }
                     }
                     //$error_log_arr['app_id'][] = empty($json_info['parent_identifier'])?$json_info['sku']:$json_info['parent_identifier'];
@@ -359,7 +360,7 @@ class AppStoreHandleProcesses extends Command
                     }
                 }
                 if ($num_country) {
-                    $error_log_arr['country'][] = isset($json_info['country_code']) ? $json_info['country_code'] : 'Unknown Region';
+                    $error_log_arr['country'][] = isset($json_info['country_code']) ? $json_info['country_code'].'('.$err_name.')' : 'Unknown Region';
                 }
 
                 // foreach ($c_currency_type_info as $currency_k => $currency_v) {
@@ -388,7 +389,7 @@ class AppStoreHandleProcesses extends Command
 
                 // }
                 if ($num_currency) {
-                    $error_log_arr['currency'][] = $json_info['currency_of_proceeds'];
+                    $error_log_arr['currency'][] = $json_info['currency_of_proceeds'].'('.$err_name.')';
                 }
                 if (($num + $num_country + $num_currency) > 0) {
 
