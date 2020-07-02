@@ -139,9 +139,10 @@ class ToutiaoTgReportCommond extends Command
                                 }
                             }else{
                                 $error_msg = AD_PLATFORM.'推广平台广告主ID为' . $toutiao_app_info["advertiser_id"] .'获取数据失败,错误信息:';
-                                if (key_exists('code',$data_arr) && $data_arr['code'] == 0){
-                                    $error_msg .= '暂无数据'.json_encode($data_arr);
-                                }elseif(key_exists('code',$data_arr) && $data_arr['code'] != 0){
+//                                if (key_exists('code',$data_arr) && $data_arr['code'] == 0){
+//                                    $error_msg .= '暂无数据'.json_encode($data_arr);
+//                                }else
+                                if(key_exists('code',$data_arr) && $data_arr['code'] != 0){
                                     $error_msg .= $data_arr['message'];
                                 }else{
                                     $error_msg .= '无数据，接口未返回任何信息';

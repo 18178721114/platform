@@ -338,10 +338,10 @@ class TapjoyTgReportCommond extends Command
             }
 
         } else {
-            $error_msg = AD_PLATFORM . '推广平台' . $company_account . '账号下ad_group_id为:' . $ad_group_id . '获取数据失败,错误信息:' . (isset($data_response['errors']) ? $data_response['errors'] : '暂无数据');
-            DataImportImp::saveDataErrorLog(1, SOURCE_ID, AD_PLATFORM, 4, $error_msg);
-            $error_msg_arr[] = $error_msg;
-            CommonFunction::sendMail($error_msg_arr, AD_PLATFORM . '推广平台取数error');
+//            $error_msg = AD_PLATFORM . '推广平台' . $company_account . '账号下ad_group_id为:' . $ad_group_id . '获取数据失败,错误信息:' . (isset($data_response['errors']) ? $data_response['errors'] : '暂无数据');
+//            DataImportImp::saveDataErrorLog(1, SOURCE_ID, AD_PLATFORM, 4, $error_msg);
+//            $error_msg_arr[] = $error_msg;
+//            CommonFunction::sendMail($error_msg_arr, AD_PLATFORM . '推广平台取数error');
         }
 
     }
