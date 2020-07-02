@@ -209,12 +209,12 @@ class SnapchatTgCommond extends Command
                     }
                 }
             }else{
-                $error_msg = $end_date.'号,Snapchat推广平台获取campaign列表数据失败,错误信息:'.(isset($campaigns_res['display_message']) ? $campaigns_res['display_message'] : isset($campaigns_res['debug_message']) ? $campaigns_res['debug_message'] : '暂无数据');
-                DataImportImp::saveDataErrorLog(1,'ptg75','Snapchat',4,$error_msg);
+//                $error_msg = $end_date.'号,Snapchat推广平台获取campaign列表数据失败,错误信息:'.(isset($campaigns_res['display_message']) ? $campaigns_res['display_message'] : isset($campaigns_res['debug_message']) ? $campaigns_res['debug_message'] : '暂无数据');
+//                DataImportImp::saveDataErrorLog(1,'ptg75','Snapchat',4,$error_msg);
             }
         }else{
-            $error_msg = $end_date.'号,Snapchat推广平台获取campaign列表数据失败,错误信息:无数据，接口未返回任何信息';
-            DataImportImp::saveDataErrorLog(1,'ptg75','Snapchat',4,$error_msg);
+//            $error_msg = $end_date.'号,Snapchat推广平台获取campaign列表数据失败,错误信息:无数据，接口未返回任何信息';
+//            DataImportImp::saveDataErrorLog(1,'ptg75','Snapchat',4,$error_msg);
         }
         return $campaign_name_list;
     }
@@ -317,11 +317,11 @@ class SnapchatTgCommond extends Command
 
                 self::insertData($all_data,$end_date,$organization_id,$adaccount_id);
             }else{
-                $error_msg = $end_date.'号,Snapchat推广平台获取报表数据失败,错误信息:'.(isset($ads_stats_res['display_message']) ? $ads_stats_res['display_message'] : isset($ads_stats_res['debug_message']) ? $ads_stats_res['debug_message'] : '暂无数据');
+                $error_msg = $end_date.'号,Snapchat推广平台'.$adaccount_id.'获取报表数据失败,错误信息:'.(isset($ads_stats_res['display_message']) ? $ads_stats_res['display_message'] : isset($ads_stats_res['debug_message']) ? $ads_stats_res['debug_message'] : '暂无数据');
                 DataImportImp::saveDataErrorLog(1,'ptg75','Snapchat',4,$error_msg);
             }
         }else{
-            $error_msg = $end_date.'号,Snapchat推广平台获取报表数据失败,错误信息:无数据，接口未返回任何信息';
+            $error_msg = $end_date.'号,Snapchat推广平台'.$adaccount_id.'获取报表数据失败,错误信息:无数据，接口未返回任何信息';
             DataImportImp::saveDataErrorLog(1,'ptg75','Snapchat',4,$error_msg);
         }
     }

@@ -121,9 +121,10 @@ class TiktokTgReportCommond extends Command
                 Artisan::call('TiktokTgHandleProcesses',['dayid'=>$dayid]);
             }else{
                 $error_msg = AD_PLATFORM.'推广平台'.'获取advertiser列表数据失败,错误信息:';
-                if (key_exists('code',$data_arr) && $data_arr['code'] == 0){
-                    $error_msg .= '暂无数据';
-                }elseif(key_exists('code',$data_arr) && $data_arr['code'] != 0){
+//                if (key_exists('code',$data_arr) && $data_arr['code'] == 0){
+//                    $error_msg .= '暂无数据';
+//                }else
+                if(key_exists('code',$data_arr) && $data_arr['code'] != 0){
                     $error_msg .= $data_arr['message'];
                 }else{
                     $error_msg .= '无数据，接口未返回任何信息';
@@ -151,9 +152,10 @@ class TiktokTgReportCommond extends Command
             }
         }else{
             $error_msg = AD_PLATFORM.'推广平台广告主ID为'.$advertiser_id.'获取campaign列表数据失败,错误信息:';
-            if (key_exists('code',$data_arr) && $data_arr['code'] == 0){
-                $error_msg .= '暂无数据';
-            }elseif(key_exists('code',$data_arr) && $data_arr['code'] != 0){
+//            if (key_exists('code',$data_arr) && $data_arr['code'] == 0){
+//                $error_msg .= '暂无数据';
+//            }else
+            if(key_exists('code',$data_arr) && $data_arr['code'] != 0){
                 $error_msg .= $data_arr['message'];
             }else{
                 $error_msg .= '无数据，接口未返回任何信息';
@@ -202,15 +204,15 @@ class TiktokTgReportCommond extends Command
 
             self::getReportData($final_insert_arr, $data_account, $dayid);
         }else{
-            $error_msg = AD_PLATFORM.'推广平台campaign_id为'.$campaign_id.'的报表数据失败,错误信息:';
-            if (key_exists('code',$data_arr) && $data_arr['code'] == 0){
-                $error_msg .= '暂无数据';
-            }elseif(key_exists('code',$data_arr) && $data_arr['code'] != 0){
-                $error_msg .= $data_arr['message'];
-            }else{
-                $error_msg .= '无数据，接口未返回任何信息';
-            }
-            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,4,$error_msg);
+//            $error_msg = AD_PLATFORM.'推广平台campaign_id为'.$campaign_id.'的报表数据失败,错误信息:';
+//            if (key_exists('code',$data_arr) && $data_arr['code'] == 0){
+//                $error_msg .= '暂无数据';
+//            }elseif(key_exists('code',$data_arr) && $data_arr['code'] != 0){
+//                $error_msg .= $data_arr['message'];
+//            }else{
+//                $error_msg .= '无数据，接口未返回任何信息';
+//            }
+//            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,4,$error_msg);
         }
     }
 

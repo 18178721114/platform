@@ -134,7 +134,7 @@ class ApplovinTgReportCommond extends Command
                         }
                     }else{
                         // 无数据报错
-                        $all_data_err[] = $value['company_account'].'账号取数失败,错误信息:暂无数据,'.json_encode($ret);
+//                        $all_data_err[] = $value['company_account'].'账号取数失败,错误信息:暂无数据,'.json_encode($ret);
                     }
                 } else {
                     // 取数错误报错
