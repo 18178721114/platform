@@ -150,7 +150,7 @@ class TiktokTgReportCommond extends Command
                 self::getTiktokData($access_token,$data_account,$advertiser_id, $advertiser_name, $campaign_name, $campaign_id,$dayid);
             }
         }else{
-            $error_msg = AD_PLATFORM.'推广平台'.'获取campaign列表数据失败,错误信息:';
+            $error_msg = AD_PLATFORM.'推广平台广告主ID为'.$advertiser_id.'获取campaign列表数据失败,错误信息:';
             if (key_exists('code',$data_arr) && $data_arr['code'] == 0){
                 $error_msg .= '暂无数据';
             }elseif(key_exists('code',$data_arr) && $data_arr['code'] != 0){
