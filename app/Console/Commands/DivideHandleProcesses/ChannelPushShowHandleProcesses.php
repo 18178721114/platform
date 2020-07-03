@@ -142,13 +142,19 @@ class ChannelPushShowHandleProcesses extends Command
                 }
             }
             $is_success = [];
+            $err_num = 0;
             if ($step) {
+
                 foreach ($step as $k => $v) {
                     $result = DataImportLogic::insertAdReportInfoDatabase('mysql_channel_1', $table, $v);
                     if (!$result) {
+                        $err_num++;
                         $is_success[] = $k;
                     }
                 }
+            }
+            if($err_num>0){
+                DB::rollBack();
             }
             DB::commit();
 
