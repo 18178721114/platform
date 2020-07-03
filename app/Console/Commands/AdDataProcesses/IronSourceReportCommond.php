@@ -76,9 +76,6 @@ class IronSourceReportCommond extends Command
         if ($PlatInfo){
             foreach ($PlatInfo as $singleInfo){
                 $user_name = $singleInfo['company_account'];
-                if($user_name =='weibo@zplay.cn'){
-                    continue;
-                }
                 sleep(5);
                 // var_dump($user_name);
                 $secret_key = $singleInfo['secret_key'];
