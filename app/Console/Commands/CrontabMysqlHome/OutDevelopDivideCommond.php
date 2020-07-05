@@ -145,7 +145,7 @@ class OutDevelopDivideCommond extends Command
                     zplay_divide_develop b,
                     c_app app     	
                 WHERE
-                b.app_id = app.id and app.is_dev_show = 2
+                b.app_id = app.id -- and app.is_dev_show = 2
                 and b.date = '$dayid'";
         $info = DB::insert($sql);
         if(!$info){
