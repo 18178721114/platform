@@ -95,7 +95,7 @@ class FacebookAdBiddingCommond extends Command
         b.publisher_id as publisher_id,
         a.account_api_key AS appkey  from c_app_ad_platform b LEFT JOIN  c_platform_account_mapping a  ON b.platform_id = a.platform_id
         WHERE
-        a.platform_id = 'pad23' and a.account_api_key != '' and b.publisher_id != '' and b.status =1 $where ;";
+        a.platform_id = 'pad23' and a.account_api_key != '' and b.publisher_id != '' and b.redundancy_status = 1 and b.status =1 $where ;";
 
         $PlatInfo = DB::select($sql);
         $PlatInfo = Service::data($PlatInfo);
