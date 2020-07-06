@@ -191,7 +191,7 @@ class TencentHandworkFfHandleProcesses extends Command
                 $array[$k]['pay_user_all'] = $json_info['流水玩家'];
                 $array[$k]['pay_time_all'] = 0;
                 $money = $json_info['流水金额'];
-                $array[$k]['platform_account'] = 'zplay';
+                $array[$k]['platform_account'] = '掌游';
                 $array[$k]['earning'] = $money*$ex_info['currency_ex'];
                 $array[$k]['earning_fix'] =$money*$ex_info['currency_ex'];//流水人民币
             	$array[$k]['earning_divide_plat'] = $money*$ex_info['currency_ex']*$divide_ad;//流水平台分成
