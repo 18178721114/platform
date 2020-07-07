@@ -144,6 +144,8 @@ class ToutiaoTgReportCommond extends Command
 //                                }else
                                 if(key_exists('code',$data_arr) && $data_arr['code'] != 0){
                                     $error_msg .= $data_arr['message'];
+                                }elseif(key_exists('code',$data_arr) && $data_arr['code'] == 0){
+                                    // 暂无数据
                                 }else{
                                     $error_msg .= '无数据，接口未返回任何信息'.json_encode($data_arr);
                                 }
