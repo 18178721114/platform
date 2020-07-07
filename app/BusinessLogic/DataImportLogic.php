@@ -299,6 +299,31 @@ class DataImportLogic
     }
 
     /**
+     *  修改错误信息状态
+     */
+    public static function updateErrorStatus($table_name,$map,$updata){
+
+        $com_obj = DB::connection('pgsql')->table($table_name);
+
+        if (isset($map["in"])) {
+            $com_obj->whereIn($map["in"][0],$map["in"][1]);
+            unset($map["in"]);
+        }
+
+        if (isset($map["or_in"])) {
+            $com_obj->orWhereIn($map["or_in"][0],$map["or_in"][1]);
+            unset($map["or_in"]);
+        }
+
+        if ($map) {
+            $com_obj->where($map);
+        }
+
+
+        return $com_obj->update($updata);
+    }
+
+    /**
      *  插入kuaishou mysql gdt数据
      */
     public static function insertKuaishouMysqlData($insert_data){
