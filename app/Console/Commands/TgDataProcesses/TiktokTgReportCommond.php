@@ -126,12 +126,13 @@ class TiktokTgReportCommond extends Command
 //                }else
                 if(key_exists('code',$data_arr) && $data_arr['code'] != 0){
                     $error_msg .= $data_arr['message'];
+                    DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,4,$error_msg);
                 }elseif(key_exists('code',$data_arr) && $data_arr['code'] == 0){
 
                 }else{
                     $error_msg .= '无数据，接口未返回任何信息';
+                    DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,4,$error_msg);
                 }
-                DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,4,$error_msg);
             }
         }else{
             $error_msg = AD_PLATFORM.'推广平台'.'获取access_token数据失败,错误信息:授权失败,access_token信息不存在,请重新授权!';
@@ -159,12 +160,13 @@ class TiktokTgReportCommond extends Command
 //            }else
             if(key_exists('code',$data_arr) && $data_arr['code'] != 0){
                 $error_msg .= $data_arr['message'];
+                DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,4,$error_msg);
             }elseif(key_exists('code',$data_arr) && $data_arr['code'] == 0){
 
             }else{
                 $error_msg .= '无数据，接口未返回任何信息';
+                DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,4,$error_msg);
             }
-            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,4,$error_msg);
         }
     }
 
