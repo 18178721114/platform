@@ -66,6 +66,7 @@ class PangolinReportHandleProcesses extends Command
 
 
     public static function PangolinAdDataProcess($source_id,$platform_name,$dayid){
+        static $stactic_num = 0;
         //查询pgsql 的数据
         $map =[];
         $map['dayid'] = $dayid;
@@ -197,7 +198,7 @@ class PangolinReportHandleProcesses extends Command
                                 }
                             }
 
-                            if ($ad_type != 0){
+                            if ($ad_type || $ad_type == 0){
                                 $new_campaign_ids[$tiktok_app_id][$app_info_detail[0]['id']][$json_info['ad_slot_id']] = $ad_type;
                             }
                         }
@@ -305,17 +306,22 @@ class PangolinReportHandleProcesses extends Command
             }
 
             if ($insert_generalize_ad_app) {
-                var_dump(count($insert_generalize_ad_app));
-                // 开启事物 保存数据
-                DB::beginTransaction();
-                $app_info = DB::table('c_app_ad_slot')->insert($insert_generalize_ad_app);
+                if($stactic_num ==1){
+                    //反更新没成功 走这里
+                }else {
+                    var_dump(count($insert_generalize_ad_app));
+                    // 开启事物 保存数据
+                    DB::beginTransaction();
+                    $app_info = DB::table('c_app_ad_slot')->insert($insert_generalize_ad_app);
 //                var_dump($app_info);
-                if (!$app_info) { // 应用信息已经重复
-                    DB::rollBack();
-                } else {
-                    DB::commit();
-                    self::PangolinAdDataProcess($source_id,$platform_name,$dayid);
-                    exit;
+                    if (!$app_info) { // 应用信息已经重复
+                        DB::rollBack();
+                    } else {
+                        DB::commit();
+                        $stactic_num++;
+                        self::PangolinAdDataProcess($source_id, $platform_name, $dayid);
+                        exit;
+                    }
                 }
             }
         }
