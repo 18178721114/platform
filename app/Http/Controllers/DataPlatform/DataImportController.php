@@ -42,7 +42,15 @@ class DataImportController extends Controller
     }
 
     /**
-     * 数据配置报错列表
+     * 数据报错日志处理状态修改
+     * @param $params array 请求数据
+     */
+    public function changeErrorStatus(){
+        DataImportImp::changeErrorStatus($this->params);
+    }
+
+    /**
+     * 配置报错
      * @param $params array 请求数据
      */
     public function getConfigErrorLog(){
