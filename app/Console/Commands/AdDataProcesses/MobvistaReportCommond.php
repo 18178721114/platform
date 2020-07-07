@@ -121,7 +121,7 @@ class MobvistaReportCommond extends Command
                     if($api_data_i ==4 && empty($result)){
                         $error_msg_1 = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:返回数据为空('.$result1.')';
                         DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg_1);
-                        continue;
+                        break;
 
                     }
 
