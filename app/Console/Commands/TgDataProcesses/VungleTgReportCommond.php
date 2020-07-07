@@ -164,20 +164,16 @@ class VungleTgReportCommond extends Command
 
         $data = json_decode($content, true);
         if (isset($data['error']) || !$data) {
-            if (!$data){
-                $status = '';
-                $error = '暂无数据'.json_encode($data);
-            }else{
+            if ($data) {
                 $status = isset($data['status']) ? $data['status'] : '';
-                $error = isset($data['error']) ? $data['error'] : '暂无数据'.json_encode($data);
+                $error = isset($data['error']) ? $data['error'] : '暂无数据' . json_encode($data);
+
+                $error_msg = 'Vungle推广平台' . $account . '账号下应用ID为' . $application_id . '取数失败,错误信息:' . $status . ',' . $error;
+
+                DataImportImp::saveDataErrorLog(1, SOURCE_ID, AD_PLATFORM, 4, $error_msg);
+//                $error_msg_arr[] = $error_msg;
+//                CommonFunction::sendMail($error_msg_arr, AD_PLATFORM . '推广平台取数error');
             }
-
-            $error_msg = 'Vungle推广平台'.$account.'账号下应用ID为'.$application_id.'取数失败,错误信息:'.$status.','.$error;
-
-            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,4,$error_msg);
-            $error_msg_arr[] = $error_msg;
-            CommonFunction::sendMail($error_msg_arr,AD_PLATFORM.'推广平台取数error');
-
             return false;
         }else{
             return $data;
