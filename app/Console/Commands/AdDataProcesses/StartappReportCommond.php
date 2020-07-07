@@ -58,21 +58,21 @@ class StartappReportCommond extends Command
         define('SCHEMA', 'ad_data');
         define('TABLE_NAME', 'erm_data');
         define('SOURCE_ID', 'pad35'); // todo 这个需要根据平台信息表确定平台ID
-
+        try{
 
         // todo  数据库配置
 //        $PlatInfo = DataImportLogic::getConf(SOURCE_ID_CONF);
 //        $PlatInfo = Service::data($PlatInfo);
 
-        $sql = " SELECT  data_account as company_account,account_token  as token,account_user_id  as partner from c_platform_account_mapping WHERE platform_id ='pad35' ";
+        $sql = " SELECT  data_account as company_account,account_token  as token,account_user_id  as partner from c_platform_account_mapping WHERE platform_id ='pad35' and status = 1 ";
         $PlatInfo = DB::select($sql);
         $PlatInfo = Service::data($PlatInfo);
 
         if (!$PlatInfo){
-            $message = "{$dayid}, " . AD_PLATFORM . " 广告平台取数失败,失败原因:取数配置信息为空" ;
-            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$message);
-            $error_msg_arr[] = $message;
-            CommonFunction::sendMail($error_msg_arr,'广告平台取数error');
+//            $message = "{$dayid}, " . AD_PLATFORM . " 广告平台取数失败,失败原因:取数配置信息为空" ;
+//            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$message);
+//            $error_msg_arr[] = $message;
+//            CommonFunction::sendMail($error_msg_arr,'广告平台取数error');
             exit;
         }
         $stime = str_replace('-', '', $dayid);
@@ -85,6 +85,24 @@ class StartappReportCommond extends Command
             $url = "http://api.startapp.com/pub/report/1.0?partner=" . $partner . "&token=" . $token . "&startDate={$stime}&endDate={$etime}&dimension=segId,adType,country,os,prod";
     		$datalist = self::get_response($url);
     		$ret = json_decode($datalist,true);
+
+            // 数据获取重试
+            $api_data_i=1;
+            while(!$ret){
+                $datalist = self::get_response($url);
+                $ret = json_decode($datalist,true);
+                $api_data_i++;
+                if($api_data_i>3)
+                    break;
+            }
+            //取数四次 取数结果仍为空
+            if($api_data_i ==4 && empty($ret)){
+                $error_msg_1 = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:返回数据为空('.$datalist.')';
+                DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg_1);
+                continue;
+
+            }
+
             if(isset($ret['data'])){
                 if ($ret['data']){
                     //var_dump(count($ret['data']));
@@ -133,12 +151,12 @@ class StartappReportCommond extends Command
                         }
                     }
                 }else{
-                    $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'暂无数据';
+                    $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'返回数据为空'.json_encode($datalist);
                     DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
                 }
 
             }else{
-                $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:'.(isset($datalist) ? $datalist: '未知错误');
+                $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:'.json_encode($datalist);
                 DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
 
                 $error_msg_arr[] = $error_msg;
@@ -149,6 +167,11 @@ class StartappReportCommond extends Command
 
         // 调用数据处理过程
         Artisan::call('StartAppHandleProcesses',['dayid' => $dayid]);
+        } catch (\Exception $e) {
+            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'广告平台程序失败，失败原因：'.$e->getMessage();
+            DataImportImp::saveDataErrorLog(5,SOURCE_ID,AD_PLATFORM,2,$error_msg_info);
+
+        }
     		
     }
     public static function get_response($url,$headers=array())

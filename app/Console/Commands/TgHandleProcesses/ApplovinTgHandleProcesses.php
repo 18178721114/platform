@@ -88,8 +88,8 @@ class ApplovinTgHandleProcesses extends Command
         $sql = "SELECT  distinct
                 c_app.id,c_app.app_id,c_app.os_id,c_generalize.platform_id,c_generalize.data_account,c_generalize.application_id,c_generalize.application_name,c_generalize.agency_platform_id,c_generalize_ad_app.campaign_id,c_generalize_ad_app.campaign_name,c_generalize_ad_app.ad_group_id,c_platform.currency_type_id,cpp.currency_type_id as ageccy_currency_type_id
                 FROM c_app 
-                LEFT JOIN c_generalize ON c_app.id = c_generalize.app_id 
-                LEFT JOIN c_generalize_ad_app ON c_generalize.id = c_generalize_ad_app.generalize_id 
+                LEFT JOIN c_generalize ON c_app.id = c_generalize.app_id and c_generalize.generalize_status = 1
+                LEFT JOIN c_generalize_ad_app ON c_generalize.id = c_generalize_ad_app.generalize_id and  c_generalize_ad_app.status = 1
                 LEFT JOIN c_platform ON c_generalize.platform_id = c_platform.platform_id 
                 LEFT JOIN c_platform as cpp ON c_generalize.agency_platform_id = cpp.platform_id 
                 WHERE 
@@ -142,6 +142,9 @@ class ApplovinTgHandleProcesses extends Command
         foreach ($info as $k => $v) {
 
             $json_info = json_decode($v['json_data'],true);
+
+            $err_name = (isset($json_info['campaign_id_external']) ? $json_info['campaign_id_external'] : 'Null') . '#' . (isset($json_info['campaign']) ? addslashes($json_info['campaign']) : 'Null') . '#' . (isset($json_info['campaign_package_name']) ? $json_info['campaign_package_name'] : 'Null') . '#' . (isset($json_info['app_name']) ?$json_info['app_name'] : 'Null');
+
             foreach ($app_list as $app_k => $app_v) {
 
                 if($app_v['os_id'] ==1){
@@ -184,7 +187,7 @@ class ApplovinTgHandleProcesses extends Command
             }
 
             if ($num){
-                $error_log_arr['campaign_id'][] = $json_info['campaign_package_name'].'_'.$json_info['platform'];
+                $error_log_arr['campaign_id'][] = ($json_info['campaign_package_name'].'_'.$json_info['platform']).'('.$err_name.')';
             }
 
             // todo 匹配国家用
@@ -201,7 +204,7 @@ class ApplovinTgHandleProcesses extends Command
          }
 
            if ($num_country){
-               $error_log_arr['country'][] = isset($json_info['country']) ? $json_info['country'] :  'Unknown Region';
+               $error_log_arr['country'][] = (isset($json_info['country']) ? $json_info['country'] :  'Unknown Region').'('.$err_name.')';
            }
 
            foreach ($AdType_info as $AdType_k => $AdType_v) {
@@ -216,7 +219,7 @@ class ApplovinTgHandleProcesses extends Command
              }
             }
             if ($num_adtype){
-               $error_log_arr['ad_type'][] = $json_info['size'].'-'.$json_info['ad_type'];
+               $error_log_arr['ad_type'][] = ($json_info['size'].'-'.$json_info['ad_type']).'('.$err_name.')';
            }
 
             if(($num+$num_country+$num_adtype)>0){
@@ -270,26 +273,31 @@ class ApplovinTgHandleProcesses extends Command
         if ($error_log_arr){
             $error_msg_array = [];
             $error_msg_mail = [];
-            if (isset($error_log_arr['campaign_id'])){
+            $error_log_arr = Service::shield_error($source_id,$error_log_arr);
+
+            if (isset($error_log_arr['campaign_id']) && !empty($error_log_arr['campaign_id'])){
                 $campaign_id = implode(',',array_unique($error_log_arr['campaign_id']));
                 $error_msg_array[] = 'campaign_package_name匹配失败,ID为:'.$campaign_id;
                 $error_msg_mail[] = 'campaign_package_name匹配失败，ID为：'.$campaign_id;
             }
-            if (isset($error_log_arr['country'])){
+            if (isset($error_log_arr['country']) && !empty($error_log_arr['country'])){
                 $country = implode(',',array_unique($error_log_arr['country']));
                 $error_msg_array[] = '国家匹配失败,code为:'.$country;
                 $error_msg_mail[] = '国家匹配失败，code为：'.$country;
             }
-            if (isset($error_log_arr['ad_type'])){
+            if (isset($error_log_arr['ad_type']) && !empty($error_log_arr['ad_type'])){
                 $ad_type = implode(',',array_unique($error_log_arr['ad_type']));
                 $error_msg_array[] = '广告类型匹配失败,ID为:'.$ad_type;
                 $error_msg_mail[] = '广告类型匹配失败，ID为：'.$ad_type;
             }
 
-            DataImportImp::saveDataErrorLog(2,$source_id,$source_name,4,implode(';',$error_msg_array));
+            if(!empty($error_msg_array)) {
+                DataImportImp::saveDataErrorLog(2, $source_id, $source_name, 4, implode(';', $error_msg_array));
+                // 发送邮件
+//                CommonFunction::sendMail($error_msg_mail,$source_name.'推广平台数据处理error');
+            }
             DataImportImp::saveDataErrorMoneyLog($source_id,$dayid,$error_detail_arr);
-            // 发送邮件
-//            CommonFunction::sendMail($error_msg_mail,$source_name.'推广平台数据处理error');
+
         }
 
         // 保存正确数据

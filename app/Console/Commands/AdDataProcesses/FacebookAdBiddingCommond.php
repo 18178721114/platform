@@ -5,6 +5,7 @@ namespace App\Console\Commands\AdDataProcesses;
 use App\BusinessImp\DataImportImp;
 use App\BusinessLogic\AdReportLogic;
 use App\BusinessLogic\DataImportLogic;
+use App\Common\ApiResponseFactory;
 use App\Common\CommonFunction;
 use App\Common\CurlRequest;
 use App\Common\ParseDayid;
@@ -69,6 +70,7 @@ class FacebookAdBiddingCommond extends Command
         $dayid = $dayid = $this->argument('dayid') ? $this->argument('dayid') : date('Y-m-d',strtotime('-1 day'));
         $fb_app_id = $this->argument('app_id') ? $this->argument('app_id') : '';
         $date = ParseDayid::get_dayid($dayid);
+        try{
 
         if (empty($date)) {
             $msg = "invalid date.";
@@ -93,7 +95,7 @@ class FacebookAdBiddingCommond extends Command
         b.publisher_id as publisher_id,
         a.account_api_key AS appkey  from c_app_ad_platform b LEFT JOIN  c_platform_account_mapping a  ON b.platform_id = a.platform_id
         WHERE
-        a.platform_id = 'pad23' and a.account_api_key != '' and b.publisher_id != '' and b.status <> 2 $where ;";
+        a.platform_id = 'pad23' and a.account_api_key != '' and b.publisher_id != '' and b.redundancy_status = 1 and b.status =1 $where ;";
 
         $PlatInfo = DB::select($sql);
         $PlatInfo = Service::data($PlatInfo);
@@ -134,6 +136,14 @@ class FacebookAdBiddingCommond extends Command
 //                    $api_data_i++;
 //                    if($api_data_i>3)
 //                        break;
+//                }
+//
+//                //取数四次 取数结果仍为空
+//                if($api_data_i ==4 && empty($re)){
+//                    $error_msg_1 = AD_PLATFORM.'广告平台'.$account.'账号下应用或资产id'.$facebook[$j]['appid'].'取数失败,错误信息:返回数据为空('.json_encode($result).')';
+//                    DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg_1);
+//                    continue;
+//
 //                }
 
                 // pgsql 逻辑
@@ -208,7 +218,7 @@ class FacebookAdBiddingCommond extends Command
                     }
 
                 }else{
-                    $error_application_ids[] = trim($rss['application_id'])."取数失败,失败原因:".(isset($re['error']['message']) ? $re['error']['message'] : '未知错误');
+                    $error_application_ids[] = trim($facebook[$j]['appid'])."取数失败,失败原因:".json_encode($result);
                 }
                 sleep(6);
             }
@@ -226,6 +236,11 @@ class FacebookAdBiddingCommond extends Command
 
         // 调用数据处理过程
         Artisan::call('FacebookBiddingHandleProcesses',['dayid' => $date]);
+        } catch (\Exception $e) {
+            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'广告平台程序失败，失败原因：'.$e->getMessage();
+            DataImportImp::saveDataErrorLog(5,SOURCE_ID,AD_PLATFORM,2,$error_msg_info);
+
+        }
     }
 
     /**

@@ -56,14 +56,14 @@ class TiktokReportCommond extends Command
         define('SCHEMA', 'ad_data');
         define('TABLE_NAME', 'erm_data');
         define('SOURCE_ID', 'pad271'); // todo 这个需要根据平台信息表确定平台ID
-
+        try{
         $start = $dayid;
         $end = $start;
         $time = time();
 
         // todo 正式
 
-        $sql = " select distinct platform_id,data_account as company_account,account_user_id as user_id,account_token as secret_key from c_platform_account_mapping where platform_id = 'pad271' and account_user_id <> '' and account_token <> '' ";
+        $sql = " select distinct platform_id,data_account as company_account,account_user_id as user_id,account_token as secret_key from c_platform_account_mapping where platform_id = 'pad271' and account_user_id <> '' and account_token <> '' and status = 1";
         $PlatInfo = DB::select($sql);
         $PlatInfo = Service::data($PlatInfo);
 
@@ -114,6 +114,13 @@ class TiktokReportCommond extends Command
                     $api_data_i++;
                     if($api_data_i>3)
                         break;
+                }
+
+                if($api_data_i ==4 && empty($result)){
+                    $error_msg_1 = AD_PLATFORM.'广告平台'.$company_account.'账号取数失败,错误信息:返回数据为空('.$result.')';
+                    DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg_1);
+                    continue;
+
                 }
                 //判断是否有数
                 if(isset($result_arr['code']) && $result_arr['code'] == 100 ){
@@ -183,6 +190,11 @@ class TiktokReportCommond extends Command
             }
             // todo tiktok 广告处理过程
             Artisan::call('TiktokReportHandleProcesses' ,['dayid'=>$dayid]);
+        }
+        } catch (\Exception $e) {
+            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'广告平台程序失败，失败原因：'.$e->getMessage();
+            DataImportImp::saveDataErrorLog(5,SOURCE_ID,AD_PLATFORM,2,$error_msg_info);
+
         }
     }
 

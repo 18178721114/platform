@@ -97,8 +97,8 @@ class ApplovinHandleProcesses extends Command
             `c_app_ad_platform`.`flow_type` 
             FROM
             `c_app`
-            LEFT JOIN `c_app_ad_platform` ON `c_app_ad_platform`.`app_id` = `c_app`.`id`
-            LEFT JOIN `c_app_ad_slot` ON `c_app_ad_slot`.`app_ad_platform_id` = `c_app_ad_platform`.`id`
+            LEFT JOIN `c_app_ad_platform` ON `c_app_ad_platform`.`app_id` = `c_app`.`id`    and `c_app_ad_platform`.`status` = 1
+            LEFT JOIN `c_app_ad_slot` ON `c_app_ad_slot`.`app_ad_platform_id` = `c_app_ad_platform`.`id`   and `c_app_ad_slot`.`status` = 1
 
             LEFT JOIN (
             SELECT
@@ -196,10 +196,12 @@ class ApplovinHandleProcesses extends Command
                 }
 
         	}
+            $err_name = 'Null#'.(isset($json_info['application']) ?$json_info['application']:'Null').'#Null#'.(isset($json_info['package_name']) ?$json_info['package_name']:'Null');
+
 
 
             if ($num){
-                $error_log_arr['application'][] = $json_info['platform'].'-'.str_replace('\'\'','\'',$json_info['package_name']);
+                $error_log_arr['application'][] = $json_info['platform'].'-'.str_replace('\'\'','\'',$json_info['package_name']).'('.$err_name.')';
             }
 
         	foreach ($country_info as $country_k => $country_v) {
@@ -215,7 +217,7 @@ class ApplovinHandleProcesses extends Command
         	}
 
             if ($num_country){
-                $error_log_arr['country'][] = isset($json_info['country']) ? $json_info['country'] : 'Unknown Region';
+                $error_log_arr['country'][] = isset($json_info['country']) ? $json_info['country'].'('.$err_name.')' : 'Unknown Region';
             }
 
             foreach ($AdType_info as $AdType_k => $AdType_v) {
@@ -230,7 +232,7 @@ class ApplovinHandleProcesses extends Command
                 }
             }
             if ($num_adtype){
-                $error_log_arr['ad_type'][] = isset($json_info['size']) ? $json_info['size'] : '' ;
+                $error_log_arr['ad_type'][] = isset($json_info['size']) ? $json_info['size'].'('.$err_name.')' : '' ;
             }
 
         	
@@ -306,25 +308,29 @@ class ApplovinHandleProcesses extends Command
         if ($error_log_arr){
             $error_msg_array = [];
             $error_msg_mail = [];
-            if (isset($error_log_arr['application'])){
+            $error_log_arr = Service::shield_error($source_id,$error_log_arr);
+
+            if (isset($error_log_arr['application']) && !empty($error_log_arr['application'])){
                 $application = implode(',',array_unique($error_log_arr['application']));
                 $error_msg_array[] = '应用名称匹配失败,ID为:'.$application;
                 $error_msg_mail[] = '应用名称匹配失败，ID为：'.$application;
             }
 
-            if (isset($error_log_arr['country'])){
+            if (isset($error_log_arr['country']) && !empty($error_log_arr['country'])){
                 $country = implode(',',array_unique($error_log_arr['country']));
                 $error_msg_array[] = '国家匹配失败,code为:'.$country;
                 $error_msg_mail[] = '国家匹配失败，code为：'.$country;
             }
-            if (isset($error_log_arr['ad_type'])){
+            if (isset($error_log_arr['ad_type']) && !empty($error_log_arr['ad_type'])){
                 $ad_type = implode(',',array_unique($error_log_arr['ad_type']));
                 $error_msg_array[] = '广告类型匹配失败,code为:'.$ad_type;
                 $error_msg_mail[] = '广告类型匹配失败，code为：'.$ad_type;
             }
+            if(!empty($error_msg_array)) {
+                DataImportImp::saveDataErrorLog(2, $source_id, $source_name, 2, implode(';', $error_msg_array));
+            }
+            DataImportImp::saveDataErrorMoneyLog($source_id, $dayid, $error_detail_arr);
 
-            DataImportImp::saveDataErrorLog(2,$source_id,$source_name,2,implode(';',$error_msg_array));
-            DataImportImp::saveDataErrorMoneyLog($source_id,$dayid,$error_detail_arr);
 
             // 发送邮件
             //CommonFunction::sendMail($error_msg_mail,$source_name.'广告平台数据处理error');

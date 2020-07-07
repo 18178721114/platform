@@ -59,20 +59,20 @@ class ChangsiReportCommond extends Command
         define('TABLE_NAME', 'erm_data');
         define('SOURCE_ID_CONF', '10023'); // todo 这个需要根据平台信息表确定平台ID
         define('SOURCE_ID', 'pad12'); // todo 这个需要根据平台信息表确定平台ID
-
+        try{
         // todo  数据库配置
 //        $PlatInfo = DataImportLogic::getConf(SOURCE_ID_CONF);
 //        $PlatInfo = Service::data($PlatInfo);
 
-        $sql = " SELECT  data_account as company_account,account_api_key  as api_key from c_platform_account_mapping WHERE platform_id ='pad12' ";
+        $sql = " SELECT  data_account as company_account,account_api_key  as api_key from c_platform_account_mapping WHERE platform_id ='pad12' and status = 1 ";
         $PlatInfo = DB::select($sql);
         $PlatInfo = Service::data($PlatInfo);
 
         if (!$PlatInfo){
-            $message = "{$dayid}, " . AD_PLATFORM . " 广告平台取数失败,失败原因:取数配置信息为空" ;
-            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$message);
-            $error_msg_arr[] = $message;
-            CommonFunction::sendMail($error_msg_arr,'广告平台取数error');
+//            $message = "{$dayid}, " . AD_PLATFORM . " 广告平台取数失败,失败原因:取数配置信息为空" ;
+//            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$message);
+//            $error_msg_arr[] = $message;
+//            CommonFunction::sendMail($error_msg_arr,'广告平台取数error');
             exit;
         }
 
@@ -86,6 +86,24 @@ class ChangsiReportCommond extends Command
             $url = str_replace(array('_USERNAME_','_KEY_','_END_DATE_','_BEGIN_DATE_'),array($value['company_account'],$key,$dayid,$dayid),env('CHANGSI_URL'));
             $data = self::get_response($url);
             $ret = json_decode($data, true);
+
+            // 数据获取重试
+            $api_data_i=1;
+            while(!$ret){
+                $data = self::get_response($url);
+                $ret = json_decode($data, true);
+                $api_data_i++;
+                if($api_data_i>3)
+                    break;
+            }
+            //取数四次 取数结果仍为空
+            if($api_data_i ==4 && empty($ret) ){
+                $error_msg_1 = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:返回数据为空('.json_encode($data).')';
+                DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg_1);
+                continue;
+
+            }
+
             if(isset($ret['status']) && $ret['status'] == 1){
                 if ($ret['data']){
                         //删除数据库里原来数据
@@ -135,12 +153,12 @@ class ChangsiReportCommond extends Command
                         }
                     }
                 }else{
-                    $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'暂无数据';
+                    $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'暂无数据('.json_encode($data).')';
                     DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
                 }
 
             }else{
-                $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:'.(isset($ret['error']) ? $ret['error'] : '未知错误');
+                $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:('.json_encode($data).')';
                 DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
 
                 $error_msg_arr[] = $error_msg;
@@ -150,7 +168,12 @@ class ChangsiReportCommond extends Command
     	}
 
         // 调用数据处理过程
-       Artisan::call('ChangsiHandleProcesses',['dayid' => $dayid]);
+            Artisan::call('ChangsiHandleProcesses',['dayid' => $dayid]);
+        } catch (\Exception $e) {
+            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'广告平台程序失败，失败原因：'.$e->getMessage();
+            DataImportImp::saveDataErrorLog(5,SOURCE_ID,AD_PLATFORM,2,$error_msg_info);
+
+        }
     		
     }
     public static function get_response($url,$headers=array())

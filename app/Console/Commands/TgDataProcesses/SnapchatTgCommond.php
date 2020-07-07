@@ -64,18 +64,26 @@ class SnapchatTgCommond extends Command
         $account = $this->argument('account');
         $date = ParseDayid::get_dayid($dayid);
 
-        $message = "date: $date";
-        self::saveLog(AD_PLATFORM, $message);
 
         $start_date = date('Y-m-d',strtotime($date) - 86400);
         $end_date= $date;
         var_dump($start_date,$end_date);
         // 获取Sino代理token
-        $sino_api_url = 'https://adsapi.snapchat.com/v1';
-        self::getSinoSnapchatToken($sino_api_url,$start_date, $end_date);
+        try {
+            $sino_api_url = 'https://adsapi.snapchat.com/v1';
+            self::getSinoSnapchatToken($sino_api_url, $start_date, $end_date);
 
-        // 数据处理
-        Artisan::call('SnapchatTgHandleProcesses',['dayid'=>$end_date]);
+            // 数据处理
+            Artisan::call('SnapchatTgHandleProcesses', ['dayid' => $end_date]);
+        }catch (\Exception $e) {
+            // 异常报错
+            $message = "{$end_date}号, " . AD_PLATFORM . " 推广平台程序报错,报错原因:".$e->getMessage();
+            DataImportImp::saveDataErrorLog(5, SOURCE_ID, AD_PLATFORM, 4, $message);
+            $error_msg_arr[] = $message;
+            CommonFunction::sendMail($error_msg_arr, '推广平台程序error');
+            exit;
+
+        }
 
     }
 
@@ -111,7 +119,7 @@ class SnapchatTgCommond extends Command
                 $sino_access_token = $get_access_token_result['access_token'];
                 Redis::set('snapchat_sino_access_token', json_encode($get_access_token_result));
             }else{
-                $error_msg = 'Snapchat推广平台Sino代理获取数据失败,错误信息:获取access_token失败';
+                $error_msg = $end_date.'号,Snapchat推广平台获取数据失败,错误信息:获取access_token失败';
                 DataImportImp::saveDataErrorLog(1,'ptg75','Snapchat',4,$error_msg);
             }
         }
@@ -123,39 +131,6 @@ class SnapchatTgCommond extends Command
                 self::getAdAccounts($sino_api_url,$organization_id, $header,$start_date, $end_date);
             }
 
-        }
-    }
-
-    // 获取百度代理token
-    public static function getBaiduSnapchatToken($baidu_api_url,$baidu_organization_id,$start_date, $end_date){
-        // todo 需要改为正式查询
-//        $sql = " select distinct a.platform_id,a.data_account as company_account,b.token as token from c_platform_account_mapping a left join c_generalize b on b.platform_id = a.platform_id and a.account = b.data_account where a.platform_id = 'ptg75' ";
-        $sql = " select distinct platform_id,data_account as company_account,account_token as token from c_platform_account_mapping where platform_id = 'ptg75' ";
-        $info = DB::select($sql);
-        $info = Service::data($info);
-        if (!$info) return;
-
-        foreach ($info as $key => $value) {
-            $refresh_token = $value['token'];
-//            $refresh_token = "eyJraWQiOiJyZWZyZXNoLXRva2VuLWExMjhnY20uMCIsInR5cCI6IkpXVCIsImVuYyI6IkExMjhHQ00iLCJhbGciOiJkaXIifQ..FyQiPixWHZMWyRPu.HTN0ERNwyK5fQt1rwq82c1n_274VkhSObClWqBst-Xs1mnNlCT609H0c81we__JWH6g-Wv8pDntK1w8Gr3lR7WR1M5Qb_yahoERGULph66aMRlU0CBW9mD8OTHiHQ3F5xcIRq23EeAdQqCyof_I9WcPvoNYtHw3RWU39Vcfhwo21yguhI0CDR-wyyAgchWuqbVs6BEF3-MMa1wbepCooD1z70cfNmUt8uH1ScKOTiySvtxxsYRumshw8PH9vjn_K8MJNz5lPqEuuHUA.jVOgUPkI7A8pYgsGPdGDjw";
-
-            $refresh_token_data = array('grant_type' => 'refresh_token', 'code' => $refresh_token,);
-            $get_access_token_url = "https://mediago.baidu.com/api/refreshtoken";
-            $get_access_token_result = self::curl_post_https($get_access_token_url, $refresh_token_data);
-            if ($get_access_token_result) {
-                $get_access_token_result = json_decode($get_access_token_result, true);
-                $access_token = isset($get_access_token_result['access_token']) ? $get_access_token_result['access_token'] : '';
-                if ($access_token) {
-                    $header = array('Authorization: Bearer ' . $access_token);
-                    self::getAdAccounts($baidu_api_url,$baidu_organization_id,$header, $start_date, $end_date);
-
-                } else {
-                    $error_msg = AD_PLATFORM . '推广平台获取access_token失败';
-                    DataImportImp::saveDataErrorLog(1, SOURCE_ID, AD_PLATFORM, 4, $error_msg);
-                    $error_msg_arr[] = $error_msg;
-                    CommonFunction::sendMail($error_msg_arr, AD_PLATFORM . '推广平台取数error');
-                }
-            }
         }
     }
 
@@ -198,7 +173,13 @@ class SnapchatTgCommond extends Command
                         self::getAdReport($api_url, $organization_id, $adaccount_name, $adaccount_id,$campaign_name_list, $header, $start_date, $end_date,$timezone);
                     }
                 }
+            }else{
+                $error_msg = $end_date.'号,Snapchat推广平台获取adaccount列表数据失败,错误信息:'.(isset($adaccounts_res['display_message']) ? $adaccounts_res['display_message'] : isset($adaccounts_res['debug_message']) ? $adaccounts_res['debug_message'] : '暂无数据');
+                DataImportImp::saveDataErrorLog(1,'ptg75','Snapchat',4,$error_msg);
             }
+        }else{
+            $error_msg = $end_date.'号,Snapchat推广平台获取adaccount列表数据失败,错误信息:无数据，接口未返回任何信息';
+            DataImportImp::saveDataErrorLog(1,'ptg75','Snapchat',4,$error_msg);
         }
     }
 
@@ -227,7 +208,13 @@ class SnapchatTgCommond extends Command
                         $campaign_name_list[$adaccount_id][$campaign_id] = $campaign_name;
                     }
                 }
+            }else{
+//                $error_msg = $end_date.'号,Snapchat推广平台获取campaign列表数据失败,错误信息:'.(isset($campaigns_res['display_message']) ? $campaigns_res['display_message'] : isset($campaigns_res['debug_message']) ? $campaigns_res['debug_message'] : '暂无数据');
+//                DataImportImp::saveDataErrorLog(1,'ptg75','Snapchat',4,$error_msg);
             }
+        }else{
+//            $error_msg = $end_date.'号,Snapchat推广平台获取campaign列表数据失败,错误信息:无数据，接口未返回任何信息';
+//            DataImportImp::saveDataErrorLog(1,'ptg75','Snapchat',4,$error_msg);
         }
         return $campaign_name_list;
     }
@@ -329,7 +316,13 @@ class SnapchatTgCommond extends Command
                 }
 
                 self::insertData($all_data,$end_date,$organization_id,$adaccount_id);
+            }else{
+                $error_msg = $end_date.'号,Snapchat推广平台'.$adaccount_id.'获取报表数据失败,错误信息:'.(isset($ads_stats_res['display_message']) ? $ads_stats_res['display_message'] : isset($ads_stats_res['debug_message']) ? $ads_stats_res['debug_message'] : '暂无数据');
+                DataImportImp::saveDataErrorLog(1,'ptg75','Snapchat',4,$error_msg);
             }
+        }else{
+            $error_msg = $end_date.'号,Snapchat推广平台'.$adaccount_id.'获取报表数据失败,错误信息:无数据，接口未返回任何信息';
+            DataImportImp::saveDataErrorLog(1,'ptg75','Snapchat',4,$error_msg);
         }
     }
 

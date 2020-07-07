@@ -66,6 +66,7 @@ class ChangsiHandleProcesses extends Command
         $map['dayid'] = $dayid;
         $map['type'] = 2;
         $map['source_id'] = $source_id;
+        $map[] =['income','<>',0] ;
         $info = DataImportLogic::getChannelData('ad_data','erm_data',$map)->get();
         $info = Service::data($info);
 
@@ -93,8 +94,8 @@ class ChangsiHandleProcesses extends Command
             `c_app_ad_platform`.`flow_type` 
             FROM
             `c_app`
-            LEFT JOIN `c_app_ad_platform` ON `c_app_ad_platform`.`app_id` = `c_app`.`id`
-            LEFT JOIN `c_app_ad_slot` ON `c_app_ad_slot`.`app_ad_platform_id` = `c_app_ad_platform`.`id`
+            LEFT JOIN `c_app_ad_platform` ON `c_app_ad_platform`.`app_id` = `c_app`.`id` and `c_app_ad_platform`.`status` = 1
+            LEFT JOIN `c_app_ad_slot` ON `c_app_ad_slot`.`app_ad_platform_id` = `c_app_ad_platform`.`id`   and `c_app_ad_slot`.`status` = 1
 
             LEFT JOIN (
             SELECT
@@ -177,9 +178,10 @@ class ChangsiHandleProcesses extends Command
         			
         		}
         	}
+            $err_name = 'Null#Null#Null#'.(isset($json_info['appname']) ?$json_info['appname']:'Null');
 
             if ($num){
-                $error_log_arr['app_name'][] = $json_info['appname'];
+                $error_log_arr['app_name'][] = $json_info['appname'].'('.$err_name.')';
             }
 
             $array[$k]['country_id'] = 16;
@@ -197,7 +199,7 @@ class ChangsiHandleProcesses extends Command
                 }
             }
             if ($num_adtype){
-                $error_log_arr['ad_type'][] = isset($json_info['adform']) ? $json_info['adform'] : '' ;
+                $error_log_arr['ad_type'][] = isset($json_info['adform']) ? $json_info['adform'].'('.$err_name.')' : '' ;
             }
 
         	if( $num+$num_adtype > 0){
@@ -272,17 +274,21 @@ class ChangsiHandleProcesses extends Command
         if ($error_log_arr){
             $error_msg_array = [];
             $error_msg_mail = [];
-            if (isset($error_log_arr['app_name'])){
+            $error_log_arr = Service::shield_error($source_id,$error_log_arr);
+
+            if (isset($error_log_arr['app_name']) && !empty($error_log_arr['app_name'])){
                 $app_name_str = implode(',',array_unique($error_log_arr['app_name']));
                 $error_msg_array[] = '应用名称匹配失败,ID为:'.$app_name_str;
                 $error_msg_mail[] = '应用名称匹配失败，ID为：'.$app_name_str;
             }
-            if (isset($error_log_arr['ad_type'])){
+            if (isset($error_log_arr['ad_type']) && !empty($error_log_arr['ad_type'])){
                 $ad_type = implode(',',array_unique($error_log_arr['ad_type']));
                 $error_msg_array[] = '广告类型匹配失败,code为:'.$ad_type;
                 $error_msg_mail[] = '广告类型匹配失败，code为：'.$ad_type;
             }
-            DataImportImp::saveDataErrorLog(2,$source_id,$source_name,2,implode(';',$error_msg_array));
+            if(!empty($error_msg_array)) {
+                DataImportImp::saveDataErrorLog(2, $source_id, $source_name, 2, implode(';', $error_msg_array));
+            }
             DataImportImp::saveDataErrorMoneyLog($source_id,$dayid,$error_detail_arr);
 
             // 发送邮件

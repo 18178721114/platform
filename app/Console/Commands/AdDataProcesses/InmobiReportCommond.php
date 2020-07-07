@@ -58,7 +58,7 @@ class InmobiReportCommond extends Command
         define('SCHEMA', 'ad_data');
         define('TABLE_NAME', 'erm_data');
         define('SOURCE_ID', 'pad02'); // todo 这个需要根据平台信息表确定平台ID
-
+        try{
         // todo 这里面要写新测试平台里的数据配置 从数据库里取数据
 
 //        $info[0]['company_account'] ='arlin@noodlecake.com';
@@ -71,7 +71,7 @@ class InmobiReportCommond extends Command
 //        $info[2]['company_pass'] ='zplaygogogo1';
 //        $info[2]['secretKey'] ='b046c4fe1d6742faa40764ff39f82bf9';
 //
-        $sql = "SELECT  data_account as company_account,account_pass  as company_pass,account_token  as secretKey from c_platform_account_mapping WHERE platform_id ='pad02' ";
+        $sql = "SELECT  data_account as company_account,account_pass  as company_pass,account_token  as secretKey from c_platform_account_mapping WHERE platform_id ='pad02' and status = 1 ";
         $info = DB::select($sql);
         $info = Service::data($info);
         if (!$info) return;
@@ -127,12 +127,7 @@ class InmobiReportCommond extends Command
                    
                 }
             } else {
-                $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:';
-                if (isset($data['errorList']) && $data['errorList']){
-                    $error_msg .= $data['errorList'][0]['message'];
-                }else{
-                    $error_msg .= '未知';
-                }
+                $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:('.json_encode($data).')';
                 DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
 
                 $error_msg_arr = [];
@@ -141,7 +136,12 @@ class InmobiReportCommond extends Command
             }
 
         }
-         Artisan::call('InmobiHandleProcesses' ,['dayid'=>$dayid]);
+            Artisan::call('InmobiHandleProcesses' ,['dayid'=>$dayid]);
+        } catch (\Exception $e) {
+            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'广告平台程序失败，失败原因：'.$e->getMessage();
+            DataImportImp::saveDataErrorLog(5,SOURCE_ID,AD_PLATFORM,2,$error_msg_info);
+
+        }
 
     }
 

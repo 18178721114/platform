@@ -392,6 +392,7 @@ class DataOperationImp extends ApiBaseImp
         }elseif($language == 'en'){
             $new_select .= " c.full_name as china_name, ";
         }
+
         if ($is_show == 1) {
             $sql = "select 
             date,

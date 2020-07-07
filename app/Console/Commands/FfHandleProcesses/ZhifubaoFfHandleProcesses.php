@@ -143,7 +143,7 @@ class ZhifubaoFfHandleProcesses extends Command
 
             	}
                 if($num){
-                    $error_log_arr['app_id'][]=$json_info['zplay_key'].'_'.$json_info['platform'];
+                    $error_log_arr['app_id'][]=$json_info['zplay_key'].'_'.$json_info['platform'].'('.$json_info['name'].')';
                 }
 
 
@@ -180,7 +180,7 @@ class ZhifubaoFfHandleProcesses extends Command
                  }
                }
                if($num_country){
-                    $error_log_arr['country'][] = isset($json_info['position']) ? $json_info['position'].'/'.$json_info['country'] : 'Unknown Region' ;
+                    $error_log_arr['country'][] = (isset($json_info['position']) ? $json_info['position'].'/'.$json_info['country'] : 'Unknown Region').'('.$json_info['name'].')';
                 }
                 
             	if(($num+$num_country+$num_channel)>0){

@@ -48,15 +48,23 @@ class TotalCommond extends Command
     public function handle()
     {
         set_time_limit(0);
+        try {
+            // 入口方法
+            $month = $this->argument('month') ? $this->argument('month') : date('Y-m');
+            $firstday = $month . '-01';
+            $lastday = date('Y-m-d', strtotime("$firstday +1 month -1 day"));
+            var_dump($month, $firstday, $lastday);
 
-        // 入口方法
-        $month = $this->argument('month')?$this->argument('month'):date('Y-m');
-        $firstday = $month.'-01';
-        $lastday = date('Y-m-d', strtotime("$firstday +1 month -1 day"));
-        var_dump($month,$firstday,$lastday);
 
-
-        $this->insertBasicDataHomePage($firstday,$lastday,$month);
+            $this->insertBasicDataHomePage($firstday, $lastday, $month);
+        }catch (\Exception $e) {
+            // 异常报错
+            $message = date("Y-m-d")."号,累计数据程序报错,报错原因:".$e->getMessage();
+            DataImportImp::saveDataErrorLog(5, 'pad-001', '累计数据', 2, $message);
+            $error_msg_arr[] = $message;
+            CommonFunction::sendMail($error_msg_arr, '累计数据');
+            exit;
+        }
 
 
 

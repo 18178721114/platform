@@ -58,7 +58,7 @@ class SmaatoCommond extends Command
         define('TABLE_NAME', 'erm_data');
         define('SOURCE_ID_CONF', '10015'); // todo 这个需要根据平台信息表确定平台ID
         define('SOURCE_ID', 'pad21'); // todo 这个需要根据平台信息表确定平台ID
-
+        try{
         $date = $this->argument('dayid') ? $this->argument('dayid') : date('Y-m-d',strtotime('-1 day'));
         $account = $this->argument('account');
 
@@ -67,17 +67,17 @@ class SmaatoCommond extends Command
 //        $PlatInfo = DataImportLogic::getConf(SOURCE_ID_CONF);
 //        $PlatInfo = Service::data($PlatInfo);
 
-        $sql = " SELECT  data_account as company_account,account_user_id  as client_id,account_token  as client_secret from c_platform_account_mapping WHERE platform_id ='pad21' ";
+        $sql = " SELECT  data_account as company_account,account_user_id  as client_id,account_token  as client_secret from c_platform_account_mapping WHERE platform_id ='pad21' and status = 1 ";
         $PlatInfo = DB::select($sql);
         $PlatInfo = Service::data($PlatInfo);
 
         if (!$PlatInfo){
-            $message = "{$dayid}, " . AD_PLATFORM . " 广告平台取数失败,失败原因:取数配置信息为空" ;
-            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$message);
-
-            $error_msg_arr = [];
-            $error_msg_arr[] = $message;
-            CommonFunction::sendMail($error_msg_arr,AD_PLATFORM.'广告平台取数error');
+//            $message = "{$date}, " . AD_PLATFORM . " 广告平台取数失败,失败原因:取数配置信息为空" ;
+//            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$message);
+//
+//            $error_msg_arr = [];
+//            $error_msg_arr[] = $message;
+//            CommonFunction::sendMail($error_msg_arr,AD_PLATFORM.'广告平台取数error');
             exit;
         }
 
@@ -101,6 +101,11 @@ class SmaatoCommond extends Command
                 // 调用数据处理过程
                 Artisan::call('SmaatoHandleProcesses',['dayid' => $date]);
             }
+        }
+        } catch (\Exception $e) {
+            $error_msg_info = $date.'号,'.AD_PLATFORM.'广告平台程序失败，失败原因：'.$e->getMessage();
+            DataImportImp::saveDataErrorLog(5,SOURCE_ID,AD_PLATFORM,2,$error_msg_info);
+
         }
 
     }
@@ -163,7 +168,7 @@ class SmaatoCommond extends Command
 
         if(!$data || isset($data['message'])){
 
-            $error_msg = AD_PLATFORM.'广告平台'.$account.'账号取数失败,错误信息:'. (isset($data['message']) ? $data['message'] : '未知');
+            $error_msg = AD_PLATFORM.'广告平台'.$account.'账号取数失败,错误信息:'.json_encode($data);
             DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
 
             $error_msg_arr = [];

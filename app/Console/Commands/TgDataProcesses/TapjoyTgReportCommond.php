@@ -59,40 +59,56 @@ class TapjoyTgReportCommond extends Command
         define('TABLE_NAME', 'erm_data');
         define('SOURCE_ID', 'ptg67'); // todo 这个需要根据平台信息表确定平台ID
 
-        // todo 这里面要写新测试平台里的数据配置 从数据库里取数据
-//        $sql = " select distinct a.platform_id,a.data_account as company_account,b.api_key as api_key from c_platform_account_mapping a left join c_generalize b on b.platform_id = a.platform_id and a.account = b.data_account where a.platform_id = 'ptg67' ";
-        $sql = "  select distinct platform_id,data_account as company_account,account_api_key as api_key from c_platform_account_mapping where platform_id = 'ptg67' ";
-        $info = DB::select($sql);
-        $info = Service::data($info);
-        if (!$info) return;
-        foreach ($info as $kk => $vv) {
-            $company_account = $vv['company_account'];
-            $app['api_key'] = $vv['api_key'];
-            $access_token_header = array("authorization:Basic " . $app['api_key'], "accept: application/json; */*",);
-            $token_url = env('TAPJOY_TOKEN_URL');
-            $response = self::curl($token_url, 'POST', $access_token_header);
-            $response = json_decode($response, true);
-            if (isset($response['error'])) {
-                $error_msg = AD_PLATFORM . '推广平台' . $company_account . '账号获取access_token失败,错误信息:' . $response['error'];
-                DataImportImp::saveDataErrorLog(1, SOURCE_ID, AD_PLATFORM, 4, $error_msg);
-                die;
-            }
-            $access_token = $response['access_token'];
-            $data_header = array("accept: application/json; */*", "authorization: Bearer  {$access_token}",);
-
-            //删除数据库里原来数据
-            $map['dayid'] = $dayid;
-            $map['source_id'] = SOURCE_ID;
-            $map['account'] = $company_account;
-            $count = DataImportLogic::getChannelData('tg_data','erm_data',$map)->count();
-            if($count>0){
-            //删除数据
-                DataImportLogic::deleteHistoryData('tg_data', 'erm_data', $map);
+        try {
+            $sql = "  select distinct platform_id,data_account as company_account,account_api_key as api_key from c_platform_account_mapping where platform_id = 'ptg67' and status = 1";
+            $info = DB::select($sql);
+            $info = Service::data($info);
+            if (!$info) {
+                // 无配置报错提醒
+                $message = "{$dayid}号, " . AD_PLATFORM . " 推广平台取数失败,失败原因:取数配置信息为空";
+                DataImportImp::saveDataErrorLog(1, SOURCE_ID, AD_PLATFORM, 4, $message);
+                $error_msg_arr[] = $message;
+                CommonFunction::sendMail($error_msg_arr, '推广平台取数error');
+                exit;
             }
 
-            // todo 获取广告集合
-            $post_url = "https://api.tapjoy.com/graphql";
-            $post_params = '{"query":"query {
+            foreach ($info as $kk => $vv) {
+                $company_account = $vv['company_account'];
+                $app['api_key'] = $vv['api_key'];
+                $access_token_header = array("authorization:Basic " . $app['api_key'], "accept: application/json; */*",);
+                $token_url = env('TAPJOY_TOKEN_URL');
+                $response = self::curl($token_url, 'POST', $access_token_header);
+                $response = json_decode($response, true);
+
+                // 数据获取重试
+                $api_data_i = 1;
+                while (!$response) {
+                    $response = self::curl($token_url, 'POST', $access_token_header);
+                    $response = json_decode($response, true);
+                    $api_data_i++;
+                    if ($api_data_i > 3) break;
+                }
+
+                if (isset($response['error']) || !$response) {
+                    $error_msg = AD_PLATFORM . '推广平台' . $company_account . '账号获取access_token失败,错误信息:' . (isset($response['error']) ? $response['error'] : '无数据，接口未返回任何信息');
+                    DataImportImp::saveDataErrorLog(1, SOURCE_ID, AD_PLATFORM, 4, $error_msg);
+                }else{
+                    $access_token = $response['access_token'];
+                    $data_header = array("accept: application/json; */*", "authorization: Bearer  {$access_token}",);
+
+                    //删除数据库里原来数据
+                    $map['dayid'] = $dayid;
+                    $map['source_id'] = SOURCE_ID;
+                    $map['account'] = $company_account;
+                    $count = DataImportLogic::getChannelData('tg_data', 'erm_data', $map)->count();
+                    if ($count > 0) {
+                        //删除数据
+                        DataImportLogic::deleteHistoryData('tg_data', 'erm_data', $map);
+                    }
+
+                    // todo 获取广告集合
+                    $post_url = "https://api.tapjoy.com/graphql";
+                    $post_params = '{"query":"query {
                   advertiser {
                     adSets(first: 100) {
                       edges {
@@ -111,42 +127,52 @@ class TapjoyTgReportCommond extends Command
                 }"
                 }';
 
-            $data_response = self::getContent2($post_url, $post_params, $data_header);
-            $data_response = json_decode($data_response, true);
+                    $data_response = self::getContent2($post_url, $post_params, $data_header);
+                    $data_response = json_decode($data_response, true);
 
 
-            if (isset($data_response['data']) && $data_response['data']) {
-                $res_data = $data_response['data'];
-                if (isset($res_data['advertiser']) && $res_data['advertiser']) {
-                    $advertiser_info = $res_data['advertiser'];
-                    if (isset($advertiser_info['adSets']) && $advertiser_info['adSets']) {
-                        $adSets = $advertiser_info['adSets'];
-                        if (isset($adSets['edges']) && $adSets['edges']){
-                            $edges = $adSets['edges'];
-//                            var_dump($edges);
-                            foreach ($edges as $adge_info){
-                                if (isset($adge_info['node']) && $adge_info['node']){
-                                    $node_info = $adge_info['node'];
-                                    $ad_id = $node_info['id'];
-                                    $ad_name = $node_info['name'];
-                                    $ad_name_suffix = $node_info['nameSuffix'];
-                                    self::getAdReport($ad_id,$dayid,$company_account,$data_header,$ad_name,$ad_name_suffix);
+                    if (isset($data_response['data']) && $data_response['data']) {
+                        $res_data = $data_response['data'];
+                        if (isset($res_data['advertiser']) && $res_data['advertiser']) {
+                            $advertiser_info = $res_data['advertiser'];
+                            if (isset($advertiser_info['adSets']) && $advertiser_info['adSets']) {
+                                $adSets = $advertiser_info['adSets'];
+                                if (isset($adSets['edges']) && $adSets['edges']) {
+                                    $edges = $adSets['edges'];
+                                    foreach ($edges as $adge_info) {
+                                        if (isset($adge_info['node']) && $adge_info['node']) {
+                                            $node_info = $adge_info['node'];
+                                            $ad_id = $node_info['id'];
+                                            $ad_name = $node_info['name'];
+                                            $ad_name_suffix = $node_info['nameSuffix'];
+                                            self::getAdReport($ad_id, $dayid, $company_account, $data_header, $ad_name, $ad_name_suffix);
+                                        }
+                                    }
                                 }
-                            }
-                        }
-                        if (isset($adSets['pageInfo']) && $adSets['pageInfo']) {
-                            $pageInfo = $adSets['pageInfo'];
-                            $endCursor = isset($pageInfo['endCursor']) ? $pageInfo['endCursor'] : '';
-                            $hasNextPage = isset($pageInfo['hasNextPage']) ? $pageInfo['hasNextPage'] : '';
-                            if ($hasNextPage && $endCursor){
-                                self::getAdIds($dayid,$company_account,$data_header,$endCursor);
+                                if (isset($adSets['pageInfo']) && $adSets['pageInfo']) {
+                                    $pageInfo = $adSets['pageInfo'];
+                                    $endCursor = isset($pageInfo['endCursor']) ? $pageInfo['endCursor'] : '';
+                                    $hasNextPage = isset($pageInfo['hasNextPage']) ? $pageInfo['hasNextPage'] : '';
+                                    if ($hasNextPage && $endCursor) {
+                                        self::getAdIds($dayid, $company_account, $data_header, $endCursor);
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
+            Artisan::call('TapjoyTgHandleProcesses', ['dayid' => $dayid]);
+
+        }catch (\Exception $e) {
+            // 异常报错
+            $message = "{$dayid}号, " . AD_PLATFORM . " 推广平台程序报错,报错原因:".$e->getMessage();
+            DataImportImp::saveDataErrorLog(5, SOURCE_ID, AD_PLATFORM, 4, $message);
+            $error_msg_arr[] = $message;
+            CommonFunction::sendMail($error_msg_arr, '推广平台程序error');
+            exit;
+
         }
-        Artisan::call('TapjoyTgHandleProcesses', ['dayid' => $dayid]);
 
     }
 
@@ -219,6 +245,11 @@ class TapjoyTgReportCommond extends Command
                     }
                 }
             }
+        }else{
+            $error_msg = AD_PLATFORM . '推广平台' . $company_account . '账号获取报表数据失败,错误信息:' . (isset($data_response['errors']) ? $data_response['errors'] : '暂无数据');
+            DataImportImp::saveDataErrorLog(1, SOURCE_ID, AD_PLATFORM, 4, $error_msg);
+            $error_msg_arr[] = $error_msg;
+            CommonFunction::sendMail($error_msg_arr, AD_PLATFORM . '推广平台取数error');
         }
     }
 
@@ -307,10 +338,10 @@ class TapjoyTgReportCommond extends Command
             }
 
         } else {
-            $error_msg = AD_PLATFORM . '推广平台' . $company_account . '账号下ad_group_id为:' . $ad_group_id . '获取数据失败,错误信息:' . (isset($data_response['errors']) ? $data_response['errors'] : '无数据');
-            DataImportImp::saveDataErrorLog(1, SOURCE_ID, AD_PLATFORM, 4, $error_msg);
-            $error_msg_arr[] = $error_msg;
-            CommonFunction::sendMail($error_msg_arr, AD_PLATFORM . '推广平台取数error');
+//            $error_msg = AD_PLATFORM . '推广平台' . $company_account . '账号下ad_group_id为:' . $ad_group_id . '获取数据失败,错误信息:' . (isset($data_response['errors']) ? $data_response['errors'] : '暂无数据');
+//            DataImportImp::saveDataErrorLog(1, SOURCE_ID, AD_PLATFORM, 4, $error_msg);
+//            $error_msg_arr[] = $error_msg;
+//            CommonFunction::sendMail($error_msg_arr, AD_PLATFORM . '推广平台取数error');
         }
 
     }

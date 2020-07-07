@@ -49,11 +49,19 @@ class PublishCountry1Commond extends Command
     public function handle()
     {
         set_time_limit(0);
-
-        // 入口方法
-        $beginday = $this->argument('beginday')?$this->argument('beginday'):date('Y-m-d',strtotime('-6 day'));
-        $endday = $this->argument('endday')?$this->argument('endday'):date('Y-m-d');
-        $this->insertBasicDataHomePage($beginday,$endday);
+        try {
+            // 入口方法
+            $beginday = $this->argument('beginday') ? $this->argument('beginday') : date('Y-m-d', strtotime('-6 day'));
+            $endday = $this->argument('endday') ? $this->argument('endday') : date('Y-m-d');
+            $this->insertBasicDataHomePage($beginday, $endday);
+        }catch (\Exception $e) {
+            // 异常报错
+            $message = date("Y-m-d")."号,发行数据分国家数据程序报错,报错原因:".$e->getMessage();
+            DataImportImp::saveDataErrorLog(5, 'pad-001', '发行数据分国家数据', 2, $message);
+            $error_msg_arr[] = $message;
+            CommonFunction::sendMail($error_msg_arr, '发行数据分国家数据');
+            exit;
+        }
 
     }
 

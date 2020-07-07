@@ -56,13 +56,13 @@ class YumiReportCommond extends Command
         //查询pgsql 的数据
         $source_id = 'pad262';
         $source_name = '玉米广告国内安卓渠道';
-
+        try {
         $sql = "SELECT
         platform_app_id
         FROM
         c_app_ad_platform
         WHERE
-        platform_id = '$source_id' and platform_app_id is not null";
+        platform_id = '$source_id' and platform_app_id is not null and status = 1";
         $app_info_list = DB::select($sql);
         $app_info_list = Service::data($app_info_list);
         $str ='';
@@ -176,146 +176,12 @@ else app_uuid end ) AS app_id,-- 玉米id
 
             Artisan::call('YumiHandleProcesses' ,['dayid'=>$dayid]);
         }
+            } catch (\Exception $e) {
+        $error_msg_info = $dayid.'号,'.$source_name.'广告平台程序失败，失败原因：'.$e->getMessage();
+        DataImportImp::saveDataErrorLog(5,$source_id,$source_name,2,$error_msg_info);
 
-//        define('AD_PLATFORM', '玉米广告');
-//        define('SCHEMA', 'ad_data');
-//        define('TABLE_NAME', 'erm_data');
-//        define('SOURCE_ID', 'pad262'); // todo 这个需要根据平台信息表确定平台ID
-//
-//        $developer_id = 'yumi7onrmzfnyull29n2'; // 开发者ID
-//        $token = 'inayuwc3qdegmvphwi93eu132ibx27jt'; // 秘钥
-//        // 生成签名
-//        $timestamp = time();
-//        $nonce = rand(1,999);
-//        $tmpArr = array($token, $timestamp, $nonce);
-//        sort($tmpArr, SORT_STRING);
-//        $signature = implode( $tmpArr );
-//        $signature = sha1( $signature );
-//
-//        $params = array(
-//            'signature' => $signature,
-//            'timestamp' => $timestamp,
-//            'nonce' => $nonce,
-//        );
-//
-//        $url = "https://im.yumimobi.com/report_api/developer/{$developer_id}/app";
-//        $url .= '?' . http_build_query($params, null, '&');
-//        $appInfoList = self::get_response($url);
-//        $appInfoList = json_decode($appInfoList,true);
-////        var_dump($appInfoList);
-//        //获取应用信息
-//        if(!empty($appInfoList['data'])){
-//            foreach ($appInfoList['data'] as $appInfo){
-//                $os = isset($appInfo['os']) ? $appInfo['os'] : ''; // 系统：1=Android，2=iOS
-//                $app_name = isset($appInfo['app_name']) ? $appInfo['app_name'] : ''; // 应用名称
-//                $app_uuid = isset($appInfo['app_uuid']) ? $appInfo['app_uuid'] : ''; // 应用id
-//                $dataUrl = "https://im.yumimobi.com/report_api/developer/{$developer_id}/app/{$app_uuid}/stat";
-//                $params['start_date'] = $dayid;
-//                $params['end_date'] = $dayid;
-//
-//                $dataUrl .= '?' . http_build_query($params, null, '&');
-//                $dataInfo = self::get_response($dataUrl);
-//                $dataInfo = json_decode($dataInfo,true);
-//                if(!empty($dataInfo['data'])){
-//
-//                    $map['dayid'] = $dayid;
-//                    $map['source_id'] = SOURCE_ID;
-//                    $map['account'] = 'zplay';
-//                    $map['app_id'] = $app_uuid;
-//                    $count = DataImportLogic::getChannelData('ad_data','erm_data',$map)->count();
-//                    if($count>0){
-//
-//                    //删除数据
-//                        DataImportLogic::deleteHistoryData(SCHEMA,TABLE_NAME,$map);
-//                    }
-//                    $index = 0;
-//                    $insert_data =[];
-//                    $step =[];
-//                    foreach ($dataInfo['data'] as $data){
-//
-//                        if ($data['ad_plat_name'] != 'yumi') continue;
-//                        $data['app_name'] = $app_name;
-//                        $data['app_id'] = $app_uuid;
-//                        $data['developer_id'] = $developer_id;
-//                        $data['app_uuid'] = $app_uuid;
-//                        $data['country'] = isset($data['country_code']) ? $data['country_code'] : '';
-//                        $data['os'] = $os;
-//
-//                        $insert_data[$index]['account'] = 'zplay';
-//                        $insert_data[$index]['app_id'] = $app_uuid;
-//                        $insert_data[$index]['type'] = 2;
-//                        $insert_data[$index]['source_id'] = SOURCE_ID;
-//                        $insert_data[$index]['dayid'] = $dayid;
-//                        $insert_data[$index]['json_data'] =str_replace('\'','\'\'',json_encode($data));
-//                        $insert_data[$index]['create_time'] = date("Y-m-d H:i:s");
-//                        $insert_data[$index]['ad_id'] =$data['slot_uuid'];
-//                        $insert_data[$index]['app_id'] =$data['app_id'];
-//                        $insert_data[$index]['app_name'] =$data['app_name'];
-//                        $insert_data[$index]['income'] =$data['income'];
-//                        $insert_data[$index]['year'] = date("Y",strtotime($dayid));
-//                        $insert_data[$index]['month'] = date("m",strtotime($dayid));
-//
-//                        $index++;
-//
-//                    }
-//                    $i = 0;
-//                    foreach ($insert_data as $kkkk => $insert_data_info) {
-//                        if ($kkkk % 2000 == 0) $i++;
-//                        if ($insert_data_info) {
-//                            $step[$i][] = $insert_data_info;
-//                        }
-//                    }
-//                    if ($step) {
-//                        foreach ($step as $k => $v) {
-//                            $result = DataImportLogic::insertChannelData(SCHEMA,TABLE_NAME,$v);
-//                            if (!$result) {
-//                                echo 'mysql_error'. PHP_EOL;
-//                            }
-//                        }
-//
-//                    }
-//                }else{
-//
-//                    if(count($dataInfo['data']) ==0){
-//
-////                        $error_msg = AD_PLATFORM.'广告平台'.$developer_id.'账号下应用'.$app_uuid.'数据为空';
-////                        DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
-//                    }else{
-//                        $error_msg = AD_PLATFORM.'广告平台'.$developer_id.'账号下应用'.$app_uuid.'取数失败,错误信息:'.$dataInfo['error'];
-//                        DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
-//
-//                        $error_msg_arr = [];
-//                        $error_msg_arr[] = $error_msg;
-//                        CommonFunction::sendMail($error_msg_arr,AD_PLATFORM.'广告平台取数error');
-//                    }
-//
-//                }
-//            }
-//
-//        }else {
-//            $error_msg = AD_PLATFORM.'广告平台'.$developer_id.'账号取数失败,错误信息:'.$appInfoList['error'];
-//            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
-//        }
+        }
     }
 
-//    public static function get_response($url, $headers='')
-//    {
-//        $ch = curl_init();
-//        curl_setopt($ch, CURLOPT_URL, $url);
-//
-//        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-//        curl_setopt($ch, CURLOPT_HEADER, 0);
-//        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-//        curl_setopt($ch, CURLOPT_TIMEOUT,120);
-//        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-//        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
-//
-//        if (!empty($headers)) {
-//            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-//        }
-//
-//        $output = curl_exec($ch);
-//        curl_close($ch);
-//        return $output;
-//    }
+
 }

@@ -28,7 +28,7 @@ class CGeneralize extends Model{
      * @var array
      */
     protected $fillable = [
-        'app_id', 'platform_id','data_account', 'agency_platform_id', 'application_id','application_name', 'token', 'account_id', 'generalize_status', 'create_time', 'update_time','api_key','user_id','user_signature','secret_key','organization_id'
+        'app_id', 'platform_id','data_account', 'agency_platform_id', 'application_id','application_name', 'token', 'account_id', 'generalize_status', 'create_time', 'update_time','api_key','user_id','user_signature','secret_key','organization_id','redundancy_generalize_status'
     ];
 
     /**

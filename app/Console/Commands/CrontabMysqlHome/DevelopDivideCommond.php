@@ -48,16 +48,24 @@ class DevelopDivideCommond extends Command
     public function handle()
     {
         set_time_limit(0);
+        try {
+            // 入口方法
+            $beginday = $this->argument('beginday') ? $this->argument('beginday') : date('Y-m-d', strtotime('-6 day'));
+            $endday = $this->argument('endday') ? $this->argument('endday') : date('Y-m-d', strtotime('-2 day'));
+            for ($i = strtotime($beginday); $i <= strtotime($endday); $i += 86400) {
+                $dayid = date('Y-m-d', $i);
+                var_dump($dayid);
+                $this->insertBasicDataHomePage($dayid);
 
-        // 入口方法
-        $beginday = $this->argument('beginday')?$this->argument('beginday'):date('Y-m-d',strtotime('-6 day'));
-        $endday = $this->argument('endday')?$this->argument('endday'):date('Y-m-d',strtotime('-2 day'));
-         for ($i=strtotime($beginday); $i <=strtotime($endday) ; $i+=86400) {
-            $dayid = date('Y-m-d',$i);
-            var_dump($dayid);
-            $this->insertBasicDataHomePage($dayid);
-
-         }
+            }
+        }catch (\Exception $e) {
+            // 异常报错
+            $message = date("Y-m-d")."号,开发者美元数据程序报错,报错原因:".$e->getMessage();
+            DataImportImp::saveDataErrorLog(5, 'pad-001', '开发者美元数据', 2, $message);
+            $error_msg_arr[] = $message;
+            CommonFunction::sendMail($error_msg_arr, '开发者美元数据');
+            exit;
+        }
 
 
     }

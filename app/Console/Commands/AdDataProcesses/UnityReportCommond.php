@@ -52,7 +52,7 @@ class UnityReportCommond extends Command
         // 入口方法
         $dayid = $this->argument('dayid')?$this->argument('dayid'):date('Y-m-d',strtotime('-1 day'));
         $appid = $this->argument('appid')?$this->argument('appid'):'';
-
+        try{
         define('AD_PLATFORM', 'Unity');
         define('SCHEMA', 'ad_data');
         define('TABLE_NAME', 'erm_data');
@@ -66,7 +66,7 @@ class UnityReportCommond extends Command
 //        $info[2]['company_account'] ='noodlecake';
 //        $info[2]['SecretKey'] ='006c90593aea438ef12e1023c6544666e87da1e919a76d647ce7b3267e5aca12';
 
-        $sql = " SELECT  data_account as company_account,account_token  as SecretKey,account_user_id as organizationId from c_platform_account_mapping WHERE platform_id ='pad24' and account_user_id is not null ";
+        $sql = " SELECT  data_account as company_account,account_token  as SecretKey,account_user_id as organizationId from c_platform_account_mapping WHERE platform_id ='pad24' and account_user_id is not null and status = 1 ";
         $info = DB::select($sql);
         $info = Service::data($info);
 //        var_dump($info);
@@ -83,7 +83,7 @@ class UnityReportCommond extends Command
 //                var_dump(count($data));
 
                 if (!$data) {
-                    $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:账号、SecretKey有误';
+                    $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:账号、SecretKey有误'.json_encode($data);
                     DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
 
                     $error_msg_arr = [];
@@ -141,6 +141,11 @@ class UnityReportCommond extends Command
                 }
             }
             Artisan::call('UnityHandleProcesses' ,['dayid'=>$dayid]);
+        }
+        } catch (\Exception $e) {
+            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'广告平台程序失败，失败原因：'.$e->getMessage();
+            DataImportImp::saveDataErrorLog(5,SOURCE_ID,AD_PLATFORM,2,$error_msg_info);
+
         }
 
     }

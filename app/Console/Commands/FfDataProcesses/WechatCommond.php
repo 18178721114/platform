@@ -51,16 +51,17 @@ class WechatCommond extends Command
     {
         set_time_limit(0);
 
-        define('AD_PLATFORM', '支付宝');
+        define('AD_PLATFORM', '微信');
         define('SCHEMA', 'ff_data');
         define('TABLE_NAME', 'erm_data');
         define('SOURCE_ID', 'pff04'); // todo 这个需要根据平台信息表确定平台ID
+        try {
 
-        // todo 以后从数据库获取  目前写死
-        $dayid = $this->argument('dayid')?$this->argument('dayid'):date('Y-m-d',strtotime('-1 day'));
-        $insert_data = [];
-            $date = date('Ymd',strtotime($dayid));
-            $month = date('Ym',strtotime($dayid));
+            // todo 以后从数据库获取  目前写死
+            $dayid = $this->argument('dayid') ? $this->argument('dayid') : date('Y-m-d', strtotime('-1 day'));
+            $insert_data = [];
+            $date = date('Ymd', strtotime($dayid));
+            $month = date('Ym', strtotime($dayid));
             $sql = " SELECT
             substr(DATE_FORMAT(a.apply_time,'%Y%m%d%h%i%s'),1,8) AS date_time,
             'wxbb0157308b290e1d' AS appid,
@@ -90,7 +91,7 @@ class WechatCommond extends Command
 
             $create_time = date("Y-m-d H:i:s", time());
 
-            foreach ($info as $k=> $v) {
+            foreach ($info as $k => $v) {
                 $insert_data[$k]['type'] = 2;
                 $insert_data[$k]['app_id'] = '';
                 $insert_data[$k]['app_name'] = '';
@@ -103,31 +104,36 @@ class WechatCommond extends Command
                 $insert_data[$k]['month'] = date("m", strtotime($dayid));
 
             }
-        
 
-        if ($insert_data) {
 
-                            //拆分批次
-            $step = array();
-            $i = 0;
-            foreach ($insert_data as $kkkk => $insert_data_info) {
-                if ($kkkk % 1000 == 0) $i++;
-                if ($insert_data_info) {
-                    $step[$i][] = $insert_data_info;
-                }
-            }
+            if ($insert_data) {
 
-            $is_success = [];
-            if ($step) {
-                foreach ($step as $k => $v) {
-                    $result = DataImportLogic::insertChannelData(SCHEMA, TABLE_NAME, $v);
-                    if (!$result) {
-                        $is_success[] = $k;
+                //拆分批次
+                $step = array();
+                $i = 0;
+                foreach ($insert_data as $kkkk => $insert_data_info) {
+                    if ($kkkk % 1000 == 0) $i++;
+                    if ($insert_data_info) {
+                        $step[$i][] = $insert_data_info;
                     }
                 }
-            }
 
-            Artisan::call('WechatFfHandleProcesses' ,['dayid'=>$date]);
+                $is_success = [];
+                if ($step) {
+                    foreach ($step as $k => $v) {
+                        $result = DataImportLogic::insertChannelData(SCHEMA, TABLE_NAME, $v);
+                        if (!$result) {
+                            $is_success[] = $k;
+                        }
+                    }
+                }
+
+                Artisan::call('WechatFfHandleProcesses', ['dayid' => $date]);
+            }
+        }catch (\Exception $e) {
+            $error_msg_info = $date.'号,'.AD_PLATFORM.'付费平台程序失败，失败原因：'.$e->getMessage();
+            DataImportImp::saveDataErrorLog(5,SOURCE_ID,AD_PLATFORM,2,$error_msg_info);
+
         }
 
     }

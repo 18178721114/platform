@@ -61,22 +61,22 @@ class OnewayReportCommond extends Command
         define('TABLE_NAME', 'erm_data');
         define('SOURCE_ID_CONF', '10064'); // todo 这个需要根据平台信息表确定平台ID
         define('SOURCE_ID', 'pad52'); // todo 这个需要根据平台信息表确定平台ID
-
+        try{
 //        $PlatInfo = DataImportLogic::getConf(SOURCE_ID_CONF);
 //        $PlatInfo = Service::data($PlatInfo);
 
         // todo  数据库配置
-        $sql = " SELECT  data_account as company_account,account_api_key  as accessKey from c_platform_account_mapping WHERE platform_id ='pad52'";
+        $sql = " SELECT  data_account as company_account,account_api_key  as accessKey from c_platform_account_mapping WHERE platform_id ='pad52' and status = 1";
         $PlatInfo = DB::select($sql);
         $PlatInfo = Service::data($PlatInfo);
 
         if (!$PlatInfo){
-            $message = "{$dayid}, " . AD_PLATFORM . "广告平台取数失败,失败原因:取数配置信息为空" ;
-            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$message);
-
-            $error_msg_arr = [];
-            $error_msg_arr[] = $message;
-            CommonFunction::sendMail($error_msg_arr,AD_PLATFORM.'广告平台取数error');
+//            $message = "{$dayid}, " . AD_PLATFORM . "广告平台取数失败,失败原因:取数配置信息为空" ;
+//            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$message);
+//
+//            $error_msg_arr = [];
+//            $error_msg_arr[] = $message;
+//            CommonFunction::sendMail($error_msg_arr,AD_PLATFORM.'广告平台取数error');
             exit;
         }
 
@@ -183,7 +183,12 @@ class OnewayReportCommond extends Command
     	}
 
         // 调用数据处理过程
-        Artisan::call('OnewayHandleProcesses',['dayid' => $dayid]);
+            Artisan::call('OnewayHandleProcesses',['dayid' => $dayid]);
+        } catch (\Exception $e) {
+            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'广告平台程序失败，失败原因：'.$e->getMessage();
+            DataImportImp::saveDataErrorLog(5,SOURCE_ID,AD_PLATFORM,2,$error_msg_info);
+
+        }
     		
     }
     /**

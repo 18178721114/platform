@@ -52,35 +52,38 @@ class TgSummaryProcesses extends Command
         $begin_date = $this->argument('begin_date') ? $this->argument('begin_date'):date('Y-m-d',strtotime('-1 day'));
         $end_date = $this->argument('end_date') ? $this->argument('end_date'):date('Y-m-d',strtotime('-1 day'));
         $platform_id = $this->argument('platform_id') ? $this->argument('platform_id'):'';
-        $where_platform = '';
-        if($platform_id){
-            $where_platform = "  and platform_id = '$platform_id'";
-        }
 
-        DB::beginTransaction();
-        $sel_sql = "select count(1) as count  FROM
+        try {
+
+            $where_platform = '';
+            if ($platform_id) {
+                $where_platform = "  and platform_id = '$platform_id'";
+            }
+
+            DB::beginTransaction();
+            $sel_sql = "select count(1) as count  FROM
         zplay_basic_report_daily
         WHERE
          plat_type = 'ct' and 
-         date_time >= '$begin_date'  and   date_time <= '$end_date' ".$where_platform;
-        $sel_info = DB::select($sel_sql);
-        $sel_info = Service::data($sel_info);
-        if($sel_info[0]['count'] !=0){
-            $del_sql ="DELETE
+         date_time >= '$begin_date'  and   date_time <= '$end_date' " . $where_platform;
+            $sel_info = DB::select($sel_sql);
+            $sel_info = Service::data($sel_info);
+            if ($sel_info[0]['count'] != 0) {
+                $del_sql = "DELETE
             FROM
                 zplay_basic_report_daily
             WHERE
                 plat_type = 'ct'
             AND date_time >= '$begin_date'
-            AND date_time <= '$end_date' ".$where_platform;
-            $update_info =DB::delete($del_sql);
+            AND date_time <= '$end_date' " . $where_platform;
+                $update_info = DB::delete($del_sql);
 
-            if(!$update_info){
-                DB::rollBack();
+                if (!$update_info) {
+                    DB::rollBack();
+                }
             }
-        }
 
-        $insert_sql ="INSERT INTO zplay_basic_report_daily (
+            $insert_sql = "INSERT INTO zplay_basic_report_daily (
         earning_type,
         game_creator,
         os_id,
@@ -129,7 +132,7 @@ class TgSummaryProcesses extends Command
         tg.data_account,
         tg.ad_type,
 		tg.channel_id";
-        $insert_info_1 = DB::insert($insert_sql);
+            $insert_info_1 = DB::insert($insert_sql);
 
 //        if(!$insert_info_1){
 //            //var_dump(3);
@@ -148,8 +151,19 @@ class TgSummaryProcesses extends Command
 //            DB::rollBack();
 //        }
 
-        DB::commit();
-
+            DB::commit();
+        }catch (\Exception $e) {
+            // 异常报错
+            if (!$platform_id){
+                $platform_id = 'ptg-002';
+            }
+            $source_name = 'TgSummary';
+            $message = "{$end_date}号, " . $source_name . "程序报错,报错原因:".$e->getMessage();
+            DataImportImp::saveDataErrorLog(5, $platform_id, $source_name, 4, $message);
+            $error_msg_arr[] = $message;
+//            CommonFunction::sendMail($error_msg_arr, '推广平台程序error');
+            exit;
+        }
 
     }
 }

@@ -59,12 +59,12 @@ class MobvistaReportCommond extends Command
         define('SCHEMA', 'ad_data');
         define('TABLE_NAME', 'erm_data');
         define('SOURCE_ID', 'pad50'); // todo 这个需要根据平台信息表确定平台ID
-
+        try{
         //这里面要写新测试平台里的数据配置 从数据库里取数据
 //    	$info[0]['company_account'] ='weibo@zplay.com';
 //    	$info[0]['Skey'] ='acb64ce075c6bc47f4f51acd261fd28f';
 //    	$info[0]['Secret'] ='8cf6690b7d64407cfcec4d6493e2d90a';
-        $sql = " SELECT  data_account as company_account,account_api_key  as Skey,account_token  as Secret from c_platform_account_mapping WHERE platform_id ='pad50' ";
+        $sql = " SELECT  data_account as company_account,account_api_key  as Skey,account_token  as Secret from c_platform_account_mapping WHERE platform_id ='pad50' and status = 1 ";
         $info = DB::select($sql);
         $info = Service::data($info);
         if ($info){
@@ -94,8 +94,37 @@ class MobvistaReportCommond extends Command
                     $url = env('MOBVISTA_URL');
                     $url .= "?" . $str . "&sign=" . $signature;
                     //var_dump($url);
-                    $result = self::get_response($url);
-                    $result = json_decode($result, true);
+                    $result1 = self::get_response($url);
+                    $result = json_decode($result1, true);
+
+                    // 数据获取重试
+                    $api_data_i=1;
+                    while(!$result){
+                        $str_arr = array("skey" => $value['Skey'], "v" => "1.3", "time" => time(), "start" => $dayid, "end" => $dayid, 'group_by' => urlencode('date,app_id,unit_id,country'), 'limit' => 1000, 'page' => $mo_i);
+                        ksort($str_arr);
+                        $str = '';
+                        foreach ($str_arr as $k => $v) {
+                            $str .= "&$k=$v";
+                        }
+                        $str = ltrim($str, '&');
+                        $str1 = urlencode($str);
+                        $signature = md5(md5($str) . $value['Secret']);
+                        $url = env('MOBVISTA_URL');
+                        $url .= "?" . $str . "&sign=" . $signature;
+                        //var_dump($url);
+                        $result1 = self::get_response($url);
+                        $result = json_decode($result1, true);
+                        $api_data_i++;
+                        if($api_data_i>3)
+                            break;
+                    }
+                    if($api_data_i ==4 && empty($result)){
+                        $error_msg_1 = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:返回数据为空('.$result1.')';
+                        DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg_1);
+                        continue;
+
+                    }
+
                     if ($result['code'] == 'ok') {
                         if (!empty($result['data']['lists'])) {
 
@@ -139,7 +168,7 @@ class MobvistaReportCommond extends Command
                         }
                     } else {
 
-                        $error_msg = AD_PLATFORM . '广告平台' . $value['company_account'] . '账号取数失败,错误信息:' . $result['code'];
+                        $error_msg = AD_PLATFORM . '广告平台' . $value['company_account'] . '账号取数失败,错误信息:' . json_encode($result);
                         DataImportImp::saveDataErrorLog(1, SOURCE_ID, AD_PLATFORM, 2, $error_msg);
 
                         $error_msg_arr = [];
@@ -150,6 +179,11 @@ class MobvistaReportCommond extends Command
 
             }
             Artisan::call('MobvistaHandleProcesses' ,['dayid'=>$dayid]);
+        }
+        } catch (\Exception $e) {
+            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'广告平台程序失败，失败原因：'.$e->getMessage();
+            DataImportImp::saveDataErrorLog(5,SOURCE_ID,AD_PLATFORM,2,$error_msg_info);
+
         }
 
     		

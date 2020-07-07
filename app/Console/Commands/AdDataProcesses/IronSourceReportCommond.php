@@ -57,7 +57,7 @@ class IronSourceReportCommond extends Command
         define('SCHEMA', 'ad_data');
         define('TABLE_NAME', 'erm_data');
         define('SOURCE_ID', 'pad05'); // todo 这个需要根据平台信息表确定平台ID
-
+        try{
         //这里面要写新测试平台里的数据配置 从数据库里取数据
 //        $PlatInfo[0]['company_account'] ='weibo@zplay.cn';
 //        $PlatInfo[0]['access_key'] ='f35e652190d0';
@@ -70,27 +70,23 @@ class IronSourceReportCommond extends Command
 //        $PlatInfo[2]['secret_key'] ='0e16d28f99033925ef9fb25e28d98c5f';
 
 
-        $sql = "SELECT  data_account as company_account,account_api_key  as access_key,account_token  as secret_key from c_platform_account_mapping WHERE platform_id ='pad05' ";
+        $sql = "SELECT  data_account as company_account,account_api_key  as access_key,account_token  as secret_key from c_platform_account_mapping WHERE platform_id ='pad05' and status = 1 ";
         $PlatInfo = DB::select($sql);
         $PlatInfo = Service::data($PlatInfo);
         if ($PlatInfo){
             foreach ($PlatInfo as $singleInfo){
                 $user_name = $singleInfo['company_account'];
-                if($user_name =='weibo@zplay.cn'){
-                    continue;
-                }
                 sleep(5);
                 // var_dump($user_name);
-                $access_key = $singleInfo['access_key'];
                 $secret_key = $singleInfo['secret_key'];
                 $base64encoded = base64_encode("$user_name:$secret_key");
                 $header = array();
                 $header[] = 'Authorization: Basic ' . $base64encoded;
 //                $url_applist = "https://platform.ironsrc.com/partners/publisher/mediation/applications/v4/stats?startDate={$dayid}&endDate={$dayid}&breakdowns=app,adSource,date,country";  //20170206更新接口地址
                 $url_applist = "https://platform.ironsrc.com/partners/publisher/mediation/applications/v5/stats?startDate={$dayid}&endDate={$dayid}&breakdowns=app,adSource,date,country&adSource=ironSource&metrics=revenue,impressions,clicks,adSourceResponses,adSourceResponses,adUnits";  //20200621更新接口地址
-                $dataList = self::get_response($url_applist, $header);
+                $dataList1 = self::get_response($url_applist, $header);
                 //var_dump($dataList);
-                $dataList  = json_decode($dataList,true);
+                $dataList  = json_decode($dataList1,true);
                 $res_i=1;
                 while(!$dataList){
                     $dataList = self::get_response($url_applist, $header);
@@ -98,6 +94,12 @@ class IronSourceReportCommond extends Command
                     $res_i++;
                     if($res_i>3)
                         break;
+                }
+                if($res_i ==4 && empty($dataList)){
+                    $error_msg_1 = AD_PLATFORM.'广告平台'.$user_name.'账号取数失败,错误信息:返回数据为空('.json_encode($dataList1).')';
+                    DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg_1);
+                    continue;
+
                 }
 
                 if(!empty($dataList['0']['data'])){
@@ -162,7 +164,7 @@ class IronSourceReportCommond extends Command
                     }
 
                 } else {
-                    $error_msg = AD_PLATFORM.'广告平台'.$user_name.'账号取数失败,错误信息:'.( isset($dataList['code']) ? $dataList['code']: 0 . ", ERROR:" . $dataList['error'] ? $dataList['error'] : '该账号无数据');
+                    $error_msg = AD_PLATFORM.'广告平台'.$user_name.'账号取数失败,错误信息:('.json_encode($dataList1).')';
                     DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
 
                     $error_msg_arr = [];
@@ -172,6 +174,11 @@ class IronSourceReportCommond extends Command
 
             }
             Artisan::call('IronsourceHandleProcesses' ,['dayid'=>$dayid]);
+        }
+        } catch (\Exception $e) {
+            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'广告平台程序失败，失败原因：'.$e->getMessage();
+            DataImportImp::saveDataErrorLog(5,SOURCE_ID,AD_PLATFORM,2,$error_msg_info);
+
         }
     }
 

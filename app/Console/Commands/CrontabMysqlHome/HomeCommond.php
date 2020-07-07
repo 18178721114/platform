@@ -57,14 +57,22 @@ class HomeCommond extends Command
 //        if($tg_len>0){
 //            die;
 //        }
+        try {
+            // 入口方法
+            $dayid = $this->argument('dayid') ? $this->argument('dayid') : date('Y-m-d', strtotime('-2 day'));
+            var_dump($dayid);
 
-        // 入口方法
-        $dayid = $this->argument('dayid')?$this->argument('dayid'):date('Y-m-d',strtotime('-2 day'));
-        var_dump($dayid);
-
-        $currency_type = 58;
-        echo $currency_type .' 开始时间：'.date('Y-m-d H:i:s')."\r\n";
-        $this->insertBasicDataHomePage($dayid,$currency_type);
+            $currency_type = 58;
+            echo $currency_type . ' 开始时间：' . date('Y-m-d H:i:s') . "\r\n";
+            $this->insertBasicDataHomePage($dayid, $currency_type);
+        }catch (\Exception $e) {
+            // 异常报错
+            $message = date("Y-m-d")."号,首页人命币数据程序报错,报错原因:".$e->getMessage();
+            DataImportImp::saveDataErrorLog(5, 'pad-001', '首页人命币数据', 2, $message);
+            $error_msg_arr[] = $message;
+            CommonFunction::sendMail($error_msg_arr, '首页人命币数据');
+            exit;
+        }
 
     }
 

@@ -509,7 +509,7 @@ class CommonImp extends ApiBaseImp
         }elseif($language == 'en'){
             $fields = ["id as id", "full_name as value"]; // 查询字段
         }
-        $map['type'] =2; 
+        $map['type'] =2;
         $method_list = CommonLogic::getTgCountryList($map, $fields)->orderby('sort','desc')->orderby('full_name')->get()->toArray();
         if (!$method_list) ApiResponseFactory::apiResponse([],[],1000);
         ApiResponseFactory::apiResponse(['table_list' => $method_list],[]);

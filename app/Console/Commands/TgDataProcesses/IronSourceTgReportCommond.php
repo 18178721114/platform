@@ -58,54 +58,68 @@ class IronSourceTgReportCommond extends Command
         define('TABLE_NAME', 'erm_data');
         define('SOURCE_ID', 'ptg03'); // todo 这个需要根据平台信息表确定平台ID
 
-        //这里面要写新测试平台里的数据配置 从数据库里取数据
-//        $sql = " select distinct a.platform_id,a.data_account as company_account,b.secret_key as SecretKey from c_platform_account_mapping a left join c_generalize b on b.platform_id = a.platform_id and a.account = b.data_account where a.platform_id = 'ptg03' ";
-        $sql = " select distinct platform_id,data_account as company_account,account_token as SecretKey from c_platform_account_mapping where platform_id = 'ptg03' ";
-        $info = DB::select($sql);
-        $info = Service::data($info);
-        if (!$info) return;
+        try {
+            $sql = " select distinct platform_id,data_account as company_account,account_token as SecretKey from c_platform_account_mapping where platform_id = 'ptg03' and status = 1 ";
+            $info = DB::select($sql);
+            $info = Service::data($info);
+            if (!$info) {
+                // 无配置报错提醒
+                $message = "{$dayid}号, " . AD_PLATFORM . " 推广平台取数失败,失败原因:取数配置信息为空";
+                DataImportImp::saveDataErrorLog(1, SOURCE_ID, AD_PLATFORM, 4, $message);
+                $error_msg_arr[] = $message;
+                CommonFunction::sendMail($error_msg_arr, '推广平台取数error');
+                exit;
+            }
 
-//        $info[0]['company_account'] ='duzonghuan@zplay.cn';
-//        $info[0]['SecretKey'] ='28f309e6a207cf6b4e722d0adad722b1';
-        foreach ($info as $key => $value) {
-            $user_name = $value['company_account'];
-            $secret_key = $value['SecretKey'];
-            $base64encoded = base64_encode("$user_name:$secret_key");
-            $header = array();
-            $header[] = 'Authorization: Basic ' . $base64encoded;
-            $url = str_replace(array('_END_DATE_','_BEGIN_DATE_'),array($dayid,$dayid),env('IRONSRC_TG_URL'));
-            $dataList = $this->get_response($url,$header);
-            $dataList  = json_decode($dataList,true);
-            
-            /*如果数据返回正常，则response不含code属性*/
-            if (!empty($dataList['data'])) {
+            $all_data_err = [];
+            foreach ($info as $key => $value) {
+                $user_name = $value['company_account'];
+                $secret_key = $value['SecretKey'];
+                $base64encoded = base64_encode("$user_name:$secret_key");
+                $header = array();
+                $header[] = 'Authorization: Basic ' . $base64encoded;
+                $url = str_replace(array('_END_DATE_', '_BEGIN_DATE_'), array($dayid, $dayid), env('IRONSRC_TG_URL'));
+                $dataList = $this->get_response($url, $header);
+                $dataList = json_decode($dataList, true);
+
+                // 数据获取重试
+                $api_data_i = 1;
+                while (!$dataList) {
+                    $dataList = $this->get_response($url, $header);
+                    $dataList = json_decode($dataList, true);
+                    $api_data_i++;
+                    if ($api_data_i > 3) break;
+                }
+
+                /*如果数据返回正常，则response不含code属性*/
+                if (!empty($dataList['data'])) {
                     $map = [];
                     $map['dayid'] = $dayid;
                     $map['source_id'] = SOURCE_ID;
                     $map['account'] = $user_name;
-                    $count = DataImportLogic::getChannelData('tg_data','erm_data',$map)->count();
-                    if($count>0){
-                    //删除数据
-                        DataImportLogic::deleteHistoryData('tg_data','erm_data',$map);
+                    $count = DataImportLogic::getChannelData('tg_data', 'erm_data', $map)->count();
+                    if ($count > 0) {
+                        //删除数据
+                        DataImportLogic::deleteHistoryData('tg_data', 'erm_data', $map);
                     }
 
                     $index = 0;
-                    $insert_data =[];
-                    $step =[];
+                    $insert_data = [];
+                    $step = [];
                     foreach ($dataList['data'] as $k => $v) {
-                                $insert_data[$index]['account'] = $user_name;
-                                $insert_data[$index]['json_data'] =str_replace('\'','\'\'',json_encode($v));
-                                $insert_data[$index]['type'] = 2;
-                                $insert_data[$index]['source_id'] = SOURCE_ID;
-                                $insert_data[$index]['dayid'] = $dayid;
-                                $insert_data[$index]['create_time'] = date("Y-m-d H:i:s");
-                                $insert_data[$index]['year'] = date("Y",strtotime($dayid));
-                                $insert_data[$index]['month'] = date("m",strtotime($dayid));
-                                $insert_data[$index]['campaign_id'] = isset($v['campaign_id']) ? addslashes($v['campaign_id']) : '';
-                                $insert_data[$index]['campaign_name'] = isset($v['campaign_name']) ? addslashes($v['campaign_name']) : '';
-                                $insert_data[$index]['cost'] = isset($v['spend']) ? $v['spend'] : 0;
-                                $index++;
-                        
+                        $insert_data[$index]['account'] = $user_name;
+                        $insert_data[$index]['json_data'] = str_replace('\'', '\'\'', json_encode($v));
+                        $insert_data[$index]['type'] = 2;
+                        $insert_data[$index]['source_id'] = SOURCE_ID;
+                        $insert_data[$index]['dayid'] = $dayid;
+                        $insert_data[$index]['create_time'] = date("Y-m-d H:i:s");
+                        $insert_data[$index]['year'] = date("Y", strtotime($dayid));
+                        $insert_data[$index]['month'] = date("m", strtotime($dayid));
+                        $insert_data[$index]['campaign_id'] = isset($v['campaign_id']) ? addslashes($v['campaign_id']) : '';
+                        $insert_data[$index]['campaign_name'] = isset($v['campaign_name']) ? addslashes($v['campaign_name']) : '';
+                        $insert_data[$index]['cost'] = isset($v['spend']) ? $v['spend'] : 0;
+                        $index++;
+
                     }
                     //批量插入
                     $i = 0;
@@ -117,28 +131,46 @@ class IronSourceTgReportCommond extends Command
                     }
                     if ($step) {
                         foreach ($step as $k => $v) {
-                            $result = DataImportLogic::insertChannelData('tg_data','erm_data',$v); 
+                            $result = DataImportLogic::insertChannelData('tg_data', 'erm_data', $v);
                             if (!$result) {
-                               echo 'mysql_error'. PHP_EOL;
-                           }
-                       }
-                       
-                   }
+                                echo 'mysql_error' . PHP_EOL;
+                            }
+                        }
 
-            } else {
+                    }
 
-                $error_msg = AD_PLATFORM.'推广平台'.$value['company_account'].'账号取数失败,错误信息:';
-                if(isset($dataList['errorMessage'])){
-                    $error_msg .= $dataList['errorMessage'];
-                }else{
-                    $error_msg .=  '该账号无数据';
+                } else {
+
+                    $error_msg = $value['company_account'] . '账号取数失败,错误信息:';
+                    if (isset($dataList['errorMessage'])) {
+                        $error_msg .= $dataList['errorMessage'];
+                    } else {
+                        $error_msg .= '无数据,接口未返回任何信息';
+                    }
+                    $all_data_err[] = $error_msg;
                 }
-                DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,4,$error_msg);
-                $error_msg_arr[] = $error_msg;
-                CommonFunction::sendMail($error_msg_arr,AD_PLATFORM.'推广平台取数error');
+
             }
 
-            Artisan::call('IronSourceTgHandleProcesses',['dayid'=>$dayid,'data_account'=>$value['company_account']]);
+            if ($all_data_err){
+                $error_application_str = implode(',',$all_data_err);
+                $message = "{$dayid}号,". AD_PLATFORM . " 推广平台取数失败信息:".$error_application_str ;
+                DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,4,$message);
+                $error_msg_arr[] = $message;
+                CommonFunction::sendMail($error_msg_arr, '推广平台取数error');
+            }
+
+            Artisan::call('IronSourceTgHandleProcesses', ['dayid' => $dayid]);
+
+
+        }catch (\Exception $e) {
+            // 异常报错
+            $message = "{$dayid}号, " . AD_PLATFORM . " 推广平台程序报错,报错原因:".$e->getMessage();
+            DataImportImp::saveDataErrorLog(5, SOURCE_ID, AD_PLATFORM, 4, $message);
+            $error_msg_arr[] = $message;
+            CommonFunction::sendMail($error_msg_arr, '推广平台程序error');
+            exit;
+
         }
 
     }

@@ -173,9 +173,10 @@ class VivoHandworkHandleProcesses extends Command
             			
             		}
             	}
-                if($num){
+                $err_name = (isset($json_info['广告位ID']) ?$json_info['广告位ID']:'Null').'#'.(isset($json_info['广告位']) ?$json_info['广告位']:'Null').'#'.(isset($json_info['应用ID']) ?$json_info['应用ID']:'Null').'#'.(isset($json_info['游戏名称']) ?$json_info['游戏名称']:'Null');
 
-                    $error_log_arr['app_id'][] = $json_info['广告位ID'];
+                if($num){
+                    $error_log_arr['app_id'][] = $json_info['广告位ID'].'('.$err_name.')';
                 }
                 //默认中国
                 $array[$k]['country_id'] = 64;

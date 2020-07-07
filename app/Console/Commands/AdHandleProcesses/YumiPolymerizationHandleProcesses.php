@@ -96,8 +96,8 @@ class YumiPolymerizationHandleProcesses extends Command
             `c_app_ad_platform`.`flow_type` 
             FROM
             `c_app`
-            LEFT JOIN `c_app_ad_platform` ON `c_app_ad_platform`.`app_id` = `c_app`.`id`
-            LEFT JOIN `c_app_ad_slot` ON `c_app_ad_slot`.`app_ad_platform_id` = `c_app_ad_platform`.`id`
+            LEFT JOIN `c_app_ad_platform` ON `c_app_ad_platform`.`app_id` = `c_app`.`id`  and `c_app_ad_platform`.`status` = 1
+            LEFT JOIN `c_app_ad_slot` ON `c_app_ad_slot`.`app_ad_platform_id` = `c_app_ad_platform`.`id`   and `c_app_ad_slot`.`status` = 1
             LEFT JOIN 
             c_platform AS c_platform ON `c_platform`.`platform_id` = `c_app_ad_platform`.`platform_id`
             WHERE
@@ -186,14 +186,11 @@ class YumiPolymerizationHandleProcesses extends Command
                 }
 
             }
-            if($num){
-//                if ($yumi_app_id && $json_info['slot_uuid']){
-//                    $new_campaign_ids[$yumi_app_id][$json_info['slot_uuid']] = $json_info['ad_type'];
-//                }
-                $error_log_arr['siteId'][] = $json_info['app_id'].'('.addslashes(str_replace('\'\'','\'',$json_info['app_name'])).')';
-            }
+            $err_name = (isset($json_info['slot_uuid']) ?$json_info['slot_uuid']:'Null').'#'.(isset($json_info['slot_name']) ?$json_info['slot_name']:'Null').'#'.(isset($json_info['app_id']) ?$json_info['app_id']:'Null').'#'.(isset($json_info['app_name']) ?$json_info['app_name']:'Null');
 
-//            var_dump($json_info['country']);
+            if($num){
+                $error_log_arr['siteId'][] = $json_info['app_id'].'('.$err_name.')';
+            }
             foreach ($country_info as $country_k => $country_v) {
                 if(strtolower(str_replace('\'\'','\'',$json_info['country'])) == strtolower($country_v['name'])){
                     $array[$k]['country_id'] = $country_v['c_country_id'];
@@ -207,7 +204,7 @@ class YumiPolymerizationHandleProcesses extends Command
                 }
             }
             if($num_country){
-                $error_log_arr['country'][] = isset($json_info['country']) ? str_replace('\'\'','\'',$json_info['country']) : 'Unknown Region' ;
+                $error_log_arr['country'][] = isset($json_info['country']) ? str_replace('\'\'','\'',$json_info['country']).'('.$err_name.')' : 'Unknown Region' ;
             }
             foreach ($AdType_info as $AdType_k => $AdType_v) {
              if($json_info['ad_type'] == $AdType_v['name'] ){
@@ -221,7 +218,7 @@ class YumiPolymerizationHandleProcesses extends Command
              }
             }
            if($num_adtype){
-               $error_log_arr['ad_type'][] = isset($json_info['ad_type']) ? str_replace('\'\'','\'',$json_info['ad_type']) :'';
+               $error_log_arr['ad_type'][] = isset($json_info['ad_type']) ? str_replace('\'\'','\'',$json_info['ad_type']).'('.$err_name.')' :'';
            }
             //渠道匹配
             foreach ($channel_list as $channel_k => $channel_v) {
@@ -236,7 +233,7 @@ class YumiPolymerizationHandleProcesses extends Command
             }
 
             if($num_channel){
-               $error_log_arr['channel'][] = isset($json_info['channel']) ? str_replace('\'\'','\'',$json_info['channel']) :'';
+               $error_log_arr['channel'][] = isset($json_info['channel']) ? str_replace('\'\'','\'',$json_info['channel']).'('.$err_name.')' :'';
            }
 
            //平台匹配
@@ -252,7 +249,7 @@ class YumiPolymerizationHandleProcesses extends Command
         }
 
         if($num_yumi_plat){
-            $error_log_arr['platfrom_yumi'][] = isset($json_info['ad_plat_id']) ? str_replace('\'\'','\'',$json_info['ad_plat_id']) :'';
+            $error_log_arr['platfrom_yumi'][] = isset($json_info['ad_plat_id']) ? str_replace('\'\'','\'',$json_info['ad_plat_id']).'('.$err_name.')' :'';
         }
             if(($num+$num_country+$num_adtype+$num_channel+$num_yumi_plat)>0){
                 $error_detail_arr[$k]['platform_id'] = $source_id;
@@ -334,37 +331,41 @@ class YumiPolymerizationHandleProcesses extends Command
         if ($error_log_arr){
             $error_msg_array = [];
             $error_msg_mail = [];
-            if (isset($error_log_arr['siteId'])){
+            $error_log_arr = Service::shield_error($source_id,$error_log_arr);
+
+
+            if (isset($error_log_arr['siteId']) && !empty($error_log_arr['siteId'])){
                 $app_id = implode(',',array_unique($error_log_arr['siteId']));
-                $error_msg_array[] = '广告位id匹配失败,ID为:'.$app_id;
-                $error_msg_mail[] = '广告位id匹配失败，ID为：'.$app_id;
+                $error_msg_array[] = '应用id匹配失败,ID为:'.$app_id;
+                $error_msg_mail[] = '应用id匹配失败，ID为：'.$app_id;
             }
 
-            if (isset($error_log_arr['country'])){
+            if (isset($error_log_arr['country']) && !empty($error_log_arr['country'])){
                 $country = implode(',',array_unique($error_log_arr['country']));
                 $error_msg_array[] = '国家匹配失败,code为:'.$country;
                 $error_msg_mail[] = '国家匹配失败，code为：'.$country;
             }
-            if (isset($error_log_arr['ad_type'])){
+            if (isset($error_log_arr['ad_type']) && !empty($error_log_arr['ad_type'])){
                 $ad_type = implode(',',array_unique($error_log_arr['ad_type']));
                 $error_msg_array[] = '广告类型匹配失败,code为:'.$ad_type;
                 $error_msg_mail[] = '广告类型匹配失败，code为：'.$ad_type;
             }
-            if (isset($error_log_arr['channel'])){
+            if (isset($error_log_arr['channel']) && !empty($error_log_arr['channel'])){
                 $channel = implode(',',array_unique($error_log_arr['channel']));
                 $error_msg_array[] = '渠道id匹配失败,code为:'.$channel;
                 $error_msg_mail[] = '渠道id匹配失败，code为：'.$channel;
             }
 
-            if (isset($error_log_arr['platfrom_yumi'])){
+            if (isset($error_log_arr['platfrom_yumi']) && !empty($error_log_arr['platfrom_yumi'])){
                 $platfrom_yumi = implode(',',array_unique($error_log_arr['platfrom_yumi']));
                 $error_msg_array[] = '玉米平台id匹配失败,code为:'.$platfrom_yumi;
                 $error_msg_mail[] = '玉米平台id匹配失败，code为：'.$platfrom_yumi;
             }
 
 
-
-            DataImportImp::saveDataErrorLog(2,$source_id,$source_name,2,implode(';',$error_msg_array));
+            if(!empty($error_msg_array)) {
+                DataImportImp::saveDataErrorLog(2, $source_id, $source_name, 2, implode(';', $error_msg_array));
+            }
             DataImportImp::saveDataErrorMoneyLog($source_id,$dayid,$error_detail_arr);
 
             //CommonFunction::sendMail($error_msg_mail,$source_name.'广告平台数据处理error');
@@ -398,20 +399,20 @@ class YumiPolymerizationHandleProcesses extends Command
             //DB::update("call ad_summary_channel('$dayid','$dayid','$source_id')");
 
             // 查询广告数据
-            $report_map = [];
-            $report_map['platform_id'] = $source_id;
-            $report_map['date'] = $dayid;
-            $map_delete['statistics'] = 2;
-            $group_by = ['platform_id','date','data_account'];
-            $report_list = PlatformLogic::getAdReportSum('zplay_ad_report_daily',$report_map)->select(DB::raw("sum(earning) as cost"),'platform_id','date','data_account')->groupBy($group_by)->get();
-            $report_list = Service::data($report_list);
-            if ($report_list){
-                // 保存广告平台
-                foreach ($report_list as $value){
-                    $value['data_account']=' ';
-                    PlatformImp::add_platform_status($source_id,$value['data_account'],$value['cost'],$dayid);
-                }
-            }
+//            $report_map = [];
+//            $report_map['platform_id'] = $source_id;
+//            $report_map['date'] = $dayid;
+//            $map_delete['statistics'] = 2;
+//            $group_by = ['platform_id','date','data_account'];
+//            $report_list = PlatformLogic::getAdReportSum('zplay_ad_report_daily',$report_map)->select(DB::raw("sum(earning) as cost"),'platform_id','date','data_account')->groupBy($group_by)->get();
+//            $report_list = Service::data($report_list);
+//            if ($report_list){
+//                // 保存广告平台
+//                foreach ($report_list as $value){
+//                    $value['data_account']=' ';
+//                    PlatformImp::add_platform_status($source_id,$value['data_account'],$value['cost'],$dayid);
+//                }
+//            }
             //echo '处理完成';
 
         }else{

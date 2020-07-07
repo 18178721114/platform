@@ -60,20 +60,20 @@ class ChartboostReportCommond extends Command
         define('TABLE_NAME', 'erm_data');
         define('SOURCE_ID_CONF', '10006'); // todo 这个需要根据平台信息表确定平台ID
         define('SOURCE_ID', 'pad03'); // todo 这个需要根据平台信息表确定平台ID
-
+        try{
         // todo  数据库配置
 //        $PlatInfo = DataImportLogic::getConf(SOURCE_ID_CONF);
 //        $PlatInfo = Service::data($PlatInfo);
-        $sql = "SELECT  data_account as company_account,account_user_id  as user_id,account_token  as user_signature from c_platform_account_mapping WHERE platform_id ='pad03' ";
+        $sql = "SELECT  data_account as company_account,account_user_id  as user_id,account_token  as user_signature from c_platform_account_mapping WHERE platform_id ='pad03' and status = 1 ";
         $PlatInfo = DB::select($sql);
         $PlatInfo = Service::data($PlatInfo);
 
         if (!$PlatInfo){
-            $message = "{$dayid}, " . AD_PLATFORM . " 广告平台取数失败,失败原因:取数配置信息为空" ;
-            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$message);
-            $error_msg_arr = [];
-            $error_msg_arr[] = $message;
-            CommonFunction::sendMail($error_msg_arr,AD_PLATFORM.'广告平台取数error');
+//            $message = "{$dayid}, " . AD_PLATFORM . " 广告平台取数失败,失败原因:取数配置信息为空" ;
+//            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$message);
+//            $error_msg_arr = [];
+//            $error_msg_arr[] = $message;
+//            CommonFunction::sendMail($error_msg_arr,AD_PLATFORM.'广告平台取数error');
             exit;
         }
 
@@ -83,9 +83,28 @@ class ChartboostReportCommond extends Command
             $user_signature = $value['user_signature'];
 
     		$url = str_replace(array('_USERID_','_USER_SIGNATURE_','_END_DATE_','_BEGIN_DATE_'),array($user_id,$user_signature,$dayid,$dayid),env('CHARTBOOST_URL'));
-    		echo $url;
+    		//echo $url;
 
     		$data = self::getContent($url,$value['company_account']);
+
+            // 数据获取重试
+            $api_data_i=1;
+            while(!$data){
+                $data = self::getContent($url,$value['company_account']);
+                $api_data_i++;
+                if($api_data_i>3)
+                    break;
+            }
+
+            //取数四次 取数结果仍为空
+            if($api_data_i ==4 && empty($data)){
+                $error_msg_1 = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:返回数据为空('.$data.')';
+                DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg_1);
+                continue;
+
+            }
+
+
     		if ($data) {
         			//删除数据库里原来数据
                 $map['dayid'] = $dayid;
@@ -131,7 +150,7 @@ class ChartboostReportCommond extends Command
 		    	}
 
     		}else{
-                $error_msg = 'Chartboos广告平台'.$value['company_account'].'账号取数失败';
+                $error_msg = 'Chartboos广告平台'.$value['company_account'].'账号取数失败('.json_encode($data).')';
                 DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
                 $error_msg_arr = [];
                 $error_msg_arr[] = $error_msg;
@@ -140,7 +159,12 @@ class ChartboostReportCommond extends Command
     	}
 
         // 调用数据处理过程
-        Artisan::call('ChartboostHandleProcesses',['dayid' => $dayid]);
+            Artisan::call('ChartboostHandleProcesses',['dayid' => $dayid]);
+        } catch (\Exception $e) {
+            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'广告平台程序失败，失败原因：'.$e->getMessage();
+            DataImportImp::saveDataErrorLog(5,SOURCE_ID,AD_PLATFORM,2,$error_msg_info);
+
+        }
     		
     }
     public static function getContent($url,$company_account)
@@ -159,7 +183,7 @@ class ChartboostReportCommond extends Command
     	$data = json_decode($content, true);
     	if (!$data || isset($data['status'])) {
 
-            $error_msg = 'Chartboos广告平台'.$company_account.'账号取数失败,错误信息:'.isset($data['message']);
+            $error_msg = 'Chartboos广告平台'.$company_account.'账号取数失败,错误信息:'.json_encode($data);
             DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
             $error_msg_arr = [];
             $error_msg_arr[] = $error_msg;

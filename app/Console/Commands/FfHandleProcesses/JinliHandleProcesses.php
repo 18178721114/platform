@@ -130,7 +130,7 @@ class JinliHandleProcesses extends Command
 
             	}
                 if($num){
-                    $error_log_arr['app_id'][]=$json_info['app_id'];
+                    $error_log_arr['app_id'][]=$json_info['app_id'].'('. $app_v['app_name'].')';
                 }
                 $array[$k]['country_id'] = 64;
             	if(($num)>0){

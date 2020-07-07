@@ -49,31 +49,32 @@ class OutTGCountryNewProcesses extends Command
      */
     public function handle()
     {
-        $begin_date = $this->argument('begin_date') ? $this->argument('begin_date') : date('Y-m-d',strtotime('-8 day'));
+        $begin_date = $this->argument('begin_date') ? $this->argument('begin_date') : date('Y-m-d', strtotime('-8 day'));
         $end_date = $this->argument('end_date') ? $this->argument('end_date') : date('Y-m-d');
 
-        DB::beginTransaction();
-        $sel_sql = "select count(1) as count  FROM
+        try {
+            DB::beginTransaction();
+            $sel_sql = "select count(1) as count  FROM
         zplay_basic_tg_country_new
         WHERE
          date >= '$begin_date'  and   date <= '$end_date' ";
-        $sel_info = DB::select($sel_sql);
-        $sel_info = Service::data($sel_info);
-        if($sel_info[0]['count'] !=0){
-            $del_sql ="         DELETE
+            $sel_info = DB::select($sel_sql);
+            $sel_info = Service::data($sel_info);
+            if ($sel_info[0]['count'] != 0) {
+                $del_sql = "         DELETE
             FROM
                 zplay_basic_tg_country_new
             WHERE
                 date BETWEEN '$begin_date'
             AND '$end_date';";
-            $update_info =DB::delete($del_sql);
+                $update_info = DB::delete($del_sql);
 
-            if(!$update_info){
-                DB::rollBack();
+                if (!$update_info) {
+                    DB::rollBack();
+                }
             }
-        }
 
-        $insert_sql ="
+            $insert_sql = "
         INSERT INTO zplay_basic_tg_country_new (
                 date,
                 app_id,
@@ -141,12 +142,20 @@ GROUP BY
 	a.app_id,
 	a.country_id  
         ";
-        $insert_info_1 = DB::insert($insert_sql);
+            $insert_info_1 = DB::insert($insert_sql);
 
-            if(!$insert_info_1){
+            if (!$insert_info_1) {
                 //var_dump(3);
                 DB::rollBack();
             }
             DB::commit();
+        }catch (\Exception $e) {
+            // 异常报错
+            $message = date("Y-m-d")."号,推广页面程序报错,报错原因:".$e->getMessage();
+            DataImportImp::saveDataErrorLog(5, 'ptg-003', '推广页面', 4, $message);
+            $error_msg_arr[] = $message;
+//            CommonFunction::sendMail($error_msg_arr, '推广平台程序error');
+            exit;
+        }
     }
 }

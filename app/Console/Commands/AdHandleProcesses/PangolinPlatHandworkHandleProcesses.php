@@ -182,6 +182,8 @@ class PangolinPlatHandworkHandleProcesses extends Command
 
                     }
                 }
+                $err_name = (isset($json_info['代码位ID']) ?$json_info['代码位ID']:'Null').'#'.(isset($json_info['代码位名称']) ?$json_info['代码位名称']:'Null').'#'.(isset($json_info['应用ID']) ?$json_info['应用ID']:'Null').'#'.(isset($json_info['应用名称']) ?$json_info['应用名称']:'Null');
+
                 if($num){
                     if ($tiktok_app_id && $json_info['代码位ID'] && isset($json_info['代码位类型'])){
 
@@ -204,7 +206,7 @@ class PangolinPlatHandworkHandleProcesses extends Command
 
 
                     }
-                    $error_log_arr['app_id'][] = $json_info['代码位ID'].'或'.$json_info['应用ID'];
+                    $error_log_arr['app_id'][] = $json_info['代码位ID'].'或'.$json_info['应用ID'].'('.$err_name.')';
                 }
                 //默认中国
                 $array[$k]['country_id'] = 64;

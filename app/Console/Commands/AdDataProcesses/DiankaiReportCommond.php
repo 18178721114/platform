@@ -47,6 +47,7 @@ class DiankaiReportCommond extends Command
      */
     public function handle()
     {
+        die;
         set_time_limit(0);
         // 入口方法
         $dayid = $this->argument('dayid')?$this->argument('dayid'):date('Y-m-d',strtotime('-1 day'));
@@ -60,9 +61,9 @@ class DiankaiReportCommond extends Command
         $start = $dayid;
         $end = $start;
         $time = time();
-
+        try{
         // todo 正式
-        $sql = " select distinct platform_id,data_account as company_account,account_token as secret_key from c_platform_account_mapping where platform_id = 'pad63' ";
+        $sql = " select distinct platform_id,data_account as company_account,account_token as secret_key from c_platform_account_mapping where platform_id = 'pad63' and status = 1 ";
         $PlatInfo = DB::select($sql);
         $PlatInfo = Service::data($PlatInfo);
         if ($PlatInfo){
@@ -78,6 +79,23 @@ class DiankaiReportCommond extends Command
                 $slot_ids = array("UW2G03"=>"b1cbd186f6d5fbae5fc70571ebe8c322", "UW270I"=>"f364edf7cc4ceb545f23ff98d92d4fc2", "UW2E0I"=>"1d211c1cda2896dea6f65d9957d9e9cf","UW5Z0Z"=>"854b828c570f0bca3f011e50f925dfae");
                 var_dump($result);
                 $result_arr = json_decode($result,true);
+
+                // 数据获取重试
+                $api_data_i=1;
+                while(!$result_arr){
+                    $result = file_get_contents($url);
+                    $result_arr = json_decode($result,true);
+                    $api_data_i++;
+                    if($api_data_i>3)
+                        break;
+                }
+                //取数四次 取数结果仍为空
+                if($api_data_i ==4 && empty($result_arr)){
+                    $error_msg_1 = AD_PLATFORM.'广告平台'.$singleInfo['company_account'].'账号取数失败,错误信息:返回数据为空('.json_encode($result).')';
+                    DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg_1);
+                    continue;
+
+                }
                 //判断是否有数
                 if(isset($result_arr['success']) && $result_arr['success']===true && count($result_arr['data'])>0){
                     $map = [];
@@ -153,7 +171,7 @@ class DiankaiReportCommond extends Command
                     }
 
                 } else {
-                    $error_msg = AD_PLATFORM.'广告平台'.$company_account.'账号取数失败,错误信息:'.( isset($result_arr['msg']) ? $result_arr['msg']: '该账号无数据');
+                    $error_msg = AD_PLATFORM.'广告平台'.$company_account.'账号取数失败,错误信息:('.json_encode($result).')';
                     DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
 
                     $error_msg_arr = [];
@@ -163,6 +181,12 @@ class DiankaiReportCommond extends Command
 
             }
             Artisan::call('DiankaiHandleProcesses' ,['dayid'=>$dayid]);
+
+        }
+        } catch (\Exception $e) {
+            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'广告平台程序失败，失败原因：'.$e->getMessage();
+            DataImportImp::saveDataErrorLog(5,SOURCE_ID,AD_PLATFORM,2,$error_msg_info);
+
         }
     }
 

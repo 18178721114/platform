@@ -51,30 +51,32 @@ class OutTGUsdProcesses extends Command
     {
         $begin_date = $this->argument('begin_date') ? $this->argument('begin_date') : date('Y-m-d',strtotime('-8 day'));
         $end_date = $this->argument('end_date') ? $this->argument('end_date') : date('Y-m-d');
-        $bengin_time = time();
 
-        DB::beginTransaction();
-        $sel_sql = "select count(1) as count  FROM
+        try {
+            $bengin_time = time();
+
+            DB::beginTransaction();
+            $sel_sql = "select count(1) as count  FROM
         zplay_basic_tg_report_total_usd
         WHERE
          date >= '$begin_date'  and   date <= '$end_date' ";
-        $sel_info = DB::select($sel_sql);
-        $sel_info = Service::data($sel_info);
-        if($sel_info[0]['count'] !=0){
-            $del_sql ="         DELETE
+            $sel_info = DB::select($sel_sql);
+            $sel_info = Service::data($sel_info);
+            if ($sel_info[0]['count'] != 0) {
+                $del_sql = "         DELETE
             FROM
                 zplay_basic_tg_report_total_usd
             WHERE
                 date BETWEEN '$begin_date'
             AND '$end_date';";
-            $update_info =DB::delete($del_sql);
+                $update_info = DB::delete($del_sql);
 
-            if(!$update_info){
-                DB::rollBack();
+                if (!$update_info) {
+                    DB::rollBack();
+                }
             }
-        }
 
-        $insert_sql ="
+            $insert_sql = "
         INSERT INTO zplay_basic_tg_report_total_usd (
                 date,
                 app_id,
@@ -626,13 +628,13 @@ company_id
                 m.country_id ASC
 
         ";
-        $insert_info_1 = DB::insert($insert_sql);
+            $insert_info_1 = DB::insert($insert_sql);
 
-            if(!$insert_info_1){
+            if (!$insert_info_1) {
                 //var_dump(3);
                 DB::rollBack();
             }
-            $update_sql= "UPDATE zplay_basic_tg_report_total_usd usd,
+            $update_sql = "UPDATE zplay_basic_tg_report_total_usd usd,
             c_currency_ex cur 
             SET usd.cost = usd.cost_cny / cur.currency_ex,usd.earning_all = usd.earning_all_cny / cur.currency_ex 
             WHERE
@@ -640,13 +642,21 @@ company_id
             AND cur.`currency_id` = 60  
             AND usd.date BETWEEN '$begin_date'
             AND '$end_date'";
-            $update_info =DB::update($update_sql);
+            $update_info = DB::update($update_sql);
 //            if (!$update_info){
 //                DB::rollBack();
 //            }
 
             DB::commit();
-        $end_time = time();
-        var_dump( $bengin_time-$end_time);
+            $end_time = time();
+            var_dump($bengin_time - $end_time);
+        }catch (\Exception $e) {
+            // 异常报错
+            $message = date("Y-m-d")."号,推广页面程序报错,报错原因:".$e->getMessage();
+            DataImportImp::saveDataErrorLog(5, 'ptg-003', '推广页面', 4, $message);
+            $error_msg_arr[] = $message;
+//            CommonFunction::sendMail($error_msg_arr, '推广平台程序error');
+            exit;
+        }
     }
 }

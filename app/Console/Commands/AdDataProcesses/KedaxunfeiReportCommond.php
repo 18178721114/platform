@@ -58,14 +58,14 @@ class KedaxunfeiReportCommond extends Command
         define('SCHEMA', 'ad_data');
         define('TABLE_NAME', 'erm_data');
         define('SOURCE_ID', 'pad29'); // todo 这个需要根据平台信息表确定平台ID
-
+        try{
         //这里面要写新测试平台里的数据配置 从数据库里取数据
 //    	$info[0]['company_account'] ='weibo@zplay.com';
 //    	$info[0]['accessKey'] ='324ed4a52f1b71ff';
 //        $info[1]['company_account'] ='global@yumimobi.com';
 //        $info[1]['accessKey'] ='26b2d6afdf20f9c6';
 
-        $sql = "SELECT  data_account as company_account,account_api_key  as accessKey from c_platform_account_mapping WHERE platform_id ='pad29'";
+        $sql = "SELECT  data_account as company_account,account_api_key  as accessKey from c_platform_account_mapping WHERE platform_id ='pad29' and status = 1";
         $info = DB::select($sql);
         $info = Service::data($info);
         if ($info) {
@@ -75,6 +75,22 @@ class KedaxunfeiReportCommond extends Command
                 $post_data = array("email" => $value['company_account'], 'start_date' => $dayid, 'end_date' => $dayid, 'sign' => $sign);
                 //echo $url . PHP_EOL;
                 $data = self::zplay_curl($url, 'post', $post_data);
+
+                // 数据获取重试
+                $api_data_i=1;
+                while(!$data){
+                    $data = self::zplay_curl($url, 'post', $post_data);
+                    $api_data_i++;
+                    if($api_data_i>3)
+                        break;
+                }
+                if($api_data_i ==4 && empty($data)){
+                    $error_msg_1 = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:返回数据为空('.json_encode($data).')';
+                    DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg_1);
+                    continue;
+
+                }
+
                 if (!$data['msg']) {
                     //删除数据库里原来数据
                     $map['dayid'] = $dayid;
@@ -125,7 +141,7 @@ class KedaxunfeiReportCommond extends Command
                     }
 
                 } else {
-                    $error_msg = AD_PLATFORM . '广告平台' . $value['company_account'] . '账号取数失败,错误信息:' . $data['msg'];
+                    $error_msg = AD_PLATFORM . '广告平台' . $value['company_account'] . '账号取数失败,错误信息:' .json_encode($data);
                     DataImportImp::saveDataErrorLog(1, SOURCE_ID, AD_PLATFORM, 2, $error_msg);
 
                     $error_msg_arr = [];
@@ -135,6 +151,11 @@ class KedaxunfeiReportCommond extends Command
 
             }
             Artisan::call('KedaxunfeiHandleProcesses', ['dayid' => $dayid]);
+        }
+        } catch (\Exception $e) {
+            $error_msg_info = $dayid.'号,'.AD_PLATFORM.'广告平台程序失败，失败原因：'.$e->getMessage();
+            DataImportImp::saveDataErrorLog(5,SOURCE_ID,AD_PLATFORM,2,$error_msg_info);
+
         }
     		
     }

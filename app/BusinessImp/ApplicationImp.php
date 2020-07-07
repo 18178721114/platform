@@ -1081,6 +1081,7 @@ class ApplicationImp extends ApiBaseImp
             if (isset($platform_keys[$ad_platform['platform_id']])){
                 $platform_key_info = $platform_keys[$ad_platform['platform_id']];
                 $ad_platform_data[$ad_platform['id']]['params']['dynamic_id'] = $ad_platform['id'];
+                $ad_platform_data[$ad_platform['id']]['params']['redundancy_status'] = $ad_platform['redundancy_status'];
                 if (isset($platform_key_info[1]) && $platform_key_info[1]){
                     foreach ($platform_key_info[1] as $kkk => $vvv){
                         $ad_platform_data[$ad_platform['id']]['params'][$vvv] = $ad_platform[$vvv];
@@ -1193,12 +1194,14 @@ class ApplicationImp extends ApiBaseImp
 
         foreach ($ad_config as $p_key => $app_ad_list){
             $id = isset($app_ad_list['dynamic_id']) ? $app_ad_list['dynamic_id'] : '';
+            $redundancy_status = isset($app_ad_list['redundancy_status']) ? $app_ad_list['redundancy_status'] : 1;
             // 获取平台的主键ID
             foreach ($platform_keys as $plat_id => $platform_key_info){
                 if ($plat_id == $platform_id) {
                     if ($id) $app_info_list[$p_key]['id'] = $id;
                     if ($app_id) $app_info_list[$p_key]['app_id'] = $app_id;
                     if ($platform_id) $app_info_list[$p_key]['platform_id'] = $platform_id;
+                    if ($redundancy_status) $app_info_list[$p_key]['redundancy_status'] = $redundancy_status;
 
                     if (isset($platform_key_info[1]) && $platform_key_info[1]) {
                         $app_info_list_info = Service::checkField($app_ad_list, $platform_key_info[1], ApplicationLogic::$appAdFieldName);
@@ -2051,6 +2054,7 @@ class ApplicationImp extends ApiBaseImp
                         if (isset($platform_keys[$n_platform_id])){
                             $platform_key_info = $platform_keys[$n_platform_id];
                             $agency_list['params']['dynamic_id'] = $a_l_generalize['id'];
+                            $agency_list['params']['redundancy_generalize_status'] = $a_l_generalize['redundancy_generalize_status'];
                             if (isset($platform_key_info[1]) && $platform_key_info[1]){
                                 foreach ($platform_key_info[1] as $kkk => $vvv){
                                     $agency_list['params'][$vvv] = $a_l_generalize[$vvv];
@@ -2240,12 +2244,14 @@ class ApplicationImp extends ApiBaseImp
         if ($ad_config){
             foreach ($ad_config as $p_key => $alize_ad_list){
                 $id = isset($alize_ad_list['dynamic_id']) ? $alize_ad_list['dynamic_id'] : '';
+                $redundancy_generalize_status = isset($alize_ad_list['redundancy_generalize_status']) ? $alize_ad_list['redundancy_generalize_status'] : 1;
                 foreach ($platform_keys as $plat_id => $platform_key_info){
                     if ($platform_id == $plat_id) {
                         if ($id) $generalize_info_list[$p_key]['id'] = $id;
                         if ($app_id) $generalize_info_list[$p_key]['app_id'] = $app_id;
                         if ($platform_id) $generalize_info_list[$p_key]['platform_id'] = $platform_id;
                         if ($data_account) $generalize_info_list[$p_key]['data_account'] = $data_account;
+                        if ($redundancy_generalize_status) $generalize_info_list[$p_key]['redundancy_generalize_status'] = $redundancy_generalize_status;
                         $generalize_info_list[$p_key]['agency_platform_id'] = $agency_id;
                         if (isset($platform_key_info[1]) && $platform_key_info[1]) {
                             $check_data = Service::checkField($alize_ad_list, $platform_key_info[1], ApplicationLogic::$appGeneralizeFieldName);

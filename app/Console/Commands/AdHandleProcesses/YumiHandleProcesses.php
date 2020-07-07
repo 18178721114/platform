@@ -112,8 +112,8 @@ class YumiHandleProcesses extends Command
             `c_app_ad_platform`.`flow_type` 
             FROM
             `c_app`
-            LEFT JOIN `c_app_ad_platform` ON `c_app_ad_platform`.`app_id` = `c_app`.`id`
-            LEFT JOIN `c_app_ad_slot` ON `c_app_ad_slot`.`app_ad_platform_id` = `c_app_ad_platform`.`id`
+            LEFT JOIN `c_app_ad_platform` ON `c_app_ad_platform`.`app_id` = `c_app`.`id`  and `c_app_ad_platform`.`status` = 1
+            LEFT JOIN `c_app_ad_slot` ON `c_app_ad_slot`.`app_ad_platform_id` = `c_app_ad_platform`.`id`  and `c_app_ad_slot`.`status` = 1
 
             LEFT JOIN (
             SELECT
@@ -200,14 +200,13 @@ class YumiHandleProcesses extends Command
                 }
 
             }
+            $err_name = (isset($json_info['slot_uuid']) ?$json_info['slot_uuid']:'Null').'#'.(isset($json_info['slot_name']) ?$json_info['slot_name']:'Null').'#'.(isset($json_info['app_id']) ?$json_info['app_id']:'Null').'#'.(isset($json_info['app_name']) ?$json_info['app_name']:'Null');
+
             if($num){
-//                if ($yumi_app_id && $json_info['slot_uuid']){
-//                    $new_campaign_ids[$yumi_app_id][$json_info['slot_uuid']] = $json_info['ad_type'];
-//                }
-                $error_log_arr['app_id'][] = $json_info['app_id'].'('.addslashes(str_replace('\'\'','\'',$json_info['app_name'])).')';
+
+                $error_log_arr['app_id'][] = $json_info['app_id'].'('.addslashes(str_replace('\'\'','\'',$err_name)).')';
             }
 
-//            if (!$json_info['country']) var_dump($v);
             foreach ($country_info as $country_k => $country_v) {
                 if(strtolower(str_replace('\'\'','\'',$json_info['country'])) == strtolower($country_v['name'])){
                     $array[$k]['country_id'] = $country_v['c_country_id'];
@@ -221,7 +220,7 @@ class YumiHandleProcesses extends Command
                 }
             }
             if($num_country){
-                $error_log_arr['country'][] = isset($json_info['country']) ? str_replace('\'\'','\'',$json_info['country']) : 'Unknown Region' ;
+                $error_log_arr['country'][] = isset($json_info['country']) ? str_replace('\'\'','\'',$json_info['country']).'('.addslashes(str_replace('\'\'','\'',$err_name)).')' : 'Unknown Region' ;
             }
             foreach ($AdType_info as $AdType_k => $AdType_v) {
              if($json_info['ad_type'] == $AdType_v['name'] ){
@@ -235,7 +234,7 @@ class YumiHandleProcesses extends Command
              }
             }
            if($num_adtype){
-               $error_log_arr['ad_type'][] = isset($json_info['ad_type']) ? str_replace('\'\'','\'',$json_info['ad_type']) :'';
+               $error_log_arr['ad_type'][] = isset($json_info['ad_type']) ? str_replace('\'\'','\'',$json_info['ad_type']).'('.addslashes(str_replace('\'\'','\'',$err_name)).')' :'';
            }
 
             if(($num+$num_country+$num_adtype)>0){
@@ -263,23 +262,13 @@ class YumiHandleProcesses extends Command
             $array[$k]['ad_unit_id'] = addslashes($json_info['slot_uuid']);
             $array[$k]['ad_unit_name'] = addslashes(str_replace('\'\'','\'',$json_info['slot_name'])) ;
             $array[$k]['impression'] = $json_info['imp'];
-//            $array[$k]['ad_unit_name'] = '' ;
-//            $array[$k]['impression'] = $json_info['exposure'];
             $array[$k]['all_request'] = $json_info['request_s'];
             $array[$k]['success_requests'] = $json_info['request_s'];
             $array[$k]['fail_requests'] = $json_info['request_f'];
             $array[$k]['impression_port'] = $json_info['imp_port'];
             $array[$k]['impression_begin'] = $json_info['imp_begin'];
-
-//            $array[$k]['all_request'] = $json_info['request'];
-//            $array[$k]['success_requests'] = $json_info['request'];
-//            $array[$k]['fail_requests'] = $json_info['request'];
-//            $array[$k]['impression_port'] = $json_info['imp_port'];
-//            $array[$k]['impression_begin'] = $json_info['imp_begin'];
-            //$array[$k]['channel_id'] = $json_info['channel'];
             $array[$k]['click'] = $json_info['click'];
             $array[$k]['earning'] = $json_info['earning'];
-//            $array[$k]['earning'] = $json_info['income'];
             if($app_list[0]['divide_ad']){
                 $divide_ad = 1-$app_list[0]['divide_ad']/100;
             }else{
@@ -288,21 +277,11 @@ class YumiHandleProcesses extends Command
 
             // 汇率判断
             $currency_ex = 1;
-            // if ($ex_info){
-            //     foreach ($ex_info as $eik => $eiv){
-            //         if ($eiv['data_account'] == $v['account']){
-            //             $currency_ex = $eiv['currency_ex'];
-            //         }
-            //     }
-            // }
+
 
             $array[$k]['earning_exc'] = $json_info['earning']*$divide_ad;
             $array[$k]['earning_flowing'] =isset($json_info['earning']) ? $json_info['earning']* $currency_ex: 0;
             $array[$k]['earning_fix'] = $json_info['earning']*$currency_ex*$divide_ad;
-
-//            $array[$k]['earning_exc'] = $json_info['income']*$divide_ad;
-//            $array[$k]['earning_flowing'] =isset($json_info['income']) ? $json_info['income']* $currency_ex: 0;
-//            $array[$k]['earning_fix'] = $json_info['income']*$currency_ex*$divide_ad;
 
             // 流水美元
             if (($array[$k]['earning'] == $array[$k]['earning_flowing']) && $usd_currency_ex){
@@ -329,24 +308,27 @@ class YumiHandleProcesses extends Command
         if ($error_log_arr){
             $error_msg_array = [];
             $error_msg_mail = [];
-            if (isset($error_log_arr['app_id'])){
+            $error_log_arr = Service::shield_error($source_id,$error_log_arr);
+
+            if (isset($error_log_arr['app_id']) && !empty($error_log_arr['app_id'])){
                 $app_id = implode(',',array_unique($error_log_arr['app_id']));
                 $error_msg_array[] = '应用id匹配失败,ID为:'.$app_id;
                 $error_msg_mail[] = '应用id匹配失败，ID为：'.$app_id;
             }
 
-            if (isset($error_log_arr['country'])){
+            if (isset($error_log_arr['country']) && !empty($error_log_arr['ad_type'])){
                 $country = implode(',',array_unique($error_log_arr['country']));
                 $error_msg_array[] = '国家匹配失败,code为:'.$country;
                 $error_msg_mail[] = '国家匹配失败，code为：'.$country;
             }
-            if (isset($error_log_arr['ad_type'])){
+            if (isset($error_log_arr['ad_type']) && !empty($error_log_arr['ad_type'])){
                 $ad_type = implode(',',array_unique($error_log_arr['ad_type']));
                 $error_msg_array[] = '广告类型匹配失败,code为:'.$ad_type;
                 $error_msg_mail[] = '广告类型匹配失败，code为：'.$ad_type;
             }
-
-            DataImportImp::saveDataErrorLog(2,$source_id,$source_name,2,implode(';',$error_msg_array));
+            if(!empty($error_msg_array)) {
+                DataImportImp::saveDataErrorLog(2, $source_id, $source_name, 2, implode(';', $error_msg_array));
+            }
             DataImportImp::saveDataErrorMoneyLog($source_id,$dayid,$error_detail_arr);
 
             //CommonFunction::sendMail($error_msg_mail,$source_name.'广告平台数据处理error');

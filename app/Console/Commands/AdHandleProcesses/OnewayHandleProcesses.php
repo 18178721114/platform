@@ -94,8 +94,8 @@ class OnewayHandleProcesses extends Command
             `c_app_ad_platform`.`flow_type` 
             FROM
             `c_app`
-            LEFT JOIN `c_app_ad_platform` ON `c_app_ad_platform`.`app_id` = `c_app`.`id`
-            LEFT JOIN `c_app_ad_slot` ON `c_app_ad_slot`.`app_ad_platform_id` = `c_app_ad_platform`.`id`
+            LEFT JOIN `c_app_ad_platform` ON `c_app_ad_platform`.`app_id` = `c_app`.`id` and `c_app_ad_platform`.`status` = 1
+            LEFT JOIN `c_app_ad_slot` ON `c_app_ad_slot`.`app_ad_platform_id` = `c_app_ad_platform`.`id`   and `c_app_ad_slot`.`status` = 1
 
             LEFT JOIN (
             SELECT
@@ -170,9 +170,10 @@ class OnewayHandleProcesses extends Command
         			
         		}
         	}
+            $err_name = (isset($json_info['placementId']) ?$json_info['placementId']:'Null').'#Null#'.(isset($json_info['publishId']) ?$json_info['publishId']:'Null').'#'.(isset($json_info['appName']) ?$json_info['appName']:'Null');
 
             if ($num){
-                $error_log_arr['app_id'][] = $json_info['publishId'].'或'.$json_info['placementId'].'('.addslashes(str_replace('\'\'','\'',$json_info['appName'])).')';
+                $error_log_arr['app_id'][] = $json_info['publishId'].'或'.$json_info['placementId'].'('.addslashes(str_replace('\'\'','\'',$err_name)).')';
             }
 
         	foreach ($country_info as $country_k => $country_v) {
@@ -188,7 +189,7 @@ class OnewayHandleProcesses extends Command
         	}
 
             if ($num_country){
-                $error_log_arr['country'][] = isset($json_info['country']) ? $json_info['country'] : 'Unknown Region';
+                $error_log_arr['country'][] = isset($json_info['country']) ? $json_info['country'].'('.$err_name.')' : 'Unknown Region';
             }
         	
         	if(($num + $num_country) > 0){
@@ -265,19 +266,23 @@ class OnewayHandleProcesses extends Command
         if ($error_log_arr){
             $error_msg_array = [];
             $error_msg_mail = [];
-            if (isset($error_log_arr['app_id'])){
+            $error_log_arr = Service::shield_error($source_id,$error_log_arr);
+
+            if (isset($error_log_arr['app_id']) && !empty($error_log_arr['app_id'])){
                 $appid_str = implode(',',array_unique($error_log_arr['app_id']));
                 $error_msg_array[] = '应用匹配失败,ID为:'.$appid_str;
                 $error_msg_mail[] = '应用匹配失败，ID为：'.$appid_str;
             }
 
-            if (isset($error_log_arr['country'])){
+            if (isset($error_log_arr['country']) && !empty($error_log_arr['country'])){
                 $country = implode(',',array_unique($error_log_arr['country']));
                 $error_msg_array[] = '国家匹配失败,code为:'.$country;
                 $error_msg_mail[] = '国家匹配失败，code为：'.$country;
             }
+            if(!empty($error_msg_array)) {
 
-            DataImportImp::saveDataErrorLog(2,$source_id,$source_name,2,implode(';',$error_msg_array));
+                DataImportImp::saveDataErrorLog(2, $source_id, $source_name, 2, implode(';', $error_msg_array));
+            }
             DataImportImp::saveDataErrorMoneyLog($source_id,$dayid,$error_detail_arr);
 
             //CommonFunction::sendMail($error_msg_mail,$source_name.'广告平台数据处理error');

@@ -47,20 +47,21 @@ class ChinaChannelHandleProcesses extends Command
      */
     public function handle()
     {
-        set_time_limit(0);
-        $source_id ='pco01';
-        $source_name = '国内安卓渠道广告分成';
-        $start_date = $this->argument('start_date')?$this->argument('start_date'):date('Y-m-d',strtotime('-8 day'));
-        $end_date = $this->argument('end_date')?$this->argument('end_date'):date('Y-m-d',strtotime('-1 day'));
+        try {
+            set_time_limit(0);
+            $source_id = 'pco01';
+            $source_name = '国内安卓渠道广告分成';
+            $start_date = $this->argument('start_date') ? $this->argument('start_date') : date('Y-m-d', strtotime('-8 day'));
+            $end_date = $this->argument('end_date') ? $this->argument('end_date') : date('Y-m-d', strtotime('-1 day'));
 
-        $sql = "delete from d_channel_ad where date_time>='$start_date' and date_time<='$end_date';";
-        $delete_info = DB::delete($sql);
-        $error_log_arr =[];
+            $sql = "delete from d_channel_ad where date_time>='$start_date' and date_time<='$end_date';";
+            $delete_info = DB::delete($sql);
+            $error_log_arr = [];
 
-        // 国内安卓渠道广告分成 
-        // 先根据 c_channel_app_divide 和广告收入小表判断是否  这个应用这个渠道是否参与广告分成
-        // 在根据应用所关联用户数  如果有活跃 那么就是广告收入乘渠道分成比例 这个是渠道的收入 否则为零
-        $sql = "insert into d_channel_ad (app_id,
+            // 国内安卓渠道广告分成
+            // 先根据 c_channel_app_divide 和广告收入小表判断是否  这个应用这个渠道是否参与广告分成
+            // 在根据应用所关联用户数  如果有活跃 那么就是广告收入乘渠道分成比例 这个是渠道的收入 否则为零
+            $sql = "insert into d_channel_ad (app_id,
         date_time,
         channel_id_show,
         channel_id,
@@ -144,11 +145,11 @@ class ChinaChannelHandleProcesses extends Command
         c_divide.type = 2 )d ON a.channel_id = d.channel_id
         -- WHERE c.app_id is not  null  and d.channel_id is not  null 
         ";
-        $insert_info = DB::insert($sql);
+            $insert_info = DB::insert($sql);
 
 
-        //未统计到用户数的应用
-        $sql = "
+            //未统计到用户数的应用
+            $sql = "
         SELECT
         a.app_id as app_id,
         a.date as date_time,
@@ -221,15 +222,15 @@ class ChinaChannelHandleProcesses extends Command
         c_divide.type = 2 )d ON a.channel_id = d.channel_id
         WHERE c.app_id is null   
         ";
-        $error_tj_info = DB::select($sql);
-        $error_tj_info = Service::data($error_tj_info);
-        if($error_tj_info){
-            foreach ($error_tj_info as $key => $value) {
-               $error_log_arr['tj'][] = $value['app_id']."(".$value['app_name'].")" ;
+            $error_tj_info = DB::select($sql);
+            $error_tj_info = Service::data($error_tj_info);
+            if ($error_tj_info) {
+                foreach ($error_tj_info as $key => $value) {
+                    $error_log_arr['tj'][] = $value['app_id'] . "(" . $value['app_name'] . ")";
+                }
             }
-        }
-        //c_divide 表没有渠道信息
-        $sql = "
+            //c_divide 表没有渠道信息
+            $sql = "
         SELECT
         a.app_id as app_id,
         a.date as date_time,
@@ -302,36 +303,44 @@ class ChinaChannelHandleProcesses extends Command
         c_divide.type = 2 )d ON a.channel_id = d.channel_id
         WHERE d.channel_id is null   
         ";
-        $error_tj_info = DB::select($sql);
-        $error_tj_info = Service::data($error_tj_info);
-        if($error_tj_info){
-            foreach ($error_tj_info as $key => $value) {
-               $error_log_arr['channel'][] = $value['channel_id']."(".$value['channel_name'].")" ;
-            }
-        }
-
-                // 保存错误信息
-        if ($error_log_arr){
-            $error_msg_array = [];
-            $error_msg_mail = [];
-            if (isset($error_log_arr['tj'])){
-                $tj = implode(',',array_unique($error_log_arr['tj']));
-                $error_msg_array[] = '未统计到用户数的应用id,ID为:'.$tj;
-                $error_msg_mail[] = '未统计到用户数的应用id，ID为：'.$tj;
+            $error_tj_info = DB::select($sql);
+            $error_tj_info = Service::data($error_tj_info);
+            if ($error_tj_info) {
+                foreach ($error_tj_info as $key => $value) {
+                    $error_log_arr['channel'][] = $value['channel_id'] . "(" . $value['channel_name'] . ")";
+                }
             }
 
-            if (isset($error_log_arr['channel'])){
-                $channel = implode(',',array_unique($error_log_arr['channel']));
-                $error_msg_array[] = '未匹配到渠道分成比例的渠道id,code为:'.$channel;
-                $error_msg_mail[] = '未匹配到渠道分成比例的渠道id，code为：'.$channel;
+            // 保存错误信息
+            if ($error_log_arr) {
+                $error_msg_array = [];
+                $error_msg_mail = [];
+                if (isset($error_log_arr['tj'])) {
+                    $tj = implode(',', array_unique($error_log_arr['tj']));
+                    $error_msg_array[] = '未统计到用户数的应用id,ID为:' . $tj;
+                    $error_msg_mail[] = '未统计到用户数的应用id，ID为：' . $tj;
+                }
+
+                if (isset($error_log_arr['channel'])) {
+                    $channel = implode(',', array_unique($error_log_arr['channel']));
+                    $error_msg_array[] = '未匹配到渠道分成比例的渠道id,code为:' . $channel;
+                    $error_msg_mail[] = '未匹配到渠道分成比例的渠道id，code为：' . $channel;
+                }
+
+                DataImportImp::saveDataErrorLog(2, $source_id, $source_name, 5, implode(';', $error_msg_array));
+                // 发送邮件
+                CommonFunction::sendMail($error_msg_mail, '国内安卓渠道分成数据处理error');
+
+
             }
-
-            DataImportImp::saveDataErrorLog(2,$source_id,$source_name,5,implode(';',$error_msg_array));
-            // 发送邮件
-            CommonFunction::sendMail($error_msg_mail,'国内安卓渠道分成数据处理error');
-
-
-        }
             echo '处理完成';
+        }catch (\Exception $e) {
+            // 异常报错
+            $message = date("Y-m-d")."号,渠道广告分成数据程序报错,报错原因:".$e->getMessage();
+            DataImportImp::saveDataErrorLog(5, 'pad-001', '渠道广告分成国家数据', 2, $message);
+            $error_msg_arr[] = $message;
+            CommonFunction::sendMail($error_msg_arr, '渠道广告分成数据');
+            exit;
+        }
     }
 }

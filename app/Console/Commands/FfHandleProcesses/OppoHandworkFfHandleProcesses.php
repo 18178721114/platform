@@ -150,7 +150,7 @@ class OppoHandworkFfHandleProcesses extends Command
 
             	}
                 if($num){
-                    $error_log_arr['app_id'][]=$json_info['app_id'];
+                    $error_log_arr['app_id'][]=$json_info['app_id'].'('.(isset($json_info['app_name'])?$json_info['app_name'] : $json_info['应用名称']).')';
                 }
                 $array[$k]['country_id'] = 64;
             	if(($num)>0){
