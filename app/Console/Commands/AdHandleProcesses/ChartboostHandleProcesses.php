@@ -197,6 +197,8 @@ class ChartboostHandleProcesses extends Command
 
             $array[$k]['data_account'] = $v['account'];
         	$array[$k]['date'] = $dayid;
+            $array[$k]['platform_app_id'] = addslashes($json_info['appId']);
+            $array[$k]['platform_app_name'] = addslashes(str_replace('\'\'','\'',$json_info['app'])) ;
         	$array[$k]['ad_unit_id'] = $json_info['appId'];
         	$array[$k]['ad_unit_name'] = addslashes(str_replace('\'\'','\'',$json_info['app']));
 

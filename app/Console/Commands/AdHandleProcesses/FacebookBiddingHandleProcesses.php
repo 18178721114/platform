@@ -223,6 +223,7 @@ class FacebookBiddingHandleProcesses extends Command
         	$array[$k]['date'] = $dayid;
         	$array[$k]['platform_app_id'] = isset($json_info['appid']) ? addslashes($json_info['appid']) : '';
         	$array[$k]['platform_app_name'] = isset($json_info['appname']) ? addslashes(str_replace('\'\'','\'',$json_info['appname'])) : '';
+            $array[$k]['ad_unit_id'] = isset($json_info['placement']) ? addslashes(str_replace('\'\'','\'',$json_info['placement'])) : '';
         	$array[$k]['success_requests'] = $json_info['request'];
         	$array[$k]['all_request'] = $json_info['request'];
         	$array[$k]['impression'] = $json_info['views'];
