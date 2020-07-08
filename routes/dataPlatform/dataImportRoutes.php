@@ -15,5 +15,8 @@ Route::match(['post'], 'api/channel/data/import', 'DataImportController@importCh
 // 数据报错日志信息
 Route::match(['post'], 'api/data/error/log', 'DataImportController@getDateErrorLog');
 
-// 数据报错日志信息
+// 数据报错日志处理状态修改
+Route::match(['post'], 'api/data/error/status', 'DataImportController@changeErrorStatus');
+
+// 配置报错
 Route::match(['post'], 'api/data/config/log', 'DataImportController@getConfigErrorLog');

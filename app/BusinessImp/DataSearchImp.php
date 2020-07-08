@@ -4992,11 +4992,11 @@ class DataSearchImp extends ApiBaseImp
         $data['table_list'] = $array;
         // todo 返回汇率待确认
         if ($all_month_arr){
-            $all_month_str = implode(',',$all_month_arr);
+            $all_month_str = str_replace('-','',implode(',',$all_month_arr));
         }else{
             $all_month_str = date('Ym');
         }
-
+        
         $sql = "select ex.currency_id,c.currency_en,c.currency_name,ex.currency_ex,ex.effective_time from c_currency_ex ex left join c_currency_type c on c.id = ex.currency_id where ex.effective_time in ({$all_month_str}) and ex.currency_id = 60 group by ex.currency_id,ex.effective_time order by ex.effective_time ";
         $currency_list = DB::select($sql);
         $currency_list = Service::data($currency_list);

@@ -272,50 +272,138 @@ class DataImportImp extends ApiBaseImp
     public static function getDateErrorLog($params){
 
         // 筛选条件判断
-        $error_type = isset($params['error_type']) ? $params['error_type'] : ''; // 错误类型
-        $start_date = isset($params['begin_time']) && $params['begin_time'] ? $params['begin_time'] : date("Y-m-d 00:00:00",time()-(6 * 86400)); // 开始时间
-        $end_date = isset($params['end_time']) && $params['end_time'] ? $params['end_time'] : date("Y-m-d 00:00:00",time()+86400); // 结束时间
+        // 错误类型 1、系统处理错误；2、数据获取错误；3、数据处理错误；4、手工核对错误
+        $error_type = isset($params['error_type']) ? $params['error_type'] : '';
+        // 处理类型 1,待处理;2,处理中;3,已完成;
+        $status = isset($params['status']) ? $params['status'] : '';
+        // 平台类型 1、统计平台；2、广告平台；3、付费平台；4、推广平台；5、其他
+        $platform_type = isset($params['platform_type']) ? $params['platform_type'] : '';
+        // 开始时间
+        $start_date = isset($params['begin_time']) && $params['begin_time'] ? $params['begin_time'] : date("Y-m-d 00:00:00",time()-(6 * 86400));
+        // 结束时间
+        $end_date = isset($params['end_time']) && $params['end_time'] ? $params['end_time'] : date("Y-m-d 00:00:00",time()+86400);
         $platform = isset($params['platform']) ? $params['platform'] : ''; // 平台名称及ID
-        $platform_type = isset($params['platform_type']) ? $params['platform_type'] : ''; // 平台类型
+
 
         $page = isset($params['page']) ? $params['page'] : 1 ;
         $page_size = isset($params['size']) ? $params['size'] : 1000 ;
 
         $map = [];
-
-        $map['between'] = ['create_time',[$start_date, $end_date]];
-
+        if ($start_date && $end_date){
+            $map['between'] = ['create_time',[$start_date, $end_date]];
+        }
         if ($error_type) $map['error_type'] = $error_type;
         if ($platform_type) $map['platform_type'] = $platform_type;
 
         if ($platform) $map['like'][] = ['platform_id','like', $platform];
         if ($platform) $map['like'][] = ['platform_name','like', $platform];
 
-        $fields = ['create_time as date','error_type as error_type_id','platform_name as name','platform_id as ID','platform_type as plat_type_id','remark'];
-        $data_error_list = DataImportLogic::getDataErrorList('error_log','error_data',$map,$fields)->forPage($page,$page_size)->orderby("create_time","desc")->get();
-        $data_error_list = Service::data($data_error_list);
+        $fields = ['id','create_time as date','error_type as error_type_id','platform_name','platform_id','platform_type as plat_type_id','status','remark'];
 
-        if (!$data_error_list) ApiResponseFactory::apiResponse([], [], 1000);
-
-        // 获取数据总数
-        $total = DataImportLogic::getDataErrorList('error_log','error_data',$map,$fields)->count();
-
-        foreach ($data_error_list as $key => $data_error ){
-            $err_msg = $data_error['remark'];
-            if ($err_msg){
-                $err_msg = json_decode($err_msg,true);
-                $data_error_list[$key]['remark'] = implode(';',array_values($err_msg));
+        // 按照处理状态查询
+        $unique_error_return = [];
+        if ($status) {
+            $unique_error_return = self::getErrorData($map,$status,$fields);
+        }else{
+            for ($status = 1;$status <= 3;$status++) {
+                $unique_error_single = self::getErrorData($map,$status,$fields);
+                $unique_error_return = array_merge($unique_error_return,$unique_error_single);
             }
         }
 
-        $back_data=[
-            'table_list'=>$data_error_list,
-            'total'=> $total,
-            'page_total'=> ceil($total / $page_size),
-        ];
+        ApiResponseFactory::apiResponse(['table_list' => array_values($unique_error_return)], []);
+    }
 
 
-        ApiResponseFactory::apiResponse(['table_list' => $back_data], []);
+    public static function getErrorData($map,$status,$fields){
+        // 待处理
+        $map['status'] = $status;
+        // 所有数据
+        $data_error_list = DataImportLogic::getDataErrorList('error_log', 'error_data', $map, $fields)->orderby("create_time", "asc")->get();
+        $data_error_list = Service::data($data_error_list);
+
+        // 错误信息
+        $fields = ['remark'];
+        $remark_error_list = DataImportLogic::getDataErrorList('error_log', 'error_data', $map, $fields)->get();
+        $remark_error_list = Service::data($remark_error_list);
+        $unique_arr = [];
+        $unique_error = [];
+        $unique_error_list = [];
+        $return_unique_error_list = [];
+        if ($remark_error_list) {
+            foreach ($remark_error_list as $remark_error_info) {
+                $unique_arr[] = $remark_error_info['remark'];
+            }
+            $unique_arr = array_unique($unique_arr);
+            if ($unique_arr) {
+                foreach ($unique_arr as $unique_arr_k => $unique_arr_v) {
+                    $unique_error[$unique_arr_k]['remark'] = $unique_arr_v;
+                }
+            }
+            if ($data_error_list && $unique_error) {
+                foreach ($data_error_list as $data_error_info) {
+                    foreach ($unique_error as $unique_error_k => $unique_data) {
+                        if ($unique_data['remark'] == $data_error_info['remark']) {
+                            $unique_error[$unique_error_k]['all'][] = $data_error_info;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        if ($unique_error) {
+            foreach ($unique_error as $unique_error_key => $unique_error_info) {
+                $err_msg = json_decode($unique_error_info['remark'], true);
+                $err_msg = implode(';', array_values($err_msg));
+                $err_ids = [];
+                foreach ($unique_error_info['all'] as $unique_error_msg) {
+                    $err_ids[] = $unique_error_msg['id'];
+                }
+
+                $unique_error[$unique_error_key]['error_num'] = count($unique_error_info['all']);
+                $unique_error[$unique_error_key]['error_detail'] = $err_msg;
+                $unique_error[$unique_error_key]['error_profile'] = $err_msg;
+                $unique_error[$unique_error_key]['error_type_id'] = $unique_error_info['all'][0]['error_type_id'];
+                $unique_error[$unique_error_key]['platform_name'] = $unique_error_info['all'][0]['platform_name'];
+                $unique_error[$unique_error_key]['platform_id'] = $unique_error_info['all'][0]['platform_id'];
+                $unique_error[$unique_error_key]['plat_type_id'] = $unique_error_info['all'][0]['plat_type_id'];
+                $unique_error[$unique_error_key]['status'] = $unique_error_info['all'][0]['status'];
+                $unique_error[$unique_error_key]['first_time'] = $unique_error_info['all'][0]['date'];
+                $unique_error[$unique_error_key]['id'] = implode(',', $err_ids);
+                unset($unique_error[$unique_error_key]['all']);
+                unset($unique_error[$unique_error_key]['remark']);
+            }
+        }
+        $unique_error = array_values($unique_error);
+        $unique_error = Service::sortArrByManyField($unique_error, 'platform_id', SORT_ASC, 'error_num', SORT_DESC);
+        return $unique_error;
+    }
+
+    /**
+     * 数据报错日志处理状态修改
+     * @param $params
+     */
+    public static function changeErrorStatus($params){
+        // 错误类型
+        $ids = isset($params['id']) ? $params['id'] : '';
+        if (!$ids) ApiResponseFactory::apiResponse([], [], 1050);
+
+        $status = isset($params['status']) ? $params['status'] : '';
+        if (!$status) ApiResponseFactory::apiResponse([], [], 1051);
+
+        // 老数据
+        $map['in'] = ['id',explode(',',$ids)];
+        $updata['status'] = $status;
+        $table_name = "error_log.error_data";
+        DB::beginTransaction();
+        $bool = DataImportLogic::updateErrorStatus($table_name,$map, $updata);
+        if (!$bool){
+            DB::rollBack();
+            ApiResponseFactory::apiResponse([],[],1052);
+        }
+        DB::commit();
+
+        ApiResponseFactory::apiResponse([],[]);
     }
 
     /**

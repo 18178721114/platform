@@ -257,7 +257,10 @@ class ApplovinHandleProcesses extends Command
 
             $array[$k]['data_account'] = $v['account'];
         	$array[$k]['date'] = $dayid;
-        	$array[$k]['platform_app_name'] = isset($json_info['application']) ? addslashes(str_replace('\'\'','\'',$json_info['application'])) : '';
+        	$array[$k]['platform_app_id'] = isset($json_info['package_name']) ? addslashes(str_replace('\'\'','\'',$json_info['package_name'])) : '';
+        	$array[$k]['platform_app_name'] = isset($json_info['package_name']) ? addslashes(str_replace('\'\'','\'',$json_info['package_name'])) : '';
+        	$array[$k]['ad_unit_id'] = isset($json_info['application']) ? addslashes(str_replace('\'\'','\'',$json_info['application'])) : '';
+        	$array[$k]['ad_unit_name'] = isset($json_info['application']) ? addslashes(str_replace('\'\'','\'',$json_info['application'])) : '';
         	$array[$k]['impression'] = $json_info['impressions'];
         	$array[$k]['click'] = $json_info['clicks'];
 

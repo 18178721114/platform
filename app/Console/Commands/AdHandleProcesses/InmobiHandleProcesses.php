@@ -234,8 +234,8 @@ class InmobiHandleProcesses extends Command
         	$array[$k]['data_account'] = $v['account'];
         	$array[$k]['platform_app_id'] = addslashes($json_info['placementId']);
         	$array[$k]['platform_app_name'] = addslashes(str_replace('\'\'','\'',$json_info['placementName'])) ;
-            $array[$k]['ad_unit_id'] = addslashes($json_info['siteId']);
-        	$array[$k]['ad_unit_name'] = addslashes(str_replace('\'\'','\'',$json_info['siteName'])) ;
+            $array[$k]['ad_unit_id'] = addslashes($json_info['placementId']);
+        	$array[$k]['ad_unit_name'] = addslashes(str_replace('\'\'','\'',$json_info['placementName'])) ;
         	$array[$k]['impression'] = $json_info['adImpressions'];
         	$array[$k]['all_request'] = $json_info['adRequests'];
         	$array[$k]['click'] = $json_info['clicks'];

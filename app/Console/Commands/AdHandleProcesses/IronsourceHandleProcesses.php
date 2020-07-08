@@ -246,6 +246,7 @@ class IronsourceHandleProcesses extends Command
         	$array[$k]['data_account'] = $v['account'];
         	$array[$k]['platform_app_id'] = addslashes($json_info['appKey']);
         	$array[$k]['platform_app_name'] = addslashes(str_replace('\'\'','\'',$json_info['app_name']));
+            $array[$k]['ad_unit_id'] = addslashes(str_replace('\'\'','\'',$json_info['bundleId']));
         	$array[$k]['ad_unit_name'] = addslashes(str_replace('\'\'','\'',$json_info['adUnits']));
         	$array[$k]['impression'] = $json_info['impressions'];
         	$array[$k]['success_requests'] = $json_info['adSourceResponses'];
