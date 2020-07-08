@@ -131,7 +131,7 @@ class AppflurryTjMonthReportCommond extends Command
 
                         }else {
 
-                            $error_msg = AD_PLATFORM . '统计平台获取用户数据失败,错误信息:' . (isset($result['message']) ? $result['message'] : '无数据，接口未返回任何信息');
+                            $error_msg = AD_PLATFORM . '统计平台获取月活用户数据失败,错误信息:' . (isset($result['message']) ? $result['message'] : '无数据，接口未返回任何信息');
                             DataImportImp::saveDataErrorLog(1, SOURCE_ID, AD_PLATFORM, 1, $error_msg);
                             $error_msg_arr[] = $error_msg;
                             CommonFunction::sendMail($error_msg_arr, AD_PLATFORM . '统计平台取数error');
