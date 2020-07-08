@@ -108,6 +108,7 @@ class SnapchatTgCommond extends Command
             var_dump($get_access_token_result);
             $token_res_i=1;
             while(!$get_access_token_result || !isset($get_access_token_result['access_token'])){
+                sleep(10);
                 $get_access_token_result = CurlRequest::curl_header_Post($get_access_token_url, $get_access_token_data,[]);
                 $get_access_token_result = json_decode($get_access_token_result,true);
 
