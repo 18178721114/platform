@@ -164,7 +164,7 @@ class VungleTgReportCommond extends Command
 
         $data = json_decode($content, true);
         if (isset($data['error']) || !$data) {
-            if ($data) {
+            if ($data && $content != '[]') {
                 $status = isset($data['status']) ? $data['status'] : '';
                 $error = isset($data['error']) ? $data['error'] : '暂无数据' . json_encode($data);
 
