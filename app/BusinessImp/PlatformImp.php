@@ -833,6 +833,7 @@ class PlatformImp extends ApiBaseImp
             $account_field = [DB::raw($sum_field),DB::raw('count(*) as record_num'),'platform_id','date','data_account as account'];
             $account_group_by = "data_account";
             $co_name_a = '广告收入';
+            $where = ['statistics' => 0];
 
         }else if ($platform_type == 3){
             // 计费平台
