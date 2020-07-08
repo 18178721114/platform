@@ -73,13 +73,15 @@ class CheckTgShowProcesses extends Command
             if(count($error_plat)>0){
                 $str = '';
                 foreach ($error_plat as $key => $value) {
-                    if($value['platform_id'] =='ptg00') continue; // ptg00 shi 测试 未知 平台
-                    $platform_sql = "select DISTINCT platform_id,platform_name from c_platform where  platform_id='".$value['platform_id']."'";
-                    $platform_name = DB::SELECT($platform_sql);
-                    $platform_name =Service::data($platform_name);
-                    $platform_name =$platform_name[0]['platform_name'];
-                    $platform_id = $value['platform_id'];
-                    $str .="$platform_id($platform_name) 日期：".$value['date']."金额为:".$value['diff'].",";
+                    if($value['diff']>0) {
+                        if ($value['platform_id'] == 'ptg00') continue; // ptg00 shi 测试 未知 平台
+                        $platform_sql = "select DISTINCT platform_id,platform_name from c_platform where  platform_id='" . $value['platform_id'] . "'";
+                        $platform_name = DB::SELECT($platform_sql);
+                        $platform_name = Service::data($platform_name);
+                        $platform_name = $platform_name[0]['platform_name'];
+                        $platform_id = $value['platform_id'];
+                        $str .= "$platform_id($platform_name) 日期：" . $value['date'] . "金额差值为:" . $value['diff'] . ",";
+                    }
                     
                 }
 
