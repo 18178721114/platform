@@ -318,6 +318,7 @@ class DataImportImp extends ApiBaseImp
     public static function getErrorData($map,$status,$fields){
         // 待处理
         $map['status'] = $status;
+        $map['notlike'][] = ["remark",'not like','mysql_connect'];
         // 所有数据
         $data_error_list = DataImportLogic::getDataErrorList('error_log', 'error_data', $map, $fields)->orderby("create_time", "asc")->get();
         $data_error_list = Service::data($data_error_list);
