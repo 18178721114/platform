@@ -63,8 +63,8 @@ class TdUserTjHandleProcesses extends Command
 
         try {
 
-            $error_msg = $dayid . '号，' . $source_name . '统计省份数据处理程序开始时间：' . date('Y-m-d H:i:s');
-            DataImportImp::saveDataErrorLog(2, $source_id, $source_name, 1, $error_msg);
+//            $error_msg = $dayid . '号，' . $source_name . '统计省份数据处理程序开始时间：' . date('Y-m-d H:i:s');
+//            DataImportImp::saveDataErrorLog(2, $source_id, $source_name, 1, $error_msg);
 
             $talkingdata_sql = "update talkingdata_china_session set channel_name = 'zy246' where channel_name = '2200109612' and day = '{$dayid}'";
             DB::update($talkingdata_sql);
@@ -301,8 +301,8 @@ class TdUserTjHandleProcesses extends Command
                         PlatformImp::add_platform_status($source_id, $value['account'], $value['cost'], $dayid);
                     }
 
-                    $error_msg = $dayid . '号，' . $source_name . '统计省份数据处理程序结束时间：' . date('Y-m-d H:i:s');
-                    DataImportImp::saveDataErrorLog(2, $source_id, $source_name, 1, $error_msg);
+//                    $error_msg = $dayid . '号，' . $source_name . '统计省份数据处理程序结束时间：' . date('Y-m-d H:i:s');
+//                    DataImportImp::saveDataErrorLog(2, $source_id, $source_name, 1, $error_msg);
 
                 }
             } else {

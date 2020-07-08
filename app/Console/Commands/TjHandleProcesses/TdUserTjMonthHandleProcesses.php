@@ -63,8 +63,8 @@ class TdUserTjMonthHandleProcesses extends Command
         try {
             $real_dayid = date('Y-m-01', strtotime('-1 month', strtotime($dayid)));
             var_dump($real_dayid);
-            $error_msg = $dayid . '号，' . $source_name . '数据处理程序开始时间：' . date('Y-m-d H:i:s');
-            DataImportImp::saveDataErrorLog(2, $source_id, $source_name, 1, $error_msg);
+//            $error_msg = $dayid . '号，' . $source_name . '数据处理程序开始时间：' . date('Y-m-d H:i:s');
+//            DataImportImp::saveDataErrorLog(2, $source_id, $source_name, 1, $error_msg);
 
             //查询pgsql 的数据
             $talkingdata_sql = "select * from talkingdata_user_month where day = '$dayid'";
