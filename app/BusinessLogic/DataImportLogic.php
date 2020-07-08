@@ -121,6 +121,14 @@ class DataImportLogic
             unset($map["like"]);
         }
 
+        if (isset($map["notlike"])) {
+            foreach ($map["notlike"] as $likefilter){
+                $com_obj->where($likefilter[0],$likefilter[1],'%'.$likefilter[2].'%');
+            }
+
+            unset($map["notlike"]);
+        }
+
         if (isset($map["leftjoin"])) {
             foreach ($map["leftjoin"] as $leftjoin){
                 $com_obj->leftjoin($leftjoin[0],$leftjoin[1],'=',$leftjoin[2]);
