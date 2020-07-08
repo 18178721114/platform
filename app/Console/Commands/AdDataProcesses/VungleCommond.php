@@ -55,24 +55,27 @@ class VungleCommond extends Command
         define('SCHEMA', 'ad_data');
         define('TABLE_NAME', 'erm_data');
         define('SOURCE_ID', 'pad09'); // todo 这个需要根据平台信息表确定平台ID
+
+        // 由于此平台接口属于国外网络，国内服务器调用经常失败，迁移到190服务器
+        exit;
+
         try{
 
+            $date = $this->argument('dayid')? $this->argument('dayid') : date('Y-m-d', strtotime('-1 day'));
 
-        $date = $this->argument('dayid')? $this->argument('dayid') : date('Y-m-d', strtotime('-1 day'));
+            $sql = " SELECT  data_account as company_account,account_api_key  as api_key from c_platform_account_mapping WHERE platform_id ='pad09'  and status = 1 order by data_account desc ";
+            $plat_list = DB::select($sql);
+            $plat_list = Service::data($plat_list);
+            if (!$plat_list) return;
 
-        $sql = " SELECT  data_account as company_account,account_api_key  as api_key from c_platform_account_mapping WHERE platform_id ='pad09'  and status = 1 order by data_account desc ";
-        $plat_list = DB::select($sql);
-        $plat_list = Service::data($plat_list);
-        if (!$plat_list) return;
-
-        $account_key = [];
-        foreach ($plat_list as $plat_key=> $plat_value){
-            $account_id = $plat_value['company_account'];
-            //if($account_id != 'weibo@zplay.cn') continue;
-//            $param_key = json_decode($plat_value['param_key'],true);
-            $api_key = $plat_value['api_key'];
-            $account_key[$account_id] = $api_key;
-        }
+            $account_key = [];
+            foreach ($plat_list as $plat_key=> $plat_value){
+                $account_id = $plat_value['company_account'];
+                //if($account_id != 'weibo@zplay.cn') continue;
+    //            $param_key = json_decode($plat_value['param_key'],true);
+                $api_key = $plat_value['api_key'];
+                $account_key[$account_id] = $api_key;
+            }
 
 
 
