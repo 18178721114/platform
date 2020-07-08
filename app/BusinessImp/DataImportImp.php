@@ -303,10 +303,10 @@ class DataImportImp extends ApiBaseImp
         // 按照处理状态查询
         $unique_error_return = [];
         if ($status) {
-            $unique_error_return = self::getErrorData($status,$fields);
+            $unique_error_return = self::getErrorData($map,$status,$fields);
         }else{
             for ($status = 1;$status <= 3;$status++) {
-                $unique_error_single = self::getErrorData($status,$fields);
+                $unique_error_single = self::getErrorData($map,$status,$fields);
                 $unique_error_return = array_merge($unique_error_return,$unique_error_single);
             }
         }
@@ -315,7 +315,7 @@ class DataImportImp extends ApiBaseImp
     }
 
 
-    public static function getErrorData($status,$fields){
+    public static function getErrorData($map,$status,$fields){
         // 待处理
         $map['status'] = $status;
         // 所有数据
