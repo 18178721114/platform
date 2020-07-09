@@ -219,7 +219,7 @@ class FacebookAdBiddingCommond extends Command
 
                 }else{
                     $message = "{$date}, Facebook广告平台分bidding应用" ;
-                    $message .= trim($facebook[$j]['appid'])."取数失败,失败原因:".json_encode($result);
+                    $message .= trim($facebook[$j]['appid'])."取数失败,失败原因:".$result;
                     DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$message);
                 }
                 sleep(6);
