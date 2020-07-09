@@ -128,21 +128,21 @@ class FlurryTjHandleProcesses extends Command
                     }
                 }
 
-                if ($num) {
-                    foreach ($app_list as $app_k => $app_v) {
-                        if ($v['app_name'] == $app_v['statistic_app_name']) {
-                            $array[$k]['app_id'] = $app_v['app_id'];
-                            $array[$k]['ad_status'] = $app_v['ad_status'];
-                            $array[$k]['channel_id'] = $app_v['channel_id'];
-                            $num = 0;
-                            break;
-                        } else {
-                            //广告位配置未配置
-                            $num++;
-
-                        }
-                    }
-                }
+//                if ($num) {
+//                    foreach ($app_list as $app_k => $app_v) {
+//                        if ($v['app_name'] == $app_v['statistic_app_name']) {
+//                            $array[$k]['app_id'] = $app_v['app_id'];
+//                            $array[$k]['ad_status'] = $app_v['ad_status'];
+//                            $array[$k]['channel_id'] = $app_v['channel_id'];
+//                            $num = 0;
+//                            break;
+//                        } else {
+//                            //广告位配置未配置
+//                            $num++;
+//
+//                        }
+//                    }
+//                }
 
                 if ($num) {
                     //var_dump($json_info['campaign_id']);
