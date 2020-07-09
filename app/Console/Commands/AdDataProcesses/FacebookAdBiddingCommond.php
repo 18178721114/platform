@@ -218,17 +218,19 @@ class FacebookAdBiddingCommond extends Command
                     }
 
                 }else{
-                    $error_application_ids[] = trim($facebook[$j]['appid'])."取数失败,失败原因:".json_encode($result);
+                    $message = "{$date}, Facebook广告平台分bidding应用" ;
+                    $message .= trim($facebook[$j]['appid'])."取数失败,失败原因:".json_encode($result);
+                    DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$message);
                 }
                 sleep(6);
             }
         }
 
-        if ($error_application_ids){
-            $error_application_str = implode(',',$error_application_ids);
-            $message = "{$date}, Facebook广告平台分bidding应用".$error_application_str ;
-            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$message);
-        }
+//        if ($error_application_ids){
+//            $error_application_str = implode(',',$error_application_ids);
+//            $message = "{$date}, Facebook广告平台分bidding应用".$error_application_str ;
+//            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$message);
+//        }
 
         $data_end = time();
         var_dump('Facebook广告平台分bidding取数结束：'.$data_end);
