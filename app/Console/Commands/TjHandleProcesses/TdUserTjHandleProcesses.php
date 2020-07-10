@@ -284,6 +284,20 @@ class TdUserTjHandleProcesses extends Command
                 sleep(10);
                 self::getUnknowProvince($dayid, $source_id);
 
+                // todo 删除星星部分版本数据
+                DB::beginTransaction();
+
+                $star_map_delete = [];
+                $star_map_delete['platform_id'] = $source_id;
+                $star_map_delete['date'] = $dayid;
+                $star_map_delete['type'] = 1;
+                $star_map_delete['in'] = ['version_id',[5342,5332,5321,530,5291]];
+                $star_result = DataImportLogic::deleteMysqlHistoryData('zplay_user_tj_report_daily', $map_delete);
+                if (!$star_result){
+                    DB::rollBack();
+                }
+                DB::commit();
+
                 // 调用存储过程更新总表数据
                 //DB::update("call tj_summary('$source_id')");
 //            Artisan::call('TjSummaryProcesses',['platform_id'=>$source_id]);
