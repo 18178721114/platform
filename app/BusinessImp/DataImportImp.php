@@ -270,7 +270,7 @@ class DataImportImp extends ApiBaseImp
      * @param $params array 请求数据
      */
     public static function getDateErrorLog($params){
-
+        set_time_limit(0);
         // 筛选条件判断
         // 错误类型 1、系统处理错误；2、数据获取错误；3、数据处理错误；4、手工核对错误
         $error_type = isset($params['error_type']) ? $params['error_type'] : '';
@@ -316,7 +316,6 @@ class DataImportImp extends ApiBaseImp
 
 
     public static function getErrorData($map,$status,$fields){
-        set_time_limit(0);
         // 待处理
         $map['status'] = $status;
         $map['notlike'][] = ["remark",'not like','mysql_connect'];
