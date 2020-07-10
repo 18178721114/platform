@@ -54,7 +54,8 @@ class TjSummaryProcesses extends Command
         $platform_id = $this->argument('platform_id') ? $this->argument('platform_id'):'';
 
         try {
-
+            $where_platform ='';
+            $where_del_platform='';
             if ($platform_id) {
                 $where_del_platform = "  and platform_id = '$platform_id'";
                 $where_platform = "  and tj.platform_id = '$platform_id'";
