@@ -270,7 +270,7 @@ class DataImportImp extends ApiBaseImp
      * @param $params array 请求数据
      */
     public static function getDateErrorLog($params){
-
+        set_time_limit(0);
         // 筛选条件判断
         // 错误类型 1、系统处理错误；2、数据获取错误；3、数据处理错误；4、手工核对错误
         $error_type = isset($params['error_type']) ? $params['error_type'] : '';
@@ -305,7 +305,7 @@ class DataImportImp extends ApiBaseImp
         if ($status) {
             $unique_error_return = self::getErrorData($map,$status,$fields);
         }else{
-            for ($status = 1;$status <= 3;$status++) {
+            for ($status = 1;$status <= 2;$status++) {
                 $unique_error_single = self::getErrorData($map,$status,$fields);
                 $unique_error_return = array_merge($unique_error_return,$unique_error_single);
             }
@@ -376,8 +376,43 @@ class DataImportImp extends ApiBaseImp
             }
         }
         $unique_error = array_values($unique_error);
-        $unique_error = Service::sortArrByManyField($unique_error, 'platform_id', SORT_ASC, 'error_num', SORT_DESC);
-        return $unique_error;
+        $unique_error1 = $unique_error;
+        $unique_error2 = $unique_error;
+        $new_unique_error = [];
+        foreach ($unique_error1 as $key1 => $value1 ){
+            foreach ($unique_error2 as $key2 => $value2 ){
+                similar_text($value1['error_detail'],$value2['error_detail'],$percent);
+                if ( $percent > 90 && ($value1['platform_id'] == $value2['platform_id'])){
+                    $new_unique_error[$key1][] = $value2;
+                    unset($unique_error2[$key2]);
+                }
+            }
+        }
+        $new_unique_error_array = [];
+        if ($new_unique_error){
+            foreach ($new_unique_error as $new_unique_key => $new_unique_value){
+                $new_unique_value_vv = [];
+                $new_unique_value_vv['error_detail'] = $new_unique_value[0]['error_detail'];
+                $new_unique_value_vv['error_profile'] = $new_unique_value[0]['error_profile'];
+                $new_unique_value_vv['error_type_id'] = $new_unique_value[0]['error_type_id'];
+                $new_unique_value_vv['platform_name'] = $new_unique_value[0]['platform_name'];
+                $new_unique_value_vv['platform_id'] = $new_unique_value[0]['platform_id'];
+                $new_unique_value_vv['plat_type_id'] = $new_unique_value[0]['plat_type_id'];
+                $new_unique_value_vv['status'] = $new_unique_value[0]['status'];
+                $new_unique_value_vv['first_time'] = $new_unique_value[0]['first_time'];
+                $new_unique_value_vv['error_num'] = 0;
+                $new_unique_value_vv['id'] = [];
+                foreach ($new_unique_value as $new_unique_value_k => $new_unique_value_v){
+                    $new_unique_value_vv['error_num'] += $new_unique_value_v['error_num'];
+                    $new_unique_value_vv['id'][] = $new_unique_value_v['id'];
+                }
+                $new_unique_value_vv['id'] = implode(',',$new_unique_value_vv['id']);
+                $new_unique_error_array[$new_unique_key] = $new_unique_value_vv;
+            }
+        }
+
+        $new_unique_error_array = Service::sortArrByManyField($new_unique_error_array, 'platform_id', SORT_ASC, 'error_num', SORT_DESC);
+        return $new_unique_error_array;
     }
 
     /**

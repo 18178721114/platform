@@ -81,12 +81,15 @@ class CheckAdShowProcesses extends Command
                     }
                     
                 }
+                if($str != ''){
+                    DataImportImp::saveDataErrorLog(3,'最近五天广告处理数据与显示数据对数','广告处理数据与显示数据对数',6,rtrim($str,','));
+                    $date =date('Y-m-d');
+                    $error_msg_mail[0]='最近五天广告处理数据与显示数据对数人民币大于100的错误平台和日期:'.$str;
+                    // 发送邮件
+                    CommonFunction::sendMail($error_msg_mail,$date.'数据不准平台和时间信息');
+                }
 
-                DataImportImp::saveDataErrorLog(3,'最近五天广告处理数据与显示数据对数','广告处理数据与显示数据对数',6,rtrim($str,','));
-                $date =date('Y-m-d');
-                $error_msg_mail[0]='最近五天广告处理数据与显示数据对数人民币大于100的错误平台和日期:'.$str;
-                // 发送邮件
-                CommonFunction::sendMail($error_msg_mail,$date.'数据不准平台和时间信息');
+
             }
 
         }
