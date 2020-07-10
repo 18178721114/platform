@@ -305,7 +305,7 @@ class DataImportImp extends ApiBaseImp
         if ($status) {
             $unique_error_return = self::getErrorData($map,$status,$fields);
         }else{
-            for ($status = 1;$status <= 3;$status++) {
+            for ($status = 1;$status <= 2;$status++) {
                 $unique_error_single = self::getErrorData($map,$status,$fields);
                 $unique_error_return = array_merge($unique_error_return,$unique_error_single);
             }
