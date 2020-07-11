@@ -291,8 +291,9 @@ class TdForeignUserTjHandleProcesses extends Command
                 $star_map_delete['platform_id'] = $source_id;
                 $star_map_delete['date'] = $dayid;
                 $star_map_delete['type'] = 2;
+                $star_map_delete['app_id'] = 'gi007008';
                 $star_map_delete['in'] = ['version_id',[5342,5332,5321,530,5291]];
-                $star_result = DataImportLogic::deleteMysqlHistoryData('zplay_user_tj_report_daily', $map_delete);
+                $star_result = DataImportLogic::deleteMysqlHistoryData('zplay_user_tj_report_daily', $star_map_delete);
                 if (!$star_result){
                     DB::rollBack();
                 }
