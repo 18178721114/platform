@@ -452,14 +452,17 @@ class AppStoreHandleProcesses extends Command
                 $error_log_arr = Service::shield_error($source_id, $error_log_arr);
 
                 if (isset($error_log_arr['app_id']) && !empty($error_log_arr['app_id'])) {
+                    sort($error_log_arr['app_id']);
                     $app_id = implode(',', array_unique($error_log_arr['app_id']));
                     $error_msg_array[] = '应用id匹配失败,ID为:' . $app_id;
                 }
                 if (isset($error_log_arr['country']) && !empty($error_log_arr['country'])) {
+                    sort($error_log_arr['country']);
                     $country = implode(',', array_unique($error_log_arr['country']));
                     $error_msg_array[] = '国家匹配失败,ID为:' . $country;
                 }
                 if (isset($error_log_arr['currency']) && !empty($error_log_arr['currency'])) {
+                    sort($error_log_arr['currency']);
                     $currency = implode(',', array_unique($error_log_arr['currency']));
                     $error_msg_array[] = '汇率匹配失败,ID为:' . $currency;
                 }
