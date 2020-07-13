@@ -169,6 +169,7 @@ class FlurryKeepTjHandleProcesses extends Command
                 $error_log_arr = Service::shield_error($source_id,$error_log_arr);
 
                 if (isset($error_log_arr['campaign_id']) && !empty($error_log_arr['campaign_id'])) {
+                    sort($error_log_arr['campaign_id']);
                     $campaign_id = implode(',', array_unique($error_log_arr['campaign_id']));
                     $error_msg_array[] = '应用ID匹配失败,ID为:' . $campaign_id;
                     $error_msg_mail[] = '应用ID匹配失败，ID为：' . $campaign_id;
