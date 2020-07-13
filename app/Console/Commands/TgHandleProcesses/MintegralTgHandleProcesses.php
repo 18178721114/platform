@@ -296,12 +296,14 @@ class MintegralTgHandleProcesses extends Command
                 $error_log_arr = Service::shield_error($source_id, $error_log_arr);
 
                 if (isset($error_log_arr['offer_id']) && !empty($error_log_arr['offer_id'])) {
+                    sort($error_log_arr['offer_id']);
                     $offer_id = implode(',', array_unique($error_log_arr['offer_id']));
                     $error_msg_array[] = 'offer_id匹配失败,ID为:' . $offer_id;
                     $error_msg_mail[] = 'offer_id匹配失败，ID为：' . $offer_id;
                 }
 
                 if (isset($error_log_arr['country']) && !empty($error_log_arr['country'])) {
+                    sort($error_log_arr['country']);
                     $country = implode(',', array_unique($error_log_arr['country']));
                     $error_msg_array[] = '国家匹配失败,code为:' . $country;
                     $error_msg_mail[] = '国家匹配失败，code为：' . $country;
