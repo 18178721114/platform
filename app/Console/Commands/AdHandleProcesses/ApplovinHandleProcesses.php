@@ -259,8 +259,8 @@ class ApplovinHandleProcesses extends Command
         	$array[$k]['date'] = $dayid;
         	$array[$k]['platform_app_id'] = isset($json_info['package_name']) ? addslashes(str_replace('\'\'','\'',$json_info['package_name'])) : '';
         	$array[$k]['platform_app_name'] = isset($json_info['package_name']) ? addslashes(str_replace('\'\'','\'',$json_info['package_name'])) : '';
-        	$array[$k]['ad_unit_id'] = isset($json_info['application']) ? addslashes(str_replace('\'\'','\'',$json_info['application'])) : '';
-        	$array[$k]['ad_unit_name'] = isset($json_info['application']) ? addslashes(str_replace('\'\'','\'',$json_info['application'])) : '';
+        	$array[$k]['ad_unit_id'] = isset($json_info['zone_id']) ? $json_info['zone_id'] : '';
+        	$array[$k]['ad_unit_name'] = '';
         	$array[$k]['impression'] = $json_info['impressions'];
         	$array[$k]['click'] = $json_info['clicks'];
 
@@ -371,8 +371,8 @@ class ApplovinHandleProcesses extends Command
                         ."'".$v['statistics']."',"//statistics
                         ."'',"//platform_app_id
                         ."'".$v['platform_app_name']."',"//platform_app_name
-                        ."'',"//ad_unit_id
-                        ."'',"//ad_unit_name
+                        ."'".$v['ad_unit_id']."',"//ad_unit_id
+                        ."'".$v['ad_unit_name']."',"//ad_unit_name
                         ."'',"//round
                         ."'',"//all_request
                         ."'',"//success_requests

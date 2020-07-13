@@ -246,8 +246,8 @@ class IronsourceHandleProcesses extends Command
         	$array[$k]['data_account'] = $v['account'];
         	$array[$k]['platform_app_id'] = addslashes($json_info['appKey']);
         	$array[$k]['platform_app_name'] = addslashes(str_replace('\'\'','\'',$json_info['app_name']));
-            $array[$k]['ad_unit_id'] = addslashes(str_replace('\'\'','\'',$json_info['bundleId']));
-        	$array[$k]['ad_unit_name'] = addslashes(str_replace('\'\'','\'',$json_info['adUnits']));
+            $array[$k]['ad_unit_id'] = isset($json_info['instanceId']) ? addslashes(str_replace('\'\'','\'',$json_info['instanceId'])) : '';
+        	$array[$k]['ad_unit_name'] = isset($json_info['instanceName']) ? addslashes(str_replace('\'\'','\'',$json_info['instanceName'])) : '';
         	$array[$k]['impression'] = $json_info['impressions'];
         	$array[$k]['success_requests'] = $json_info['adSourceResponses'];
         	$array[$k]['all_request'] = $json_info['adSourceResponses'];
@@ -356,8 +356,8 @@ class IronsourceHandleProcesses extends Command
                         ."'".$v['statistics']."',"//statistics
                         ."'".$v['platform_app_id']."',"//platform_app_id
                         ."'".$v['platform_app_name']."',"//platform_app_name
-                        ."'',"//ad_unit_id
-                        ."'',"//ad_unit_name
+                        ."'".$v['ad_unit_id']."',"//ad_unit_id
+                        ."'".$v['ad_unit_name']."',"//ad_unit_name
                         ."'',"//round
                         ."'".$v['all_request']."',"//all_request
                         ."'".$v['success_requests']."',"//success_requests
