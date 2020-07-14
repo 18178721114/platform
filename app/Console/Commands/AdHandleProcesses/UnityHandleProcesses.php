@@ -162,7 +162,7 @@ class UnityHandleProcesses extends Command
         $error_detail_arr = [];//报错的 详细数据信息
         foreach ($info as $k => $v) {
         	$json_info = json_decode($v['json_data'],true);
-        	foreach ($app_list as $app_k => $app_v) {
+            foreach ($app_list as $app_k => $app_v) {
                 
         		if($json_info['source_game_id'] == $app_v['platform_app_id'] ){
         			$array[$k]['app_id'] = $app_v['app_id'];
@@ -233,14 +233,12 @@ class UnityHandleProcesses extends Command
         		//插入错误数据
         		continue;
         	}
-
-
-        	$array[$k]['date'] = $dayid;
+            $array[$k]['ad_unit_id'] = isset($json_info['placement']) ? addslashes(str_replace('\'\'','\'',$json_info['placement'])) : '';
+            $array[$k]['date'] = $dayid;
         	$array[$k]['data_account'] = $v['account'];
         	$array[$k]['platform_app_id'] = isset($json_info['source_game_id']) ? addslashes($json_info['source_game_id']) : '';
         	$array[$k]['platform_app_name'] = isset($json_info['source_name']) ? addslashes(str_replace('\'\'','\'',$json_info['source_name'])) : '';
-            $array[$k]['ad_unit_id'] = isset($json_info['placement']) ? addslashes(str_replace('\'\'','\'',$json_info['placement'])) : '';
-        	$array[$k]['impression'] = $json_info['view_count'];
+            $array[$k]['impression'] = $json_info['view_count'];
         	$array[$k]['success_requests'] = $json_info['available_sum'];
         	$array[$k]['all_request'] = $json_info['adrequest_count'];
         	$array[$k]['earning'] = isset($json_info['revenue_sum']) ? $json_info['revenue_sum'] : '';
@@ -345,7 +343,7 @@ class UnityHandleProcesses extends Command
                         ."'".$v['statistics']."',"//statistics
                         ."'".$v['platform_app_id']."',"//platform_app_id
                         ."'".$v['platform_app_name']."',"//platform_app_name
-                        ."'',"//ad_unit_id
+                        ."'".$v['ad_unit_id']."',"//ad_unit_id
                         ."'',"//ad_unit_name
                         ."'',"//round
                         ."'".$v['all_request']."',"//all_request
