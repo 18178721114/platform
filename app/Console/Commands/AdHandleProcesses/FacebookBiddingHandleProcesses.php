@@ -340,7 +340,7 @@ class FacebookBiddingHandleProcesses extends Command
                         ."'".$v['statistics']."',"//statistics
                         ."'".$v['platform_app_id']."',"//platform_app_id
                         ."'".$v['platform_app_name']."',"//platform_app_name
-                        ."'',"//ad_unit_id
+                        ."'".$v['ad_unit_id']."',"//ad_unit_id
                         ."'',"//ad_unit_name
                         ."'',"//round
                         ."'".$v['all_request']."',"//all_request
