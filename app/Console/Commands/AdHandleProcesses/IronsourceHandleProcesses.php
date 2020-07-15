@@ -68,7 +68,7 @@ class IronsourceHandleProcesses extends Command
         $map['type']  =2;
         $map['source_id']  ='pad05';
         $map[] =['income','<>',0] ;
-        $map['like'][] = ["json_data->providerName",'like','ironSource'];
+        //$map['like'][] = ["json_data->providerName",'like','ironSource'];
         $info = DataImportLogic::getChannelData('ad_data','erm_data',$map)->get();
         $info = Service::data($info);
         if(!$info){
@@ -171,10 +171,10 @@ class IronsourceHandleProcesses extends Command
         	$json_info = json_decode($v['json_data'],true);
 
         	// var_dump($json_info['countryCode']);
-        	if($json_info['providerName'] !='ironSource'){
-        		//插入错误数据
-        		continue;
-        	}
+//        	if($json_info['providerName'] !='ironSource'){
+//        		//插入错误数据
+//        		continue;
+//        	}
         	foreach ($app_list as $app_k => $app_v) {
         		if($json_info['appKey'] ==$app_v['platform_app_id'] ){
         			$array[$k]['app_id'] = $app_v['app_id'];
@@ -288,7 +288,11 @@ class IronsourceHandleProcesses extends Command
             }
 
         	$array[$k]['platform_id'] = 'pad05';
-        	$array[$k]['statistics'] = '0';//0是三方2是玉米
+            $array[$k]['statistics'] = '2';//0是三方2是玉米
+            if($json_info['providerName'] =='ironSource'){
+                $array[$k]['statistics'] = '0';//0是三方2是玉米
+            }
+
 //        	$array[$k]['flow_type'] = '2';//(1,自有流量;2,三方流量)
         	$array[$k]['create_time'] = date('Y-m-d H:i:s');
         	$array[$k]['update_time'] = date('Y-m-d H:i:s');
