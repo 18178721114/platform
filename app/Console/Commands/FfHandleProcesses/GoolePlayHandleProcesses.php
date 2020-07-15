@@ -101,10 +101,10 @@ class GoolePlayHandleProcesses extends Command
             `c_app`.`id`
             FROM
             `c_app`
-            LEFT JOIN `c_billing` ON `c_billing`.`app_id` = `c_app`.`id`
-            LEFT JOIN `c_billing_point` ON `c_billing_point`.`app_id` = `c_app`.`id`
+            LEFT JOIN `c_billing` ON `c_billing`.`app_id` = `c_app`.`id`  and  c_billing.status = 1
+            LEFT JOIN `c_billing_point` ON `c_billing_point`.`app_id` = `c_app`.`id` and  c_billing_point.status = 0
             WHERE
-            (
+            ( 
             `c_app`.os_id = 2
             AND  `c_billing`.`pay_platform_id` ='$source_id'
         )";
@@ -185,7 +185,7 @@ class GoolePlayHandleProcesses extends Command
                         $c_currency_info = Service::data($c_currency_type_info);
 
                         if (!$c_currency_info) {
-                            $error_msg = 'goolePlay计费平台数据处理程序汇率类型查询为空1' . $app_v['currency_type'];
+                            $error_msg = 'goolePlay计费平台数据处理程序汇率类型查询为空1' . $app_v['currency_type'].$app_v['app_package_name'];
                             DataImportImp::saveDataErrorLog(2, $source_id, $billing_name, 3, $error_msg);
                             $num++;
                             break;
