@@ -95,8 +95,8 @@ class AppStoreHandleProcesses extends Command
             `c_app`.`id`
             FROM
             `c_app`
-            LEFT JOIN `c_billing` ON `c_billing`.`app_id` = `c_app`.`id`
-            LEFT JOIN `c_billing_point` ON `c_billing_point`.`app_id` = `c_app`.`id`
+            LEFT JOIN `c_billing` ON `c_billing`.`app_id` = `c_app`.`id`  and  c_billing.status = 1
+            LEFT JOIN `c_billing_point` ON `c_billing_point`.`app_id` = `c_app`.`id` and  c_billing_point.status = 0
             WHERE
             (
             `c_app`.os_id = 1
