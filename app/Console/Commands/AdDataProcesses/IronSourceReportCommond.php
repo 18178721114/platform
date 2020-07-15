@@ -83,7 +83,10 @@ class IronSourceReportCommond extends Command
                 $header = array();
                 $header[] = 'Authorization: Basic ' . $base64encoded;
 //                $url_applist = "https://platform.ironsrc.com/partners/publisher/mediation/applications/v4/stats?startDate={$dayid}&endDate={$dayid}&breakdowns=app,adSource,date,country";  //20170206更新接口地址
+
                 $url_applist = "https://platform.ironsrc.com/partners/publisher/mediation/applications/v5/stats?startDate={$dayid}&endDate={$dayid}&breakdowns=app,adSource,date,country,instanceId&adSource=ironSource&metrics=revenue,impressions,clicks,adSourceResponses,adUnits";  //20200621更新接口地址
+                $url_applist = "https://platform.ironsrc.com/partners/publisher/mediation/applications/v5/stats?startDate={$dayid}&endDate={$dayid}&breakdowns=app,adSource,date,country,instanceId&metrics=revenue,impressions,clicks,adSourceResponses,adUnits";  //20200621更新接口地址
+
                 $dataList1 = self::get_response($url_applist, $header);
                 //var_dump($dataList);
                 $dataList  = json_decode($dataList1,true);
