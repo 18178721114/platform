@@ -464,14 +464,30 @@ class DataOperationImp extends ApiBaseImp
             $array[$key]['date'] =$value['date'];
 
             // 发行区域ID(1,全球;2,国外;3,国内;)
-            if ($value['release_region_id'] == 1){
-                $release_region_id = '全球-';
-            }elseif ($value['release_region_id'] == 2){
-                $release_region_id = '国外-';
-            }elseif ($value['release_region_id'] == 3){
-                $release_region_id = '国内-';
-            }else{
-                $release_region_id = '未知区域-';
+            if ($language == 'cn') {
+                if ($value['release_region_id'] == 1){
+                    $release_region_id = '全球-';
+                }elseif ($value['release_region_id'] == 2){
+                    $release_region_id = '国外-';
+                }elseif ($value['release_region_id'] == 3){
+                    $release_region_id = '国内-';
+                }elseif ($value['release_region_id'] == 4){
+                    $release_region_id = '线下-';
+                }else{
+                    $release_region_id = '未知区域-';
+                }
+            }elseif($language == 'en'){
+                if ($value['release_region_id'] == 1){
+                    $release_region_id = 'Global-';
+                }elseif ($value['release_region_id'] == 2){
+                    $release_region_id = 'Foreign-';
+                }elseif ($value['release_region_id'] == 3){
+                    $release_region_id = 'CN-';
+                }elseif ($value['release_region_id'] == 4){
+                    $release_region_id = 'Offline-';
+                }else{
+                    $release_region_id = 'Unknown-';
+                }
             }
 
             // 操作系统(1,ios;2,Android;3,h5;4,Amazon;)
@@ -510,13 +526,14 @@ class DataOperationImp extends ApiBaseImp
                 if ($language == 'cn') {
                     $array[$key]['country'] = $value['china_name'] ? $value['china_name'] : '未知国家';
                 }elseif($language == 'en'){
-                    $array[$key]['country'] = $value['china_name'] ? $value['china_name'] : 'Unkonw';
+                    $array[$key]['country'] = $value['china_name'] ? $value['china_name'] : 'Unknown';
                 }
             }else{
                 $array[$key]['keep_day7_rate'] = $value['new'] ? round(($value['keep_day7'] * 100) / $value['new'], 2) . "%" : "0.00%"; // 7日留存
                 $array[$key]['keep_day2_rate'] = $value['new'] ? round(($value['keep_day2'] * 100) / $value['new'], 2) . "%" : "0.00%"; // 次日留存
             }
 
+            $array[$key]['cpi'] = $value['new'] ? round(($value['cost']/$value['new']),4) : 0.0000;//cpi 单价
             $array[$key]['insert_imp_per'] = $value['active'] ? round($value['interst_ad_imp'] / $value['active'],2) : 0; // 插屏人均展示
             $array[$key]['video_imp_per'] = $value['active'] ? round($value['video_ad_imp'] / $value['active'],2) : 0; // 视频人均展示
 
@@ -613,7 +630,7 @@ class DataOperationImp extends ApiBaseImp
                 $total_answer_data[$t_key]['insert_imp_per'] = $t_data['active'] ? round($t_data['interst_ad_imp'] / $t_data['active'],2) : 0; // 插屏人均展示
                 $total_answer_data[$t_key]['video_imp_per'] = $t_data['active'] ? round($t_data['video_ad_imp'] / $t_data['active'],2) : 0; // 视频人均展示
 
-
+                $total_answer_data[$t_key]['cpi'] = $t_data['new'] ? round(($t_data['cost']/$t_data['new']),4) : 0.0000;//cpi 单价
                 $total_answer_data[$t_key]['cost'] = $t_data['cost'] ? round($t_data['cost'],2) : 0;// 推广成本
 //            $total_answer_data[$t_key]['cost_per'] = $t_data['tg_new'] ? round($t_data['cost']/$t_data['tg_new'],2) : 0; // 推广单价
 

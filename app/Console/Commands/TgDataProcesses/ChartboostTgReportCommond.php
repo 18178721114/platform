@@ -166,9 +166,10 @@ class ChartboostTgReportCommond extends Command
                             }
                         }
 
-                    } else {
-                        $all_data_err[] = $value['company_account'] . '账号下'.$jobId.'ID取数失败,错误信息:无数据,接口未返回任何信息';
                     }
+//                    else {
+//                        $all_data_err[] = $value['company_account'] . '账号下'.$jobId.'ID取数失败,错误信息:无数据,接口未返回任何信息';
+//                    }
                 }
 
             }

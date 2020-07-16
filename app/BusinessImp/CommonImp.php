@@ -427,6 +427,7 @@ class CommonImp extends ApiBaseImp
             $show_field = 'publish_on';
         }
 
+        $language = isset($params['language']) ? $params['language'] : 'cn'; // 中英文  en 英文  cn 中文
 
         $gameData = [];
         //当能查询到游戏权限时
@@ -457,14 +458,31 @@ class CommonImp extends ApiBaseImp
         if ($gameList){
             foreach ($gameList as $all_app_info){
                 // 发行区域ID(1,全球;2,国外;3,国内;)
-                if ($all_app_info['release_region_id'] == 1){
-                    $release_region_id = '全球-';
-                }elseif ($all_app_info['release_region_id'] == 2){
-                    $release_region_id = '国外-';
-                }elseif ($all_app_info['release_region_id'] == 3){
-                    $release_region_id = '国内-';
-                }else{
-                    $release_region_id = '未知区域-';
+                if ($language == 'cn') {
+                    // 发行区域ID(1,全球;2,国外;3,国内;)
+                    if ($all_app_info['release_region_id'] == 1){
+                        $release_region_id = '全球-';
+                    }elseif ($all_app_info['release_region_id'] == 2){
+                        $release_region_id = '国外-';
+                    }elseif ($all_app_info['release_region_id'] == 3){
+                        $release_region_id = '国内-';
+                    }elseif ($all_app_info['release_region_id'] == 4){
+                        $release_region_id = '线下-';
+                    }else{
+                        $release_region_id = '未知区域-';
+                    }
+                }elseif($language == 'en'){
+                    if ($all_app_info['release_region_id'] == 1){
+                        $release_region_id = 'Global-';
+                    }elseif ($all_app_info['release_region_id'] == 2){
+                        $release_region_id = 'Foreign-';
+                    }elseif ($all_app_info['release_region_id'] == 3){
+                        $release_region_id = 'CN-';
+                    }elseif ($all_app_info['release_region_id'] == 4){
+                        $release_region_id = 'Offline-';
+                    }else{
+                        $release_region_id = 'Unknown-';
+                    }
                 }
 
                 // 操作系统(1,ios;2,Android;3,h5;4,Amazon;)
