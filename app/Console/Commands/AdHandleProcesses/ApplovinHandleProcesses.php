@@ -369,7 +369,7 @@ class ApplovinHandleProcesses extends Command
                         ."'".$v['platform_id']."',"//platform_id
                         ."'".$v['ad_type']."',"//ad_type
                         ."'".$v['statistics']."',"//statistics
-                        ."'',"//platform_app_id
+                        ."'".$v['platform_app_id']."',"//platform_app_id
                         ."'".$v['platform_app_name']."',"//platform_app_name
                         ."'".$v['ad_unit_id']."',"//ad_unit_id
                         ."'".$v['ad_unit_name']."',"//ad_unit_name
