@@ -90,7 +90,7 @@ class TapjoyTgReportCommond extends Command
                 }
 
                 if (isset($response['error']) || !$response) {
-                    $error_msg = AD_PLATFORM . '推广平台' . $company_account . '账号获取access_token失败,错误信息:' . (isset($response['error']) ? $response['error'] : '无数据，接口未返回任何信息');
+                    $error_msg = "{$dayid}号, " .AD_PLATFORM . '推广平台' . $company_account . '账号获取access_token失败,错误信息:' . (isset($response['error']) ? $response['error'] : '无数据，接口未返回任何信息');
                     DataImportImp::saveDataErrorLog(1, SOURCE_ID, AD_PLATFORM, 4, $error_msg);
                 }else{
                     $access_token = $response['access_token'];
