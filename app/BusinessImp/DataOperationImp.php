@@ -524,12 +524,12 @@ class DataOperationImp extends ApiBaseImp
                 }elseif($language == 'en'){
                     $array[$key]['country'] = $value['china_name'] ? $value['china_name'] : 'Unkonw';
                 }
-                $array[$key]['cpi'] = $value['new'] ? round(($value['cost']/$value['new']),4) : 0.0000;//cpi 单价
             }else{
                 $array[$key]['keep_day7_rate'] = $value['new'] ? round(($value['keep_day7'] * 100) / $value['new'], 2) . "%" : "0.00%"; // 7日留存
                 $array[$key]['keep_day2_rate'] = $value['new'] ? round(($value['keep_day2'] * 100) / $value['new'], 2) . "%" : "0.00%"; // 次日留存
             }
 
+            $array[$key]['cpi'] = $value['new'] ? round(($value['cost']/$value['new']),4) : 0.0000;//cpi 单价
             $array[$key]['insert_imp_per'] = $value['active'] ? round($value['interst_ad_imp'] / $value['active'],2) : 0; // 插屏人均展示
             $array[$key]['video_imp_per'] = $value['active'] ? round($value['video_ad_imp'] / $value['active'],2) : 0; // 视频人均展示
 
@@ -618,7 +618,6 @@ class DataOperationImp extends ApiBaseImp
                 if ($is_show == 1) {
                     $total_answer_data[$t_key]['country_id'] = '-';
                     $total_answer_data[$t_key]['country'] = '-';
-                    $total_answer_data[$t_key]['cpi'] = $t_data['new'] ? round(($t_data['cost']/$t_data['new']),4) : 0.0000;//cpi 单价
                 }else{
                     $total_answer_data[$t_key]['keep_day7_rate'] = '-'; // 7日留存
                     $total_answer_data[$t_key]['keep_day2_rate'] = '-'; // 次日留存
@@ -627,7 +626,7 @@ class DataOperationImp extends ApiBaseImp
                 $total_answer_data[$t_key]['insert_imp_per'] = $t_data['active'] ? round($t_data['interst_ad_imp'] / $t_data['active'],2) : 0; // 插屏人均展示
                 $total_answer_data[$t_key]['video_imp_per'] = $t_data['active'] ? round($t_data['video_ad_imp'] / $t_data['active'],2) : 0; // 视频人均展示
 
-
+                $total_answer_data[$t_key]['cpi'] = $t_data['new'] ? round(($t_data['cost']/$t_data['new']),4) : 0.0000;//cpi 单价
                 $total_answer_data[$t_key]['cost'] = $t_data['cost'] ? round($t_data['cost'],2) : 0;// 推广成本
 //            $total_answer_data[$t_key]['cost_per'] = $t_data['tg_new'] ? round($t_data['cost']/$t_data['tg_new'],2) : 0; // 推广单价
 
