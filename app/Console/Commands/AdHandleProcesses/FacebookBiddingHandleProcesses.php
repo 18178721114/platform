@@ -167,6 +167,11 @@ class FacebookBiddingHandleProcesses extends Command
         			$array[$k]['app_id'] = $app_v['app_id'];
         			$array[$k]['ad_type'] = $app_v['ad_type'];
                     $array[$k]['flow_type'] = $app_v['flow_type'];
+                    $array[$k]['platform_app_id'] = isset($app_v['platform_app_id']) ? addslashes($app_v['platform_app_id']) : '';
+                    if(empty($app_v['platform_app_id'])){
+                        $array[$k]['platform_app_id'] = isset($app_v['publisher_id']) ? addslashes($app_v['publisher_id']) : '';
+
+                    }
         			$num = 0;
         			break;
         		}else{
@@ -221,7 +226,7 @@ class FacebookBiddingHandleProcesses extends Command
         	// 格式化数据
             $array[$k]['data_account'] = $v['account'];
         	$array[$k]['date'] = $dayid;
-        	$array[$k]['platform_app_id'] = isset($json_info['appid']) ? addslashes($json_info['appid']) : '';
+
         	$array[$k]['platform_app_name'] = isset($json_info['appname']) ? addslashes(str_replace('\'\'','\'',$json_info['appname'])) : '';
             $array[$k]['ad_unit_id'] = isset($json_info['placement']) ? addslashes(str_replace('\'\'','\'',$json_info['placement'])) : '';
         	$array[$k]['success_requests'] = $json_info['request'];
