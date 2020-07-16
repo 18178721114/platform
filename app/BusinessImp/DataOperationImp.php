@@ -464,14 +464,26 @@ class DataOperationImp extends ApiBaseImp
             $array[$key]['date'] =$value['date'];
 
             // 发行区域ID(1,全球;2,国外;3,国内;)
-            if ($value['release_region_id'] == 1){
-                $release_region_id = '全球-';
-            }elseif ($value['release_region_id'] == 2){
-                $release_region_id = '国外-';
-            }elseif ($value['release_region_id'] == 3){
-                $release_region_id = '国内-';
-            }else{
-                $release_region_id = '未知区域-';
+            if ($language == 'cn') {
+                if ($value['release_region_id'] == 1){
+                    $release_region_id = '全球-';
+                }elseif ($value['release_region_id'] == 2){
+                    $release_region_id = '国外-';
+                }elseif ($value['release_region_id'] == 3){
+                    $release_region_id = '国内-';
+                }else{
+                    $release_region_id = '未知区域-';
+                }
+            }elseif($language == 'en'){
+                if ($value['release_region_id'] == 1){
+                    $release_region_id = 'Global-';
+                }elseif ($value['release_region_id'] == 2){
+                    $release_region_id = 'Foreign-';
+                }elseif ($value['release_region_id'] == 3){
+                    $release_region_id = 'CN-';
+                }else{
+                    $release_region_id = 'Unkonw-';
+                }
             }
 
             // 操作系统(1,ios;2,Android;3,h5;4,Amazon;)
@@ -512,6 +524,7 @@ class DataOperationImp extends ApiBaseImp
                 }elseif($language == 'en'){
                     $array[$key]['country'] = $value['china_name'] ? $value['china_name'] : 'Unkonw';
                 }
+                $array[$key]['cpi'] = $value['new'] ? round(($value['cost']/$value['new']),4) : 0.0000;//cpi 单价
             }else{
                 $array[$key]['keep_day7_rate'] = $value['new'] ? round(($value['keep_day7'] * 100) / $value['new'], 2) . "%" : "0.00%"; // 7日留存
                 $array[$key]['keep_day2_rate'] = $value['new'] ? round(($value['keep_day2'] * 100) / $value['new'], 2) . "%" : "0.00%"; // 次日留存
@@ -605,6 +618,7 @@ class DataOperationImp extends ApiBaseImp
                 if ($is_show == 1) {
                     $total_answer_data[$t_key]['country_id'] = '-';
                     $total_answer_data[$t_key]['country'] = '-';
+                    $total_answer_data[$t_key]['cpi'] = $t_data['new'] ? round(($t_data['cost']/$t_data['new']),4) : 0.0000;//cpi 单价
                 }else{
                     $total_answer_data[$t_key]['keep_day7_rate'] = '-'; // 7日留存
                     $total_answer_data[$t_key]['keep_day2_rate'] = '-'; // 次日留存
