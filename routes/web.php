@@ -34,6 +34,8 @@ Route::match(['get'], 'api/tiktok/code', 'OauthController@getTiktokCode');
 Route::match(['get'], 'api/toutiao/code', 'OauthController@getToutiaoCode');
 // 获取snapchatcode
 Route::match(['get'], 'api/snapchat/code', 'OauthController@getSnapchatCode');
+// 获取twitter
+Route::match(['get'], 'api/twitter/code', 'OauthController@getTwitterCode');
 // 获取appsflyer push data
 Route::namespace('DataPlatform')->group(function () {
     Route::match(['get', 'post'], 'api/appsflyer/push', 'AppsFlyerController@getAppsflyerPushData');

@@ -61,6 +61,12 @@ class OauthController
     public function getSnapchatCode () {
         (new OauthImp())->getSnapchatCode();
     }
+    /**
+     * twitter
+     */
+    public function getTwitterCode () {
+        (new OauthImp())->getTwitterCode();
+    }
 
         /**
      * 测试文件
