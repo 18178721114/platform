@@ -471,6 +471,8 @@ class DataOperationImp extends ApiBaseImp
                     $release_region_id = '国外-';
                 }elseif ($value['release_region_id'] == 3){
                     $release_region_id = '国内-';
+                }elseif ($value['release_region_id'] == 4){
+                    $release_region_id = '线下-';
                 }else{
                     $release_region_id = '未知区域-';
                 }
@@ -481,8 +483,10 @@ class DataOperationImp extends ApiBaseImp
                     $release_region_id = 'Foreign-';
                 }elseif ($value['release_region_id'] == 3){
                     $release_region_id = 'CN-';
+                }elseif ($value['release_region_id'] == 4){
+                    $release_region_id = 'Offline-';
                 }else{
-                    $release_region_id = 'Unkonw-';
+                    $release_region_id = 'Unknown-';
                 }
             }
 
@@ -522,7 +526,7 @@ class DataOperationImp extends ApiBaseImp
                 if ($language == 'cn') {
                     $array[$key]['country'] = $value['china_name'] ? $value['china_name'] : '未知国家';
                 }elseif($language == 'en'){
-                    $array[$key]['country'] = $value['china_name'] ? $value['china_name'] : 'Unkonw';
+                    $array[$key]['country'] = $value['china_name'] ? $value['china_name'] : 'Unknown';
                 }
             }else{
                 $array[$key]['keep_day7_rate'] = $value['new'] ? round(($value['keep_day7'] * 100) / $value['new'], 2) . "%" : "0.00%"; // 7日留存

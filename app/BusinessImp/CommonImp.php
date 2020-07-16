@@ -466,6 +466,8 @@ class CommonImp extends ApiBaseImp
                         $release_region_id = '国外-';
                     }elseif ($all_app_info['release_region_id'] == 3){
                         $release_region_id = '国内-';
+                    }elseif ($all_app_info['release_region_id'] == 4){
+                        $release_region_id = '线下-';
                     }else{
                         $release_region_id = '未知区域-';
                     }
@@ -476,8 +478,10 @@ class CommonImp extends ApiBaseImp
                         $release_region_id = 'Foreign-';
                     }elseif ($all_app_info['release_region_id'] == 3){
                         $release_region_id = 'CN-';
+                    }elseif ($all_app_info['release_region_id'] == 4){
+                        $release_region_id = 'Offline-';
                     }else{
-                        $release_region_id = 'Unkonw-';
+                        $release_region_id = 'Unknown-';
                     }
                 }
 
