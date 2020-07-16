@@ -52,7 +52,6 @@ class RedCommond extends Command
         try {
             set_time_limit(0);
             $mysql_table = 'zplay_red_data_statistics';
-            //ºì°üÊı¾İ
             $dayid = $this->argument('dayid') ? $this->argument('dayid') : date('Y-m-d', strtotime('-1 day'));
             $sql = " select * from data_statistics where date_time = '$dayid'";
             $info = DB::connection('mysql_zhifubao')->select($sql);
@@ -84,13 +83,21 @@ class RedCommond extends Command
 
 
             $create_time = date("Y-m-d H:i:s", time());
-
+            $num =0 ;
             foreach ($info as $k => $v) {
                 foreach ($app_info as $a => $b) {
                     if ($v['game_id'] == $b['app_id']) {
                         $insert_data[$k]['app_id'] = $b['id'];
-                        continue;
+                        $num =0 ;
+                        break;
+                    }else{
+                        $num ++;
                     }
+                }
+                if($num>0){
+                    $message = date("Y-m-d")."çº¢åŒ…æ•°æ®åº”ç”¨idåŒ¹é…å¤±è´¥ï¼Œå¤±è´¥åŸå› :".$v['game_id'];
+                    DataImportImp::saveDataErrorLog(5, 'pad-001', 'çº¢åŒ…æ•°æ®', 2, $message);
+                    continue;
                 }
                 $insert_data[$k]['date_time'] = $v['date_time'];
                 $insert_data[$k]['all_card_count'] = $v['all_card_count'];
@@ -103,6 +110,9 @@ class RedCommond extends Command
                 $insert_data[$k]['today_red_bags_user_count'] = $v['today_red_bags_user_count'];
                 $insert_data[$k]['tixian_total'] = $v['tixian_total'];
                 $insert_data[$k]['all_send_money'] = $v['all_send_money'];
+                $insert_data[$k]['red_bags_count'] = $v['red_bags_count'];
+                $insert_data[$k]['red_bags_user_count'] = $v['red_bags_user_count'];
+                $insert_data[$k]['tixian_user_count'] = $v['tixian_user_count'];
                 $insert_data[$k]['create_time'] = $create_time;
 
             }
@@ -110,7 +120,7 @@ class RedCommond extends Command
 
             if ($insert_data) {
 
-                //²ğ·ÖÅú´Î
+                //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                 $step = array();
                 $i = 0;
                 foreach ($insert_data as $kkkk => $insert_data_info) {
@@ -135,11 +145,9 @@ class RedCommond extends Command
 
             }
         }catch (\Exception $e) {
-            // Òì³£±¨´í
-            $message = date("Y-m-d")."ºÅ,ºì°üÊı¾İ³ÌĞò±¨´í,±¨´íÔ­Òò:".$e->getMessage();
-            DataImportImp::saveDataErrorLog(5, 'pad-001', 'ºì°üÊı¾İ', 2, $message);
-            $error_msg_arr[] = $message;
-            CommonFunction::sendMail($error_msg_arr, 'ºì°üÊı¾İ');
+
+            $message = date("Y-m-d")."çº¢åŒ…æ•°æ®ç¨‹åºæŠ¥é”™ï¼Œå¤±è´¥åŸå› :".$e->getMessage();
+            DataImportImp::saveDataErrorLog(5, 'pad-001', 'çº¢åŒ…æ•°æ®', 2, $message);
             exit;
         }
 
