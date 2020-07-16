@@ -400,6 +400,36 @@ class OauthImp
 
     }
 
+    // getTwitterCode
+
+    public function getTwitterCode(){
+//        Redis::select(0);
+        var_dump($_GET);
+//        if(isset($_GET['code']) && $_GET['code']){
+//            $code = $_GET['code'];
+//            // todo 此处为生成access_token代码
+//            $get_access_token_data = [
+//                'client_id'=>'69da582e-40f7-4284-a94f-b9eecd3d85b0',
+//                'client_secret'=>'3d5f45d44d3d89ca2b2e',
+//                'grant_type'=>'authorization_code',
+//                'code'=>$code,
+//                'redirect_uri'=>"https://erp-api.zplay.cn/api/snapchat/code"
+//            ];
+//            $get_access_token_url = "https://accounts.snapchat.com/login/oauth2/access_token";
+//            $get_access_token_result = CurlRequest::curl_header_Post($get_access_token_url, $get_access_token_data,[]);
+//            var_dump($get_access_token_result);
+//            $get_access_token_result = json_decode($get_access_token_result,true);
+//            if ($get_access_token_result && isset($get_access_token_result['access_token'])) {
+//                Redis::set('snapchat_sino_access_token', json_encode($get_access_token_result));
+//                echo 'ok';
+//            }
+//
+//        }else{
+//            echo 'auth_code获取失败';
+//        }
+
+    }
+
 
     // 数据接口
     public function dataCommond(){
