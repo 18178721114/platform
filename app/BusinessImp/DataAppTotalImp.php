@@ -32,7 +32,7 @@ class DataAppTotalImp extends ApiBaseImp
         session_write_close();
         // 列表参数：1、应用大类 ; 2、应用名称
         $app_type_id = isset($params['app_type_id']) ? $params['app_type_id'] : 1;
-        // 时间参数：1、累计；2、本月；3、上月
+        // 时间参数：1、累计；2、本月；3、上月；4、今年；5、去年
         $period_id = isset($params['period_id']) ? $params['period_id'] : 1;
         // 排序指标：1、新增用户；2、活跃用户；3、付费收入；4、广告收入；5、总收入；6、推广成本；7、毛利润；8、开发者分成；9、总利润
         $target_id = isset($params['target_id']) ? $params['target_id'] : 1;
@@ -45,7 +45,7 @@ class DataAppTotalImp extends ApiBaseImp
         if (!in_array($app_type_id,[1,2])){
             ApiResponseFactory::apiResponse([],[],1020);
         }
-        if (!in_array($period_id,[1,2,3])){
+        if (!in_array($period_id,[1,2,3,4,5])){
             ApiResponseFactory::apiResponse([],[],1021);
         }
         if (!in_array($target_id,[1,2,3,4,5,6,7,8,9])){
@@ -109,6 +109,14 @@ class DataAppTotalImp extends ApiBaseImp
         }elseif($period_id == 3){
             $last_month = date("Y-m",strtotime('-1 month'));
             $where .= " and date_time = '{$last_month}' ";
+        }elseif($period_id == 4){
+            $start_month = date("Y-01",strtotime('-0 year'));
+            $end_month = date("Y-m",strtotime('-0 month'));
+            $where .= " and date_time between '{$start_month}' and '{$end_month}' ";
+        }elseif($period_id == 5){
+            $start_month = date("Y-01",strtotime('-1 year'));
+            $end_month = date("Y-12",strtotime('-1 year'));
+            $where .= " and date_time between '{$start_month}' and '{$end_month}' ";
         }
 
         // 1、新增用户；2、活跃用户；3、付费收入；4、广告收入；5、总收入；6、推广成本；7、毛利润；8、开发者分成；9、总利润
@@ -146,6 +154,7 @@ class DataAppTotalImp extends ApiBaseImp
             $limit .= " limit {$size} ";
         }
         $sql = " select {$select} from $table_name $where $group_by $order_by $limit ;";
+
         $data_list = DB::select($sql);
         $data_list = Service::data($data_list);
 
