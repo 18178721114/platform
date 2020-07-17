@@ -142,11 +142,13 @@ class ToutiaoTgReportCommond extends Command
 //                                if (key_exists('code',$data_arr) && $data_arr['code'] == 0){
 //                                    $error_msg .= '暂无数据'.json_encode($data_arr);
 //                                }else
-                                if(key_exists('code',$data_arr) && $data_arr['code'] != 0){
-                                    $error_msg .= $data_arr['message'];
-                                    DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,4,$error_msg);
-                                }elseif(key_exists('code',$data_arr) && $data_arr['code'] == 0){
-                                    // 暂无数据
+                                if ($data_arr) {
+                                    if (key_exists('code', $data_arr) && $data_arr['code'] != 0) {
+                                        $error_msg .= $data_arr['message'];
+                                        DataImportImp::saveDataErrorLog(1, SOURCE_ID, AD_PLATFORM, 4, $error_msg);
+                                    }elseif (key_exists('code', $data_arr) && $data_arr['code'] == 0) {
+                                        // todo 暂无数据
+                                    }
                                 }else{
                                     $error_msg .= '无数据，接口未返回任何信息'.json_encode($data_arr);
                                     DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,4,$error_msg);
