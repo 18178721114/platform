@@ -11,6 +11,7 @@ use App\Common\ApiResponseFactory;
 use App\Common\CommonFunction;
 use App\Common\Service;
 use App\Common\CurlRequest;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
 use App\BusinessLogic\UserLogic;
 use Illuminate\Support\Facades\DB;
@@ -108,11 +109,13 @@ class RedPacketRealizationImp extends ApiBaseImp
      * @return [type]         [description]
      */
     public static function getRedPacketData($params){
+
         $userid = $_SESSION['erm_data']['guid'];
         if(!$userid){
             ApiResponseFactory::apiResponse([],[],741);
         }
         session_write_close();
+        Artisan::call('RedRealTimeCommond');
         // 应用ID
         $app_id = isset($params['app_id']) ? $params['app_id'] : '';
         // 开始时间
