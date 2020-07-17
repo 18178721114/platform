@@ -204,7 +204,10 @@ class RedPacketRealizationImp extends ApiBaseImp
         round(sum(all_today_total),2) as all_today_total, 
         sum(today_red_bags_user_count) as today_red_bags_user_count, 
         round(sum(tixian_total),2) as tixian_total, 
-        round(sum(all_send_money),2) as all_send_money ";
+        round(sum(all_send_money),2) as all_send_money,
+        sum(red_bags_count) as red_bags_count,
+        sum(red_bags_user_count) as red_bags_user_count,
+        sum(tixian_user_count) as tixian_user_count";
 
         $total_select .= " 
         sum(red.all_card_count) as all_card_count, 
@@ -216,7 +219,10 @@ class RedPacketRealizationImp extends ApiBaseImp
         round(sum(all_today_total),2) as all_today_total, 
         sum(today_red_bags_user_count) as today_red_bags_user_count, 
         round(sum(tixian_total),2) as tixian_total, 
-        round(sum(all_send_money),2) as all_send_money  ";
+        round(sum(all_send_money),2) as all_send_money,
+         sum(red_bags_count) as red_bags_count,
+        sum(red_bags_user_count) as red_bags_user_count,
+        sum(tixian_user_count) as tixian_user_count";
 
         $table_name = 'zplay_red_data_statistics as red';
 
