@@ -4,6 +4,7 @@ namespace App\Console\Commands\CrontabMysqlHome;
 
 use App\BusinessImp\DataImportImp;
 use App\BusinessLogic\AdReportLogic;
+use App\Common\ApiResponseFactory;
 use App\Common\CommonFunction;
 use App\Common\CurlRequest;
 use App\Common\Service;
@@ -92,7 +93,7 @@ class RedRealTimeCommond extends Command
                 if($num>0){
                     $message = date("Y-m-d")."红包数据应用id匹配失败，失败原因:".$ret['all_money_arr']['game_id'];
                     DataImportImp::saveDataErrorLog(5, 'pad-001', '红包数据', 2, $message);
-                    die;
+                    ApiResponseFactory::apiResponse([],[],1056);
                 }
 
                     $insert_data[$k]['date_time'] = $dayid;
@@ -144,6 +145,7 @@ class RedRealTimeCommond extends Command
         } catch (\Exception $e) {
             $message = $dayid."红包实时数据程序报错，失败原因:".$e->getMessage();
             DataImportImp::saveDataErrorLog(5, 'pad-001', '红包实时数据', 2, $message);
+            ApiResponseFactory::apiResponse([],[],1056,$message);
 
         }
 
