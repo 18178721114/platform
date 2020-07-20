@@ -83,7 +83,7 @@ class UnityReportCommond extends Command
 //                var_dump(count($data));
 
                 if (!$data) {
-                    $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:账号、SecretKey有误'.json_encode($data);
+                    $error_msg = AD_PLATFORM.'广告平台'.$value['company_account'].'账号取数失败,错误信息:'.json_encode($data);
                     DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,2,$error_msg);
 
                     $error_msg_arr = [];
