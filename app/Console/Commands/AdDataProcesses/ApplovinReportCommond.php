@@ -47,6 +47,8 @@ class ApplovinReportCommond extends Command
      */
     public function handle()
     {
+        // 由于此平台接口属于国外网络，国内服务器调用经常失败，迁移到190服务器
+        exit;
         
         set_time_limit(0);
        // ini_set('memory_limit','100M');
