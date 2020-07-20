@@ -366,6 +366,18 @@ class DataProcessController extends Controller
             Artisan::call("AfAnalysisIdfaCommond",['dayid'=>$day,'hours' => $hours]);
         }
     }
+    /**
+     * ironSourceAdProcess ad 保存数据
+     * @param $params array 请求数据
+     */
+    public function ironSourceAdProcess()
+    {
+        $params = $this->params;
+        $day = isset($params['dayid']) ? $params['dayid'] : '';
+        if ($day){
+            Artisan::call("IronSourceReportCommond",['dayid'=>$day]);
+        }
+    }
 
     
 }

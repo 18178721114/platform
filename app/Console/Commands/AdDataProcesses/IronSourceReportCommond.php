@@ -47,6 +47,8 @@ class IronSourceReportCommond extends Command
      */
     public function handle()
     {
+//        // 由于此平台接口属于国外网络，国内服务器调用经常失败，迁移到190服务器
+//        exit;
         set_time_limit(0);
         // 入口方法
         $dayid = $this->argument('dayid')?$this->argument('dayid'):date('Y-m-d',strtotime('-1 day'));
@@ -92,8 +94,8 @@ class IronSourceReportCommond extends Command
                 $dataList  = json_decode($dataList1,true);
                 $res_i=1;
                 while(!$dataList){
-                    $dataList = self::get_response($url_applist, $header);
-                    $dataList  = json_decode($dataList,true);
+                    $dataList1 = self::get_response($url_applist, $header);
+                    $dataList  = json_decode($dataList1,true);
                     $res_i++;
                     if($res_i>3)
                         break;
