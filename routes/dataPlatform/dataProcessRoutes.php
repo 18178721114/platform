@@ -86,3 +86,6 @@ Route::match(['get'], 'api/jinli/ff/process', 'DataProcessController@jinliFfProc
 // appsflyer  pull 数据处理过程
 Route::match(['get'], 'api/appsflyer/pull/process', 'DataProcessController@appsflyerPullProcess');
 
+// IronSource
+Route::match(['get'], 'api/ironSource/ad/process', 'DataProcessController@ironSourceAdProcess');
+
