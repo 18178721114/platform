@@ -188,6 +188,18 @@ class ToutiaoTgReportCommond extends Command
             $get_access_token_url = "https://ad.toutiao.com/open_api/oauth2/refresh_token/";
             $get_access_token_result = CurlRequest::curl_post_https($get_access_token_url, $refresh_token_data);
             $get_access_token_result = json_decode($get_access_token_result,true);
+
+            // 数据获取重试
+            $api_data_i = 1;
+            while(!$get_access_token_result){
+                sleep(5);
+                $get_access_token_result = CurlRequest::curl_post_https($get_access_token_url, $refresh_token_data);
+                $get_access_token_result = json_decode($get_access_token_result,true);
+                $api_data_i++;
+                if($api_data_i > 3)
+                    break;
+            }
+
             if ($get_access_token_result && !empty($get_access_token_result['data'])){
                 Redis::set($advertiser_id,json_encode($get_access_token_result));
                 return json_encode($get_access_token_result);
