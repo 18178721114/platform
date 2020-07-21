@@ -375,7 +375,7 @@ class DataProcessController extends Controller
         $params = $this->params;
         $day = isset($params['dayid']) ? $params['dayid'] : '';
         if ($day){
-            Artisan::call("IronSourceReportCommond",['dayid'=>$day]);
+            Artisan::call("IronsourceHandleProcesses",['dayid'=>$day]);
         }
     }
 
