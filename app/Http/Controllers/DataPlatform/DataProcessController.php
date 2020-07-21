@@ -379,5 +379,18 @@ class DataProcessController extends Controller
         }
     }
 
+
+    /**
+     * twitter tg process 数据处理过程
+     * @param $params array 请求数据
+     */
+    public function twitterTgProcess()
+    {
+        $dayid = isset($_GET['dayid']) ? $_GET['dayid'] : '';
+        if ($dayid){
+            Artisan::call('TwitterTgHandleProcesses',['dayid' => $dayid]);
+        }
+    }
+
     
 }
