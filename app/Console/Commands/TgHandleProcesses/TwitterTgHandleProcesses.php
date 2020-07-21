@@ -255,12 +255,12 @@ class TwitterTgHandleProcesses extends Command
                 $array[$k]['new'] = isset($json_info['app_installs']) ? $json_info['app_installs'] : 0;
 
 
-                $array[$k]['cost'] = isset($json_info['cost']) ? $json_info['cost'] : 0.00; // 流水原币
+                $array[$k]['cost'] = isset($json_info['cost']) ? $json_info['cost'] / 1000000 : 0.00; // 流水原币
                 $currency_ex = floatval($ex_info['currency_ex']);
                 if (!$currency_ex) {
                     $currency_ex = 1;
                 }
-                $array[$k]['cost_exc'] = isset($json_info['cost']) ? $json_info['cost'] * $currency_ex : 0;
+                $array[$k]['cost_exc'] = isset($json_info['cost']) ? $json_info['cost'] / 1000000 * $currency_ex : 0;
 
                 // 成本美元
                 if (($array[$k]['cost'] == $array[$k]['cost_exc']) && $usd_currency_ex) {
