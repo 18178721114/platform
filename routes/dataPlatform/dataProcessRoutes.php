@@ -89,3 +89,5 @@ Route::match(['get'], 'api/appsflyer/pull/process', 'DataProcessController@appsf
 // IronSource
 Route::match(['get'], 'api/ironSource/ad/process', 'DataProcessController@ironSourceAdProcess');
 
+//twitter 处理过程
+Route::match(['get'], 'api/twitter/tg/process', 'DataProcessController@twitterTgProcess');
