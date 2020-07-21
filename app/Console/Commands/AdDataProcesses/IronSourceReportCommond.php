@@ -47,8 +47,8 @@ class IronSourceReportCommond extends Command
      */
     public function handle()
     {
-//        // 由于此平台接口属于国外网络，国内服务器调用经常失败，迁移到190服务器
-//        exit;
+        // 由于此平台接口属于国外网络，国内服务器调用经常失败，迁移到190服务器
+        exit;
         set_time_limit(0);
         // 入口方法
         $dayid = $this->argument('dayid')?$this->argument('dayid'):date('Y-m-d',strtotime('-1 day'));
