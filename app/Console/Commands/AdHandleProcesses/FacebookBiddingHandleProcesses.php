@@ -176,7 +176,7 @@ class FacebookBiddingHandleProcesses extends Command
         			
         		}
         	}
-            $err_name = (isset($json_info['placement']) ?$json_info['placement']:'Null').'#'.(isset($json_info['ad_unit_name']) ?$json_info['ad_unit_name']:'Null').'#'.(isset($json_info['appid']) ?$json_info['appid']:'Null').'#'.(isset($json_info['appname']) ?$json_info['appname']:'Null');
+            $err_name = (isset($json_info['placement']) ?$json_info['placement']:'Null').'#'.(isset($json_info['placement_name']) ?$json_info['placement_name']:'Null').'#'.(isset($json_info['appid']) ?$json_info['appid']:'Null').'#'.(isset($json_info['appname']) ?$json_info['appname']:'Null');
 
             if ($num){
                 $error_log_arr['ad_unit_id'][] = $json_info['appid'].'/'.$json_info['placement'].'('.$err_name.')';
@@ -206,8 +206,8 @@ class FacebookBiddingHandleProcesses extends Command
                 $error_detail_arr[$k]['err_date'] = $dayid;
                 $error_detail_arr[$k]['first_level_id'] = isset($json_info['appid']) ? addslashes($json_info['appid']) : '';
                 $error_detail_arr[$k]['first_level_name'] = isset($json_info['appname']) ? addslashes(str_replace('\'\'','\'',$json_info['appname'])) : '';
-                $error_detail_arr[$k]['second_level_id'] = $json_info['placement'];
-                $error_detail_arr[$k]['second_level_name'] = '';
+                $error_detail_arr[$k]['second_level_id'] = isset($json_info['placement']) ? $json_info['placement'] : '';
+                $error_detail_arr[$k]['second_level_name'] = isset($json_info['placement_name']) ? $json_info['placement_name'] : '';
                 $error_detail_arr[$k]['money'] = $json_info['income'];
                 $error_detail_arr[$k]['account'] = $v['account'];
                 $error_detail_arr[$k]['create_time'] = date('Y-m-d H:i:s');
@@ -225,10 +225,11 @@ class FacebookBiddingHandleProcesses extends Command
 
         	$array[$k]['platform_app_name'] = isset($json_info['appname']) ? addslashes(str_replace('\'\'','\'',$json_info['appname'])) : '';
             $array[$k]['ad_unit_id'] = isset($json_info['placement']) ? addslashes(str_replace('\'\'','\'',$json_info['placement'])) : '';
-            $array[$k]['success_requests'] = $json_info['request'];
-            $array[$k]['all_request'] = $json_info['request'];
-            $array[$k]['impression'] = $json_info['views'];
-            $array[$k]['click'] = $json_info['clicks'];
+            $array[$k]['ad_unit_name'] = isset($json_info['placement_name']) ? addslashes(str_replace('\'\'','\'',$json_info['placement_name'])) : '';
+        	$array[$k]['success_requests'] = $json_info['request'];
+        	$array[$k]['all_request'] = $json_info['request'];
+        	$array[$k]['impression'] = $json_info['views'];
+        	$array[$k]['click'] = $json_info['clicks'];
 
             $array[$k]['earning'] = isset($json_info['income']) ? $json_info['income'] : 0.00; // 流水原币
 
@@ -330,40 +331,40 @@ class FacebookBiddingHandleProcesses extends Command
                         # code...
 
                         $sql_str.= "('".$v['date']."'," // date
-                            ."'".$v['app_id']."',"  //app_id
-                            ."'',"// version
-                            ."'',"//channel_id
-                            ."'".$v['country_id']."',"//country_id
-                            ."'',"//data_platform_id
-                            ."'".$v['data_account']."',"//data_account
-                            ."'".$v['platform_id']."',"//platform_id
-                            ."'".$v['ad_type']."',"//ad_type
-                            ."'".$v['statistics']."',"//statistics
-                            ."'".$v['platform_app_id']."',"//platform_app_id
-                            ."'".$v['platform_app_name']."',"//platform_app_name
-                            ."'".$v['ad_unit_id']."',"//ad_unit_id
-                            ."'',"//ad_unit_name
-                            ."'',"//round
-                            ."'".$v['all_request']."',"//all_request
-                            ."'".$v['success_requests']."',"//success_requests
-                            ."'',"//fail_requests;
-                            ."'',"//impression_port;
-                            ."'',"//impression_begin;
-                            ."'".$v['impression']."',"//impression;
-                            ."'".$v['click']."',"//click;
-                            ."'',"//download;
-                            ."'',"//activate;
-                            ."'',"//reward;
-                            ."'".$v['earning']."',"//earning;
-                            ."'".$v['earning_exc']."',"//earning_exc;
-                            ."'".$v['earning_flowing']."',"//earning_flowing;
-                            ."'".$v['earning_fix']."',"//earning_fix;
-                            ."'".$v['flow_type']."',"//flow_type;
-                            ."'',"//remark;
-                            ."'".$time."',"//create_time
-                            ."'".$time."',"//update_time
-                            ."'".$v['earning_usd']."',"//earning_usd
-                            ."'".$v['earning_exc_usd']."'),";//earning_exc_usd
+                        ."'".$v['app_id']."',"  //app_id
+                        ."'',"// version
+                        ."'',"//channel_id
+                        ."'".$v['country_id']."',"//country_id
+                        ."'',"//data_platform_id
+                        ."'".$v['data_account']."',"//data_account
+                        ."'".$v['platform_id']."',"//platform_id
+                        ."'".$v['ad_type']."',"//ad_type
+                        ."'".$v['statistics']."',"//statistics
+                        ."'".$v['platform_app_id']."',"//platform_app_id
+                        ."'".$v['platform_app_name']."',"//platform_app_name
+                        ."'".$v['ad_unit_id']."',"//ad_unit_id
+                        ."'".$v['ad_unit_name']."',"//ad_unit_name
+                        ."'',"//round
+                        ."'".$v['all_request']."',"//all_request
+                        ."'".$v['success_requests']."',"//success_requests
+                        ."'',"//fail_requests;
+                        ."'',"//impression_port;
+                        ."'',"//impression_begin;
+                        ."'".$v['impression']."',"//impression;
+                        ."'".$v['click']."',"//click;
+                        ."'',"//download;
+                        ."'',"//activate;
+                        ."'',"//reward;
+                        ."'".$v['earning']."',"//earning;
+                        ."'".$v['earning_exc']."',"//earning_exc;
+                        ."'".$v['earning_flowing']."',"//earning_flowing;
+                        ."'".$v['earning_fix']."',"//earning_fix;
+                        ."'".$v['flow_type']."',"//flow_type;
+                        ."'',"//remark;
+                        ."'".$time."',"//create_time
+                        ."'".$time."',"//update_time
+                        ."'".$v['earning_usd']."',"//earning_usd
+                        ."'".$v['earning_exc_usd']."'),";//earning_exc_usd
 
                     }
                     $sql_str = rtrim($sql_str,',');
