@@ -67,7 +67,7 @@ class FacebookBiddingHandleProcesses extends Command
         $map['type'] = 3;
         $map['source_id'] = $source_id;
         $map[] =['income','<>',0] ;
-        $map['like'][] = ["json_data->delivery_method",'like','standard'];
+       // $map['like'][] = ["json_data->delivery_method",'like','standard'];
 
         $info = DataImportLogic::getChannelData('ad_data','erm_data',$map)->get();
         $info = Service::data($info);
