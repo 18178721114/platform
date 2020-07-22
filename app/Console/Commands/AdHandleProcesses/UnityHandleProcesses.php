@@ -238,7 +238,7 @@ class UnityHandleProcesses extends Command
         	$array[$k]['data_account'] = $v['account'];
         	$array[$k]['platform_app_id'] = isset($json_info['source_game_id']) ? addslashes($json_info['source_game_id']) : '';
         	$array[$k]['platform_app_name'] = isset($json_info['source_name']) ? addslashes(str_replace('\'\'','\'',$json_info['source_name'])) : '';
-            $array[$k]['impression'] = $json_info['view_count'];
+            $array[$k]['impression'] = isset($json_info['start_count']) ? $json_info['start_count'] : '';
         	$array[$k]['success_requests'] = $json_info['available_sum'];
         	$array[$k]['all_request'] = $json_info['adrequest_count'];
         	$array[$k]['earning'] = isset($json_info['revenue_sum']) ? $json_info['revenue_sum'] : '';
