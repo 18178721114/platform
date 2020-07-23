@@ -146,7 +146,7 @@ class TuiaAdHandleProcesses extends Command
 //        }
 
         // 获取美元汇率
-        $effective_time = date("Ym",strtotime($dayid));
+        $effective_time = date("Ym",strtotime($dayid_date));
         $usd_ex_info = DataImportImp::getPlatformExchangeRate($effective_time);
         $usd_currency_ex = 0;
         if ($usd_ex_info){
