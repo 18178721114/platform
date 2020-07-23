@@ -244,24 +244,24 @@ class AppsFlyerImp extends ApiBaseImp
 
     public static function getAppsflyerPushData($params)
     {
-        $fileName = date('YmdH',time());
-        $fileData = date('Y-m-d',time());
-        $dir = '/data/af_push/'.$fileData;
-
-        if (!is_dir($dir)) {
-            mkdir($dir,0777,true);
-        }
-        $logFilename = $dir.'/'.$fileName.'.log';
-        //生成日志
-        file_put_contents( $logFilename,json_encode($params) . "\n",FILE_APPEND);
-
-//        Redis::select(1);
-//        if ($params) {
+//        $fileName = date('YmdH',time());
+//        $fileData = date('Y-m-d',time());
+//        $dir = '/data/af_push/'.$fileData;
 //
-//            $appsflyer_key = env('REDIS_APPSFLYER_KEYS');
-//            Redis::rpush($appsflyer_key, json_encode($params));
-//
+//        if (!is_dir($dir)) {
+//            mkdir($dir,0777,true);
 //        }
+//        $logFilename = $dir.'/'.$fileName.'.log';
+//        //生成日志
+//        file_put_contents( $logFilename,json_encode($params) . "\n",FILE_APPEND);
+
+        Redis::select(2);
+        if ($params) {
+
+            $appsflyer_key = env('REDIS_APPSFLYER_KEYS');
+            Redis::rpush($appsflyer_key, json_encode($params));
+
+        }
     }
 
 }
