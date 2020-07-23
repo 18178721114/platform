@@ -31,7 +31,7 @@ class Service
 
         $data = [];
         foreach ($condition as $key => $value){
-            if ($value != 'ad_type' && $value != 'app_version' &&  $value != 'statistic_version' &&  $value != 'divide_billing' && $value != 'divide_ad' && $value != 'divide_cost' && $value != 'ad_status'){
+            if ($value != 'ad_type' && $value != 'app_version' &&  $value != 'statistic_version' &&  $value != 'divide_billing' && $value != 'divide_ad' && $value != 'divide_cost' && $value != 'ad_status' && $value != 'instance_id'){
                 if (!isset($value,$arr) || !$arr[$value]){
                     if (isset($tableFieldName[$value]) && $tableFieldName[$value]){
                         ApiResponseFactory::apiResponse( [], $condition, $tableFieldName[$value]);
