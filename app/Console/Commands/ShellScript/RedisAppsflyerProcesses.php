@@ -50,7 +50,7 @@ class RedisAppsflyerProcesses extends Command
     public function handle()
     {
         set_time_limit(0);
-        Redis::select(1);
+        Redis::select(2);
 
         $dayid = $this->argument('dayid') ? $this->argument('dayid'):date('Y-m-d');
         $hours = $this->argument('hours') ? $this->argument('hours'):date("H", time()) - 1;
