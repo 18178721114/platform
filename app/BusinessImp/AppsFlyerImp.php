@@ -254,14 +254,22 @@ class AppsFlyerImp extends ApiBaseImp
 //        $logFilename = $dir.'/'.$fileName.'.log';
 //        //生成日志
 //        file_put_contents( $logFilename,json_encode($params) . "\n",FILE_APPEND);
-
         Redis::select(2);
         if ($params) {
 
+            // pgsql 全量数据备份
             $appsflyer_key = env('REDIS_APPSFLYER_KEYS');
             Redis::rpush($appsflyer_key, json_encode($params));
 
+            // 越狱渠道当天新增设备
+            if (isset($params['idfa']) && $params['idfa']){
+                $idfa = $params['idfa'];
+                $appsflyer_break_key = env('REDIS_APPSFLYER_KEYS_BREAK');
+                Redis::rpush($appsflyer_break_key,$idfa);
+            }
         }
+
+
     }
 
 }
