@@ -146,7 +146,9 @@ class FlurryTjHandleProcesses extends Command
 
                 if ($num) {
                     //var_dump($json_info['campaign_id']);
-                    $error_log_arr['campaign_id'][] = $v['version'] . '#' . $v['app_name'];
+                    if (isset($v['new_devices']) && $v['new_devices'] > 10) {
+                        $error_log_arr['campaign_id'][] = $v['version'] . '#' . $v['app_name'];
+                    }
                 }
 
                 // todo 匹配国家用
@@ -162,7 +164,9 @@ class FlurryTjHandleProcesses extends Command
 
                 }
                 if ($num_country) {
-                    $error_log_arr['country'][] = (isset($v['country']) ? $v['country'] : 'Unknown Region'). '#' . $v['app_name'];
+                    if (isset($v['new_devices']) && $v['new_devices'] > 10) {
+                        $error_log_arr['country'][] = (isset($v['country']) ? $v['country'] : 'Unknown Region') . '#' . $v['app_name'];
+                    }
                 }
                 if (($num + $num_country) > 0) {
 
