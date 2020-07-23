@@ -65,37 +65,37 @@ class RedisAppsflyerProcesses extends Command
 
         $start_time = time();
         var_dump('开始时间：'.$start_time);
-
+        $insert_date = [];
         while($appsflyer_len>0){
 
-            $insert_date = [];
-
             $str_json = Redis::lpop($appsflyer_key);
-            $str_arr = json_decode($str_json,true);
-            var_dump(count($str_arr));
-            if ($str_arr){
-                $ii = 0;
-                foreach ($str_arr as $str_key => $str){
-                    if ($str_key % 500 == 0) $ii++;
-                    $one_insert_data = [
-                        "dayid" => $dayid,
-                        "json_data" => $str,
-                        "year" => date("Y", strtotime($dayid)),
-                        "month" => date("m", strtotime($dayid)),
-                        "hours" => $hours,
-                        'create_time' => date("Y-m-d H:i:s")
-                    ];
-                    $insert_date[$ii][] = $one_insert_data;
-                }
-            }
-
-            if ($insert_date) {
-                foreach ($insert_date as $k => $v_info) {
-                    $result = DataImportLogic::insertChannelData("appsflyer_push_data", "erm_data", $v_info);
-                }
-            }
+            $insert_date[] = $str_json;
 
             $appsflyer_len = Redis::llen($appsflyer_key);
+        }
+//        var_dump(count($insert_date));
+        $new_insert_date = [];
+        if ($insert_date){
+            $ii = 0;
+            foreach ($insert_date as $str_key => $str){
+                if ($str_key % 500 == 0) $ii++;
+                $one_insert_data = [
+                    "dayid" => $dayid,
+                    "json_data" => $str,
+                    "year" => date("Y", strtotime($dayid)),
+                    "month" => date("m", strtotime($dayid)),
+                    "hours" => $hours,
+                    'create_time' => date("Y-m-d H:i:s")
+                ];
+                $new_insert_date[$ii][] = $one_insert_data;
+            }
+        }
+
+//        var_dump(count($new_insert_date));
+        if ($new_insert_date) {
+            foreach ($new_insert_date as $k => $v_info) {
+                $result = DataImportLogic::insertChannelData("appsflyer_push_data", "erm_data", $v_info);
+            }
         }
 
         $end_time = time();
