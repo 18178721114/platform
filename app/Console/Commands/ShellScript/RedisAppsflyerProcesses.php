@@ -66,14 +66,12 @@ class RedisAppsflyerProcesses extends Command
         $start_time = time();
         var_dump('开始时间：'.$start_time);
         $insert_date = [];
-        while($appsflyer_len>0){
-
+        var_dump($appsflyer_len);
+        for ($i = 1; $i <= $appsflyer_len; $i++) {
             $str_json = Redis::lpop($appsflyer_key);
             $insert_date[] = $str_json;
-
-            $appsflyer_len = Redis::llen($appsflyer_key);
         }
-//        var_dump(count($insert_date));
+        var_dump(count($insert_date));
         $new_insert_date = [];
         if ($insert_date){
             $ii = 0;
@@ -91,7 +89,7 @@ class RedisAppsflyerProcesses extends Command
             }
         }
 
-//        var_dump(count($new_insert_date));
+        var_dump(count($new_insert_date));
         if ($new_insert_date) {
             foreach ($new_insert_date as $k => $v_info) {
                 $result = DataImportLogic::insertChannelData("appsflyer_push_data", "erm_data", $v_info);
