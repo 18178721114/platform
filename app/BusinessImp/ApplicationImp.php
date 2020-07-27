@@ -1507,7 +1507,7 @@ class ApplicationImp extends ApiBaseImp
         //计费的基础信息
         foreach ($app_billing_statistic_list as $key => $app_billing){
             //os_id 1 ios计费不分国内国外    2 安卓 区分国内国外计费
-            if($app_list[0]['os_id'] ==  1 || ($app_list[0]['os_id'] ==  2 && $app_list[0]['release_region_id'] ==2)){
+            if($app_list[0]['os_id'] ==  1 || ($app_list[0]['os_id'] ==  2 && $app_list[0]['release_region_id'] ==1)){
                 $data['overseas']['app_package_name'] = $app_billing['app_package_name'];
             }elseif (($app_list[0]['os_id'] ==  2 && $app_list[0]['release_region_id'] ==3)){
                 $data['domestic']['billing_list'][$index]['billing_id']= $app_billing['id'];
@@ -1525,7 +1525,7 @@ class ApplicationImp extends ApiBaseImp
         //计费点信息
         foreach ($app_billing_point_statistic_list as $k => $app_billing_point){
             //1、海外计费信息2、国内计费信息
-            if ($app_list[0]['os_id'] ==  1 || ($app_list[0]['os_id'] ==  2 && $app_list[0]['release_region_id'] ==2)){
+            if ($app_list[0]['os_id'] ==  1 || ($app_list[0]['os_id'] ==  2 && $app_list[0]['release_region_id'] ==1)){
                 $data['overseas']['bill_point_list'][$num]['id'] = $app_billing_point['id'];
                 $data['overseas']['bill_point_list'][$num]['billing_point_name'] = $app_billing_point['billing_point_name'];
                 $data['overseas']['bill_point_list'][$num]['billing_point_id'] = $app_billing_point['billing_point_id'];
@@ -1592,6 +1592,14 @@ class ApplicationImp extends ApiBaseImp
             }
 
             $map['app_id'] =$params['overseas']['appid'];
+
+            // 判断同一个应用大类下相同的渠道
+            $map_app_id = $map['app_id'];
+            $map_app_package_name = $params['overseas']['app_package_name'];
+            $package_info = DB::select("select * from c_billing b left join c_app a on b.app_id = a.id where b.channel_id = {$channel_id} and a.app_full_name in (select app_full_name from c_app where  id = {$map_app_id})  and app_package_name = '{$map_app_package_name}'");
+            $package_info = Service::data($package_info);
+            if (!empty($package_info)) ApiResponseFactory::apiResponse([],[],761);
+
             //整理数据
             $data['bill_list'][$bill_index]['pay_platform_id']=$platform_id;
             $data['bill_list'][$bill_index]['channel_id']=$channel_id;
@@ -1621,7 +1629,8 @@ class ApplicationImp extends ApiBaseImp
                 //判断 计费点名称 or 计费点id 不能重复
                 $map = [];
                 $map['status'] = 0;
-                $map['orWhere'][] = ['billing_point_name',$value['billing_point_name']];
+                $map['app_id'] = $params['overseas']['appid'];
+//                $map['orWhere'][] = ['billing_point_name',$value['billing_point_name']];
                 $map['orWhere'][] = ['billing_point_id',$value['billing_point_id']];
 //                $map['billing_point_price_usd'] =$value['billing_point_price_usd'];
 //                $map['billing_point_price_cny'] =$value['billing_point_price_cny'];
