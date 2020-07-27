@@ -227,7 +227,7 @@ class VungleHandleProcesses extends Command
                     }
 
                 }
-                $error_log_arr['app_id'][] = $json_info['application id'].'/'.$json_info['placement reference id'].'('.addslashes(str_replace('\'\'','\'',$err_name)).')';
+                $error_log_arr['app_id'][] = $json_info['placement reference id'].'('.addslashes(str_replace('\'\'','\'',$err_name)).')';
             }
             
         	foreach ($country_info as $country_k => $country_v) {
