@@ -222,7 +222,7 @@ class BaiduHandleProcesses extends Command
                             $error_log_arr['ad_type'][] = $json_info['adtypeid'].'('.$err_name.')' ;
                         }
 
-                        if ($ad_type || $ad_type == 0){
+                        if ($ad_type || $ad_type === 0){
                             $new_campaign_ids[$json_info['appid']][$app_info_detail[0]['id']][$json_info['adpositionid']] = $ad_type;
                         }
                     }

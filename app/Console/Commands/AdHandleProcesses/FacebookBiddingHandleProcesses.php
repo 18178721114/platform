@@ -61,13 +61,20 @@ class FacebookBiddingHandleProcesses extends Command
         $source_id = 'pad23';
         $source_name = 'Facebook';
         var_dump('Facebook-pad23-'.$dayid);
+
+        self::facebookAdDataProcess($source_id, $source_name, $dayid);
+
+    }
+
+    public static function facebookAdDataProcess($source_id, $source_name, $dayid){
+        static $stactic_num = 0;
         //查询pgsql 的数据
         $map =[];
         $map['dayid'] = $dayid;
         $map['type'] = 3;
         $map['source_id'] = $source_id;
         $map[] =['income','<>',0] ;
-       // $map['like'][] = ["json_data->delivery_method",'like','standard'];
+        // $map['like'][] = ["json_data->delivery_method",'like','standard'];
 
         $info = DataImportLogic::getChannelData('ad_data','erm_data',$map)->get();
         $info = Service::data($info);
@@ -78,8 +85,8 @@ class FacebookBiddingHandleProcesses extends Command
             exit;
         }
 
-        //获取匹配应用的数据 
-            $sql = "SELECT DISTINCT
+        //获取匹配应用的数据
+        $sql = "SELECT DISTINCT
             c_app.os_id,
             c_app_ad_platform.publisher_id,
             c_app_ad_platform.platform_app_id,
@@ -151,56 +158,124 @@ class FacebookBiddingHandleProcesses extends Command
             exit;
         }
 
+        //获取对照表广告类型
+        $AdType_map['platform_id'] =$source_id;
+        $AdType_info = CommonLogic::getAdTypeCorrespondingList($AdType_map)->get();
+        $AdType_info = Service::data($AdType_info);
+//        if(!$AdType_info){
+//            $error_msg = $dayid.'号，'.$source_name.'广告平台数据处理程序广告类型数据查询失败';
+//            DataImportImp::saveDataErrorLog(2,$source_id,$source_name,2,$error_msg);
+//            exit;
+//        }
+
         $array = [];
         $num = 0;
         $num_country = 0;
+        $num_adtype =0;
         $error_log_arr = [];
         $error_detail_arr = [];//报错的 详细数据信息
+        $new_campaign_ids = [];
         foreach ($info as $k => $v) {
-        	$json_info = json_decode($v['json_data'],true);
-
-        	foreach ($app_list as $app_k => $app_v) {
-        		if($json_info['placement'] == $app_v['ad_slot_id'] && ($json_info['appid'] == $app_v['platform_app_id'] || $json_info['appid'] == $app_v['publisher_id']) ){
-        			$array[$k]['app_id'] = $app_v['app_id'];
-        			$array[$k]['ad_type'] = $app_v['ad_type'];
+            $json_info = json_decode($v['json_data'],true);
+            $third_app_id = $json_info['appid'];
+//            var_dump($third_app_id);
+            foreach ($app_list as $app_k => $app_v) {
+                if($json_info['placement'] == $app_v['ad_slot_id'] && ($json_info['appid'] == $app_v['platform_app_id'] || $json_info['appid'] == $app_v['publisher_id']) ){
+                    $array[$k]['app_id'] = $app_v['app_id'];
+                    $array[$k]['ad_type'] = $app_v['ad_type'];
                     $array[$k]['flow_type'] = $app_v['flow_type'];
                     $array[$k]['platform_app_id'] = isset($app_v['platform_app_id']) ? addslashes($app_v['platform_app_id']) : '';
                     if(empty($app_v['platform_app_id'])){
                         $array[$k]['platform_app_id'] = isset($app_v['publisher_id']) ? addslashes($app_v['publisher_id']) : '';
 
                     }
-        			$num = 0;
-        			break;
-        		}else{
-        			//广告位配置未配置
-        			$num++;
-        			
-        		}
-        	}
+                    $num = 0;
+                    break;
+                }else{
+                    //广告位配置未配置
+                    $num++;
+
+                }
+            }
             $err_name = (isset($json_info['placement']) ?$json_info['placement']:'Null').'#'.(isset($json_info['placement_name']) ?$json_info['placement_name']:'Null').'#'.(isset($json_info['appid']) ?$json_info['appid']:'Null').'#'.(isset($json_info['appname']) ?$json_info['appname']:'Null');
 
             if ($num){
-                $error_log_arr['ad_unit_id'][] = $json_info['appid'].'/'.$json_info['placement'].'('.$err_name.')';
+
+                if($third_app_id && isset($json_info['placement']) && $json_info['placement'] && isset($json_info['platform']) && $json_info['platform']){
+                    $app_os_id = '';
+                    if ($json_info['platform'] == 'ios'){
+                        $app_os_id = 1;
+                    }elseif($json_info['platform'] == 'android'){
+                        $app_os_id = 2;
+                    }elseif($json_info['platform'] == 'h5'){
+                        $app_os_id = 3;
+                    }elseif($json_info['platform'] == 'amazon'){
+                        $app_os_id = 4;
+                    }
+                    $app_info_sql = "select ad.`id`,ad.`platform_id`,ad.`platform_app_id`,ca.`os_id`,ca.`app_name`
+                                     from c_app_ad_platform ad 
+                                     left join c_app ca on ad.app_id = ca.id where ad.`platform_id` = '{$source_id}' and ad.status = 1
+                                     and (ad.`platform_app_id` = '{$third_app_id}' or ad.`publisher_id` = '{$third_app_id}') and ca.`os_id` = {$app_os_id} limit 1";
+//                    var_dump($app_info_sql);
+                    $app_info_detail = DB::select($app_info_sql);
+                    $app_info_detail = Service::data($app_info_detail);
+                    if (isset($app_info_detail[0]) && $app_info_detail[0]){
+
+//                        var_dump($json_info['placement_name']);
+                        $campaign_os_mad_name = explode('-', $json_info['placement_name']);
+                        $adtypename = '';
+                        if($campaign_os_mad_name){
+                            $len = count($campaign_os_mad_name);
+                            $adtypename = $campaign_os_mad_name[$len-1];
+                        }
+
+//                        var_dump($adtypename);
+                        $ad_type = '';
+                        // 匹配广告类型
+                        foreach ($AdType_info as $AdType_k => $AdType_v) {
+                            if(strtolower($adtypename) == strtolower($AdType_v['name']) ){
+                                $ad_type = $AdType_v['ad_type_id'];
+                                $num_adtype=0;
+                                break;
+                            }else{
+                                //广告类型失败
+                                $num_adtype++;
+
+                            }
+                        }
+                        if($num_adtype){
+                            $error_log_arr['ad_type'][] = $adtypename.'('.$err_name.')' ;
+                        }
+
+//                        var_dump($ad_type);
+                        if ($ad_type || $ad_type === 0){
+                            $new_campaign_ids[$third_app_id][$app_info_detail[0]['id']][$json_info['placement']] = $ad_type;
+                        }
+                    }
+
+                }
+
+                $error_log_arr['ad_unit_id'][] = $json_info['placement'].'('.$err_name.')';
             }
 
-        	foreach ($country_info as $country_k => $country_v) {
-        		if($json_info['country'] == $country_v['name'] ){
-        			$array[$k]['country_id'] = $country_v['c_country_id'];
-        			$num_country = 0;
-        			break;
-        		}else{
-        			//国家配置失败
-        			$num_country++;
-        			
-        		}
-        	}
+            foreach ($country_info as $country_k => $country_v) {
+                if($json_info['country'] == $country_v['name'] ){
+                    $array[$k]['country_id'] = $country_v['c_country_id'];
+                    $num_country = 0;
+                    break;
+                }else{
+                    //国家配置失败
+                    $num_country++;
+
+                }
+            }
 
             if ($num_country){
                 $error_log_arr['country'][] = isset($json_info['country']) ? $json_info['country'].'('.$err_name.')' : 'Unknown Region';
             }
-        	
-        	
-        	if(($num+$num_country)>0){
+
+
+            if(($num+$num_country)>0){
                 $error_detail_arr[$k]['platform_id'] = $source_id;
                 $error_detail_arr[$k]['platform_name'] = $source_name;
                 $error_detail_arr[$k]['platform_type'] =2;
@@ -212,25 +287,25 @@ class FacebookBiddingHandleProcesses extends Command
                 $error_detail_arr[$k]['money'] = $json_info['income'];
                 $error_detail_arr[$k]['account'] = $v['account'];
                 $error_detail_arr[$k]['create_time'] = date('Y-m-d H:i:s');
-        		unset($array[$k]);
-        		//插入错误数据
-        		continue;
-        	}
+                unset($array[$k]);
+                //插入错误数据
+                continue;
+            }
 
 
 
 
-        	// 格式化数据
+            // 格式化数据
             $array[$k]['data_account'] = $v['account'];
-        	$array[$k]['date'] = $dayid;
+            $array[$k]['date'] = $dayid;
 
-        	$array[$k]['platform_app_name'] = isset($json_info['appname']) ? addslashes(str_replace('\'\'','\'',$json_info['appname'])) : '';
+            $array[$k]['platform_app_name'] = isset($json_info['appname']) ? addslashes(str_replace('\'\'','\'',$json_info['appname'])) : '';
             $array[$k]['ad_unit_id'] = isset($json_info['placement']) ? addslashes(str_replace('\'\'','\'',$json_info['placement'])) : '';
             $array[$k]['ad_unit_name'] = isset($json_info['placement_name']) ? addslashes(str_replace('\'\'','\'',$json_info['placement_name'])) : '';
-        	$array[$k]['success_requests'] = $json_info['request'];
-        	$array[$k]['all_request'] = $json_info['request'];
-        	$array[$k]['impression'] = $json_info['views'];
-        	$array[$k]['click'] = $json_info['clicks'];
+            $array[$k]['success_requests'] = $json_info['request'];
+            $array[$k]['all_request'] = $json_info['request'];
+            $array[$k]['impression'] = $json_info['views'];
+            $array[$k]['click'] = $json_info['clicks'];
 
             $array[$k]['earning'] = isset($json_info['income']) ? $json_info['income'] : 0.00; // 流水原币
 
@@ -240,7 +315,7 @@ class FacebookBiddingHandleProcesses extends Command
                 $divide_ad = 1;
             }
             $array[$k]['earning_exc'] = isset($json_info['income']) ? $json_info['income'] * $divide_ad: 0;
-  
+
 
             // 汇率判断
             $currency_ex = 1;
@@ -268,7 +343,7 @@ class FacebookBiddingHandleProcesses extends Command
                 $array[$k]['earning_exc_usd'] = $array[$k]['earning_exc'];
             }
 
-        	$array[$k]['platform_id'] = $source_id;
+            $array[$k]['platform_id'] = $source_id;
 
             $delivery_method = isset($json_info['delivery_method']) ? $json_info['delivery_method'] : '';
             if ($delivery_method == 'standard'){
@@ -278,12 +353,54 @@ class FacebookBiddingHandleProcesses extends Command
             }
 
 //        	$array[$k]['flow_type'] = '2';//(1,自有流量;2,三方流量)
-        	$array[$k]['create_time'] = date('Y-m-d H:i:s');
-        	$array[$k]['update_time'] = date('Y-m-d H:i:s');
+            $array[$k]['create_time'] = date('Y-m-d H:i:s');
+            $array[$k]['update_time'] = date('Y-m-d H:i:s');
 
-        	
+
         }
 
+//        var_dump(count($new_campaign_ids));
+        if ($new_campaign_ids) {
+            $insert_generalize_ad_app = [];
+            foreach ($new_campaign_ids as $package_name => $offer_id) {
+                if ($offer_id) {
+                    foreach ($offer_id as $offer_key => $offer_id_nums) {
+                        foreach ($offer_id_nums as $offer_id_nums_key => $offer_id_nums_value) {
+                            $insert_generalize_ad_info = [];
+                            $insert_generalize_ad_info['app_ad_platform_id'] = $offer_key;
+                            $insert_generalize_ad_info['ad_slot_id'] = strval($offer_id_nums_key);
+                            $insert_generalize_ad_info['ad_type'] = $offer_id_nums_value;
+                            $insert_generalize_ad_info['status'] = 1;
+                            $insert_generalize_ad_info['create_time'] = date("Y-m-d H:i:s", time());
+                            $insert_generalize_ad_info['update_time'] = date("Y-m-d H:i:s", time());
+                            $insert_generalize_ad_app[] = $insert_generalize_ad_info;
+                        }
+                    }
+                }
+            }
+
+//            var_dump(count($insert_generalize_ad_app));
+            if ($insert_generalize_ad_app) {
+                if($stactic_num ==1){
+                    //反更新没成功 走这里
+                }else {
+                    // 开启事物 保存数据
+                    DB::beginTransaction();
+                    $app_info = DB::table('c_app_ad_slot')->insert($insert_generalize_ad_app);
+//                var_dump($app_info);
+                    if (!$app_info) { // 应用信息已经重复
+                        DB::rollBack();
+                    } else {
+                        DB::commit();
+                        $stactic_num++;
+                        self::facebookAdDataProcess($source_id, $source_name, $dayid);
+                        exit;
+                    }
+                }
+            }
+        }
+
+//        var_dump($error_log_arr);
         // 保存错误信息
         if ($error_log_arr){
             $error_msg_array = [];
@@ -301,6 +418,13 @@ class FacebookBiddingHandleProcesses extends Command
                 $error_msg_array[] = '国家匹配失败,code为:'.$country;
                 $error_msg_mail[] = '国家匹配失败，code为：'.$country;
             }
+
+            if (isset($error_log_arr['ad_type']) && !empty($error_log_arr['ad_type'])){
+                $ad_type = implode(',',array_unique($error_log_arr['ad_type']));
+                $error_msg_array[] = '广告类型匹配失败,code为:'.$ad_type;
+                $error_msg_mail[] = '广告类型匹配失败，code为：'.$ad_type;
+            }
+
             if(!empty($error_msg_array)) {
 
                 DataImportImp::saveDataErrorLog(2, $source_id, $source_name, 2, implode(';', $error_msg_array));
@@ -314,7 +438,7 @@ class FacebookBiddingHandleProcesses extends Command
         if ($array) {
             $plat_str =$source_id.'lishuyang@lishuyang'.$dayid;
             Redis::rpush(env('REDIS_AD_KEYS'), $plat_str);
-                        //拆分批次
+            //拆分批次
             $step = array();
             $i = 0;
             foreach ($array as $kkkk => $insert_data_info) {
@@ -330,42 +454,42 @@ class FacebookBiddingHandleProcesses extends Command
                     $sql_str ='';
                     foreach ($v_info as $k_sql => $v) {
                         # code...
-                    
+
                         $sql_str.= "('".$v['date']."'," // date
-                        ."'".$v['app_id']."',"  //app_id
-                        ."'',"// version
-                        ."'',"//channel_id
-                        ."'".$v['country_id']."',"//country_id
-                        ."'',"//data_platform_id
-                        ."'".$v['data_account']."',"//data_account
-                        ."'".$v['platform_id']."',"//platform_id
-                        ."'".$v['ad_type']."',"//ad_type
-                        ."'".$v['statistics']."',"//statistics
-                        ."'".$v['platform_app_id']."',"//platform_app_id
-                        ."'".$v['platform_app_name']."',"//platform_app_name
-                        ."'".$v['ad_unit_id']."',"//ad_unit_id
-                        ."'".$v['ad_unit_name']."',"//ad_unit_name
-                        ."'',"//round
-                        ."'".$v['all_request']."',"//all_request
-                        ."'".$v['success_requests']."',"//success_requests
-                        ."'',"//fail_requests;
-                        ."'',"//impression_port;
-                        ."'',"//impression_begin;
-                        ."'".$v['impression']."',"//impression;
-                        ."'".$v['click']."',"//click;
-                        ."'',"//download;
-                        ."'',"//activate;
-                        ."'',"//reward;
-                        ."'".$v['earning']."',"//earning;
-                        ."'".$v['earning_exc']."',"//earning_exc;
-                        ."'".$v['earning_flowing']."',"//earning_flowing;
-                        ."'".$v['earning_fix']."',"//earning_fix;
-                        ."'".$v['flow_type']."',"//flow_type;
-                        ."'',"//remark;
-                        ."'".$time."',"//create_time
-                        ."'".$time."',"//update_time
-                        ."'".$v['earning_usd']."',"//earning_usd
-                        ."'".$v['earning_exc_usd']."'),";//earning_exc_usd
+                            ."'".$v['app_id']."',"  //app_id
+                            ."'',"// version
+                            ."'',"//channel_id
+                            ."'".$v['country_id']."',"//country_id
+                            ."'',"//data_platform_id
+                            ."'".$v['data_account']."',"//data_account
+                            ."'".$v['platform_id']."',"//platform_id
+                            ."'".$v['ad_type']."',"//ad_type
+                            ."'".$v['statistics']."',"//statistics
+                            ."'".$v['platform_app_id']."',"//platform_app_id
+                            ."'".$v['platform_app_name']."',"//platform_app_name
+                            ."'".$v['ad_unit_id']."',"//ad_unit_id
+                            ."'".$v['ad_unit_name']."',"//ad_unit_name
+                            ."'',"//round
+                            ."'".$v['all_request']."',"//all_request
+                            ."'".$v['success_requests']."',"//success_requests
+                            ."'',"//fail_requests;
+                            ."'',"//impression_port;
+                            ."'',"//impression_begin;
+                            ."'".$v['impression']."',"//impression;
+                            ."'".$v['click']."',"//click;
+                            ."'',"//download;
+                            ."'',"//activate;
+                            ."'',"//reward;
+                            ."'".$v['earning']."',"//earning;
+                            ."'".$v['earning_exc']."',"//earning_exc;
+                            ."'".$v['earning_flowing']."',"//earning_flowing;
+                            ."'".$v['earning_fix']."',"//earning_fix;
+                            ."'".$v['flow_type']."',"//flow_type;
+                            ."'',"//remark;
+                            ."'".$time."',"//create_time
+                            ."'".$time."',"//update_time
+                            ."'".$v['earning_usd']."',"//earning_usd
+                            ."'".$v['earning_exc_usd']."'),";//earning_exc_usd
 
                     }
                     $sql_str = rtrim($sql_str,',');
@@ -376,6 +500,5 @@ class FacebookBiddingHandleProcesses extends Command
             }
             //echo '处理完成';
         }
-
     }
 }

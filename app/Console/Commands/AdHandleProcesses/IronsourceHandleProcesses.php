@@ -231,7 +231,7 @@ class IronsourceHandleProcesses extends Command
                             $error_log_arr['ad_type'][] = $json_info['adUnits'].'('.$err_name.')' ;
                         }
 
-                        if ($ad_type || $ad_type == 0){
+                        if ($ad_type || $ad_type === 0){
                             $new_campaign_ids[$json_info['appKey']][$app_info_detail[0]['id']][$json_info['instanceId']] = $ad_type;
                         }
                     }

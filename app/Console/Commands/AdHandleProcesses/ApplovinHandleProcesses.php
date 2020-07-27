@@ -255,7 +255,7 @@ class ApplovinHandleProcesses extends Command
                         if ($num_adtype){
                             $error_log_arr['ad_type'][] = isset($json_info['size']) ? $json_info['size'].'-'.$json_info['ad_type'].'('.$err_name.')' : '' ;
                         }
-                        if ($ad_type || $ad_type == 0){
+                        if ($ad_type || $ad_type === 0){
                             $new_campaign_ids[$platform_id_name][$app_info_detail[0]['id']][$json_info['zone_id']] = $ad_type;
                         }
 

@@ -216,7 +216,7 @@ class MobvistaHandleProcesses extends Command
                             $error_log_arr['ad_type'][] = isset($json_info['ad_format']) ? $json_info['ad_format'].'('.$err_name.')' : '' ;
                         }
 
-                        if ($ad_type || $ad_type == 0){
+                        if ($ad_type || $ad_type === 0){
                             $new_campaign_ids[$json_info['app_id']][$app_info_detail[0]['id']][$json_info['unit_id']] = $ad_type;
                         }
                     }
