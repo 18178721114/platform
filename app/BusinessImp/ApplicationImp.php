@@ -1594,21 +1594,23 @@ class ApplicationImp extends ApiBaseImp
             $map['app_id'] =$params['overseas']['appid'];
 
             // 判断同一个应用大类下相同的渠道
-            $map_app_id = $map['app_id'];
-            $map_app_package_name = $params['overseas']['app_package_name'];
-            $package_info = DB::select("select * from c_billing b left join c_app a on b.app_id = a.id where b.channel_id = {$channel_id} and a.app_full_name in (select app_full_name from c_app where  id = {$map_app_id})  and app_package_name = '{$map_app_package_name}'");
-            $package_info = Service::data($package_info);
-            if (!empty($package_info)) ApiResponseFactory::apiResponse([],[],761);
+            if (isset($params['overseas']['app_package_name']) && $params['overseas']['app_package_name']) {
+                $map_app_id = $map['app_id'];
+                $map_app_package_name = $params['overseas']['app_package_name'];
+                $package_info = DB::select("select * from c_billing b left join c_app a on b.app_id = a.id where b.channel_id = {$channel_id} and a.app_full_name in (select app_full_name from c_app where  id = {$map_app_id})  and app_package_name = '{$map_app_package_name}'");
+                $package_info = Service::data($package_info);
+                if (!empty($package_info)) ApiResponseFactory::apiResponse([], [], 761);
 
-            //整理数据
-            $data['bill_list'][$bill_index]['pay_platform_id']=$platform_id;
-            $data['bill_list'][$bill_index]['channel_id']=$channel_id;
-            $data['bill_list'][$bill_index]['app_package_name']=$params['overseas']['app_package_name'];
-            $data['bill_list'][$bill_index]['status']=1;
-            $data['bill_list'][$bill_index]['create_time']=$create_time;
-            $data['bill_list'][$bill_index]['update_time']=$update_time;
-            $data['bill_list'][$bill_index]['app_id']=$params['overseas']['appid'];
-            $bill_index++;
+                //整理数据
+                $data['bill_list'][$bill_index]['pay_platform_id'] = $platform_id;
+                $data['bill_list'][$bill_index]['channel_id'] = $channel_id;
+                $data['bill_list'][$bill_index]['app_package_name'] = $params['overseas']['app_package_name'];
+                $data['bill_list'][$bill_index]['status'] = 1;
+                $data['bill_list'][$bill_index]['create_time'] = $create_time;
+                $data['bill_list'][$bill_index]['update_time'] = $update_time;
+                $data['bill_list'][$bill_index]['app_id'] = $params['overseas']['appid'];
+                $bill_index++;
+            }
             foreach ($params['overseas']['bill_point_list'] as $key => $value) {
                 //判断这些字段不能为空
 //                $condition = ['billing_point_name', 'billing_point_id', 'billing_point_price_usd','billing_point_price_cny'];
