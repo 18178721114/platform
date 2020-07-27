@@ -98,7 +98,8 @@ class PangolinReportHandleProcesses extends Command
             `c_app_ad_slot`.`interstitial_placement_id`,
             `c_app_ad_slot`.`ad_type`,
             `c_platform`.`currency_type_id`,
-            `c_app_ad_platform`.`flow_type` 
+            `c_app_ad_platform`.`flow_type`, 
+            `c_app_ad_platform`.`instance_id`
             FROM
             `c_app`
             LEFT JOIN `c_app_ad_platform` ON `c_app_ad_platform`.`app_id` = `c_app`.`id` and `c_app_ad_platform`.`status` = 1
@@ -170,6 +171,7 @@ class PangolinReportHandleProcesses extends Command
                         $array[$k]['app_id'] = $app_v['app_id'];
                         $array[$k]['ad_type'] =$app_v['ad_type'];
                         $array[$k]['flow_type'] = $app_v['flow_type'];
+                        $array[$k]['channel_id'] = $app_v['instance_id'];
                         $num = 0;
                         break;
                     }else{
@@ -371,7 +373,7 @@ class PangolinReportHandleProcesses extends Command
                         $sql_str.= "('".$v['date']."'," // date
                             ."'".$v['app_id']."',"  //app_id
                             ."'',"// version
-                            ."'',"//channel_id
+                            ."'".$v['channel_id']."',"//channel_id
                             ."'".$v['country_id']."',"//country_id
                             ."'',"//data_platform_id
                             ."'".$v['data_account']."',"//data_account
