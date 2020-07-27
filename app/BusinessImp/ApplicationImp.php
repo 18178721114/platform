@@ -1507,7 +1507,7 @@ class ApplicationImp extends ApiBaseImp
         //计费的基础信息
         foreach ($app_billing_statistic_list as $key => $app_billing){
             //os_id 1 ios计费不分国内国外    2 安卓 区分国内国外计费
-            if($app_list[0]['os_id'] ==  1 || ($app_list[0]['os_id'] ==  2 && $app_list[0]['release_region_id'] ==2)){
+            if($app_list[0]['os_id'] ==  1 || ($app_list[0]['os_id'] ==  2 && $app_list[0]['release_region_id'] ==1)){
                 $data['overseas']['app_package_name'] = $app_billing['app_package_name'];
             }elseif (($app_list[0]['os_id'] ==  2 && $app_list[0]['release_region_id'] ==3)){
                 $data['domestic']['billing_list'][$index]['billing_id']= $app_billing['id'];
@@ -1525,7 +1525,7 @@ class ApplicationImp extends ApiBaseImp
         //计费点信息
         foreach ($app_billing_point_statistic_list as $k => $app_billing_point){
             //1、海外计费信息2、国内计费信息
-            if ($app_list[0]['os_id'] ==  1 || ($app_list[0]['os_id'] ==  2 && $app_list[0]['release_region_id'] ==2)){
+            if ($app_list[0]['os_id'] ==  1 || ($app_list[0]['os_id'] ==  2 && $app_list[0]['release_region_id'] ==1)){
                 $data['overseas']['bill_point_list'][$num]['id'] = $app_billing_point['id'];
                 $data['overseas']['bill_point_list'][$num]['billing_point_name'] = $app_billing_point['billing_point_name'];
                 $data['overseas']['bill_point_list'][$num]['billing_point_id'] = $app_billing_point['billing_point_id'];
@@ -1621,7 +1621,8 @@ class ApplicationImp extends ApiBaseImp
                 //判断 计费点名称 or 计费点id 不能重复
                 $map = [];
                 $map['status'] = 0;
-                $map['orWhere'][] = ['billing_point_name',$value['billing_point_name']];
+                $map['app_id'] = $params['overseas']['appid'];
+//                $map['orWhere'][] = ['billing_point_name',$value['billing_point_name']];
                 $map['orWhere'][] = ['billing_point_id',$value['billing_point_id']];
 //                $map['billing_point_price_usd'] =$value['billing_point_price_usd'];
 //                $map['billing_point_price_cny'] =$value['billing_point_price_cny'];
