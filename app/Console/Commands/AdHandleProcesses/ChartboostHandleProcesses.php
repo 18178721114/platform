@@ -61,7 +61,17 @@ class ChartboostHandleProcesses extends Command
         $source_id = 'pad03';
         $source_name = 'Chartboost';
         var_dump('Chartboost-pad03-'.$dayid);
+        try{
+            self::ChartboostAdDataProcess($source_id, $source_name, $dayid);
+        }catch (\Exception $e) {
+            $error_msg_info = $dayid.'号,'.$source_name.'广告平台处理程序失败，失败原因：'.$e->getMessage();
+            DataImportImp::saveDataErrorLog(5,$source_id,$source_name,2,$error_msg_info);
+        }
 
+
+    }
+    public static function ChartboostAdDataProcess($source_id,$source_name,$dayid){
+        static $stactic_num = 0;
         //查询pgsql 的数据
         $map =[];
         $map['dayid'] = $dayid;

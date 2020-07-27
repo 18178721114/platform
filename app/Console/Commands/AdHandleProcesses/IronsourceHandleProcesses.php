@@ -61,6 +61,17 @@ class IronsourceHandleProcesses extends Command
         $source_id = 'pad05';
         $source_name = 'ironSource';
         var_dump('ironSource-pad05-'.$dayid);
+        try{
+            self::ironSourceAdDataProcess($source_id, $source_name, $dayid);
+        }catch (\Exception $e) {
+            $error_msg_info = $dayid.'号,'.$source_name.'广告平台处理程序失败，失败原因：'.$e->getMessage();
+            DataImportImp::saveDataErrorLog(5,$source_id,$source_name,2,$error_msg_info);
+        }
+
+
+    }
+    public static function ironSourceAdDataProcess($source_id,$source_name,$dayid){
+        static $stactic_num = 0;
 
         //查询pgsql 的数据
         $map =[];
@@ -166,18 +177,21 @@ class IronsourceHandleProcesses extends Command
         $num_country = 0;
         $num_adtype =0;
         $error_detail_arr = [];//报错的 详细数据信息
+        $new_campaign_ids = [];
+
         foreach ($info as $k => $v) {
 
         	$json_info = json_decode($v['json_data'],true);
 
         	// var_dump($json_info['countryCode']);
-//        	if($json_info['providerName'] !='ironSource'){
-//        		//插入错误数据
-//        		continue;
-//        	}
+        	if($json_info['providerName'] !='ironSource'){
+        		//插入错误数据
+        		continue;
+        	}
         	foreach ($app_list as $app_k => $app_v) {
-        		if($json_info['appKey'] ==$app_v['platform_app_id'] ){
+        		if($json_info['appKey'] ==$app_v['platform_app_id']  && $json_info['instanceId'] ==$app_v['ad_slot_id']){
         			$array[$k]['app_id'] = $app_v['app_id'];
+                    $array[$k]['ad_type'] = $app_v['ad_type'];
                     $array[$k]['flow_type'] = $app_v['flow_type'];
         			$num = 0;
         			break;
@@ -192,6 +206,37 @@ class IronsourceHandleProcesses extends Command
             $err_name = (isset($json_info['adUnits']) ?$json_info['adUnits']:'Null').'#Null#'.(isset($json_info['appKey']) ?$json_info['appKey']:'Null').'#'.(isset($json_info['app_name']) ?$json_info['app_name']:'Null');
 
             if($num){
+                if($json_info['appKey'] && ($json_info['instanceId'] ||  $json_info['instanceId'] ==0)){
+                    $app_info_sql = "select ad.`id`,ad.`platform_id`,ad.`platform_app_id`,ca.`os_id`,ca.`app_name`
+                                     from c_app_ad_platform ad 
+                                     left join c_app ca on ad.app_id = ca.id   where ad.`platform_id` = '{$source_id}' and ad.status = 1
+                                     and ad.`platform_app_id` = '{$json_info['appKey']}' limit 1";
+                    $app_info_detail = DB::select($app_info_sql);
+                    $app_info_detail = Service::data($app_info_detail);
+                    if (isset($app_info_detail[0]) && $app_info_detail[0]){
+                        $ad_type = '';
+                        // 匹配广告类型
+                        foreach ($AdType_info as $AdType_k => $AdType_v) {
+                            if($json_info['adUnits'] == $AdType_v['name'] ){
+                                $ad_type = $AdType_v['ad_type_id'];
+                                $num_adtype=0;
+                                break;
+                            }else{
+                                //广告类型失败
+                                $num_adtype++;
+
+                            }
+                        }
+                        if($num_adtype){
+                            $error_log_arr['ad_type'][] = $json_info['adUnits'].'('.$err_name.')' ;
+                        }
+
+                        if ($ad_type || $ad_type == 0){
+                            $new_campaign_ids[$json_info['appKey']][$app_info_detail[0]['id']][$json_info['instanceId']] = $ad_type;
+                        }
+                    }
+
+                }
                 $error_log_arr['app_id'][] = $json_info['appKey'].'('.addslashes(str_replace('\'\'','\'',$err_name)).')';
             }
             
@@ -210,20 +255,20 @@ class IronsourceHandleProcesses extends Command
             if($num_country){
                 $error_log_arr['country'][] = isset($json_info['countryCode']) ? $json_info['countryCode'].'('.$err_name.')' : 'Unknown Region' ;
             }
-        	foreach ($AdType_info as $AdType_k => $AdType_v) {
-        		if($json_info['adUnits'] == $AdType_v['name'] ){
-        			$array[$k]['ad_type'] = $AdType_v['ad_type_id'];
-        			$num_adtype = 0;
-        			break;
-        		}else{
-        			//广告类型失败
-        			$num_adtype++;
-        			
-        		}
-        	}
-            if($num_adtype){
-                $error_log_arr['ad_type'][] = isset($json_info['adUnits']) ? $json_info['adUnits'].'('.$err_name.')' : '' ;
-            }
+//        	foreach ($AdType_info as $AdType_k => $AdType_v) {
+//        		if($json_info['adUnits'] == $AdType_v['name'] ){
+//        			$array[$k]['ad_type'] = $AdType_v['ad_type_id'];
+//        			$num_adtype = 0;
+//        			break;
+//        		}else{
+//        			//广告类型失败
+//        			$num_adtype++;
+//
+//        		}
+//        	}
+//            if($num_adtype){
+//                $error_log_arr['ad_type'][] = isset($json_info['adUnits']) ? $json_info['adUnits'].'('.$err_name.')' : '' ;
+//            }
         	if(($num+$num_country+$num_adtype)>0){
                 $error_detail_arr[$k]['platform_id'] = $source_id;
                 $error_detail_arr[$k]['platform_name'] = $source_name;
@@ -297,6 +342,45 @@ class IronsourceHandleProcesses extends Command
         	$array[$k]['create_time'] = date('Y-m-d H:i:s');
         	$array[$k]['update_time'] = date('Y-m-d H:i:s');
         	
+        }
+
+        //var_dump($new_campaign_ids);die;
+        if ($new_campaign_ids) {
+            $insert_generalize_ad_app = [];
+            foreach ($new_campaign_ids as $package_name => $offer_id) {
+                if (isset($offer_id)) {
+                    foreach ($offer_id as $offer_key => $offer_id_nums) {
+                        foreach ($offer_id_nums as $offer_id_nums_key => $offer_id_nums_value) {
+                            $insert_generalize_ad_info = [];
+                            $insert_generalize_ad_info['app_ad_platform_id'] = $offer_key;
+                            $insert_generalize_ad_info['ad_slot_id'] = strval($offer_id_nums_key);
+                            $insert_generalize_ad_info['ad_type'] = $offer_id_nums_value;
+                            $insert_generalize_ad_info['status'] = 1;
+                            $insert_generalize_ad_info['create_time'] = date("Y-m-d H:i:s", time());
+                            $insert_generalize_ad_info['update_time'] = date("Y-m-d H:i:s", time());
+                            $insert_generalize_ad_app[] = $insert_generalize_ad_info;
+                        }
+                    }
+                }
+            }
+            if ($insert_generalize_ad_app) {
+                if($stactic_num ==1){
+                    //反更新没成功 走这里
+                }else {
+                    // 开启事物 保存数据
+                    DB::beginTransaction();
+                    $app_info = DB::table('c_app_ad_slot')->insert($insert_generalize_ad_app);
+//                var_dump($app_info);
+                    if (!$app_info) { // 应用信息已经重复
+                        DB::rollBack();
+                    } else {
+                        DB::commit();
+                        $stactic_num++;
+                        self::ironSourceAdDataProcess($source_id, $source_name, $dayid);
+                        exit;
+                    }
+                }
+            }
         }
                 // 保存错误信息
         if ($error_log_arr){

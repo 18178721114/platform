@@ -62,6 +62,17 @@ class GuangdiantongHandleProcesses extends Command
         $source_id = 'pad10';
         $source_name = '广点通';
         var_dump('广点通-pad10-'.$dayid);
+        try{
+            self::GuangdiantongAdDataProcess($source_id, $source_name, $dayid);
+        }catch (\Exception $e) {
+            $error_msg_info = $dayid.'号,'.$source_name.'广告平台处理程序失败，失败原因：'.$e->getMessage();
+            DataImportImp::saveDataErrorLog(5,$source_id,$source_name,2,$error_msg_info);
+        }
+
+
+    }
+    public static function GuangdiantongAdDataProcess($source_id,$source_name,$dayid){
+        static $stactic_num = 0;
         //查询pgsql 的数据
         $map =[];
         $map['dayid'] = $dayid;
@@ -140,12 +151,24 @@ class GuangdiantongHandleProcesses extends Command
             DataImportImp::saveDataErrorLog(2,$source_id,$source_name,2,$error_msg);
             exit;
         }
+        //获取对照表广告类型
+        $AdType_map['platform_id'] =$source_id;
+        $AdType_info = CommonLogic::getAdTypeCorrespondingList($AdType_map)->get();
+        $AdType_info = Service::data($AdType_info);
+        if(!$AdType_info){
+            $error_msg = $dayid.'号，百度广告平台数据处理程序广告类型数据查询失败';
+            DataImportImp::saveDataErrorLog(2,$source_id,'Baidu',2,$error_msg);
+            exit;
+        }
 
         $array = [];
         $num = 0;
         $num_country = 0;
+        $num_adtype=0;
         $error_log_arr = [];
         $error_detail_arr = [];//报错的 详细数据信息
+        $new_campaign_ids = [];
+
         foreach ($info as $k => $v) {
 
         	$json_info = json_decode($v['json_data'],true);
@@ -165,6 +188,36 @@ class GuangdiantongHandleProcesses extends Command
             $err_name = (isset($json_info['PlacementId']) ?$json_info['PlacementId']:'Null').'#'.(isset($json_info['PlacementName']) ?$json_info['PlacementName']:'Null').'#'.(isset($json_info['AppId']) ?$json_info['AppId']:'Null').'#Null';
 
             if ($num){
+                if($json_info['AppId'] && $json_info['PlacementId']){
+                    $app_info_sql = "select ad.`id`,ad.`platform_id`,ad.`platform_app_id`,ca.`os_id`,ca.`app_name`
+                                     from c_app_ad_platform ad
+                                     left join c_app ca on ad.app_id = ca.id where ad.`platform_id` = '{$source_id}' and ad.status = 1
+                                     and ad.`platform_app_id` = '{$json_info['AppId']}' limit 1";
+                    $app_info_detail = DB::select($app_info_sql);
+                    $app_info_detail = Service::data($app_info_detail);
+                    if (isset($app_info_detail[0]) && $app_info_detail[0]){
+                        $ad_type = '';
+                        // 匹配广告类型
+                        foreach ($AdType_info as $AdType_k => $AdType_v) {
+                            if($json_info['PlacementType'] == $AdType_v['name'] ){
+                                $ad_type = $AdType_v['ad_type_id'];
+                                $num_adtype=0;
+
+                                break;
+                            }else{
+                                $num_adtype++;
+                            }
+                        }
+                        if ($num_adtype){
+                            $error_log_arr['ad_type'][] = isset($json_info['PlacementType']) ? $json_info['PlacementType'].'('.$err_name.')' : '' ;
+                        }
+
+                        if ($ad_type || $ad_type == 0){
+                            $new_campaign_ids[$json_info['AppId']][$app_info_detail[0]['id']][$json_info['PlacementId']] = $ad_type;
+                        }
+                    }
+
+                }
                 $error_log_arr['PlacementId'][] = $json_info['PlacementId'].'('.addslashes(str_replace('\'\'','\'',$err_name)).')';
             }
 
@@ -232,6 +285,44 @@ class GuangdiantongHandleProcesses extends Command
         	$array[$k]['update_time'] = date('Y-m-d H:i:s');
 
         }
+        if ($new_campaign_ids) {
+            $insert_generalize_ad_app = [];
+            foreach ($new_campaign_ids as $package_name => $offer_id) {
+                if ($offer_id) {
+                    foreach ($offer_id as $offer_key => $offer_id_nums) {
+                        foreach ($offer_id_nums as $offer_id_nums_key => $offer_id_nums_value) {
+                            $insert_generalize_ad_info = [];
+                            $insert_generalize_ad_info['app_ad_platform_id'] = $offer_key;
+                            $insert_generalize_ad_info['ad_slot_id'] = strval($offer_id_nums_key);
+                            $insert_generalize_ad_info['ad_type'] = $offer_id_nums_value;
+                            $insert_generalize_ad_info['status'] = 1;
+                            $insert_generalize_ad_info['create_time'] = date("Y-m-d H:i:s", time());
+                            $insert_generalize_ad_info['update_time'] = date("Y-m-d H:i:s", time());
+                            $insert_generalize_ad_app[] = $insert_generalize_ad_info;
+                        }
+                    }
+                }
+            }
+
+            if ($insert_generalize_ad_app) {
+                if($stactic_num ==1){
+                    //反更新没成功 走这里
+                }else {
+                    // 开启事物 保存数据
+                    DB::beginTransaction();
+                    $app_info = DB::table('c_app_ad_slot')->insert($insert_generalize_ad_app);
+//                var_dump($app_info);
+                    if (!$app_info) { // 应用信息已经重复
+                        DB::rollBack();
+                    } else {
+                        DB::commit();
+                        $stactic_num++;
+                        self::GuangdiantongAdDataProcess($source_id, $source_name, $dayid);
+                        exit;
+                    }
+                }
+            }
+        }
 
         // 保存错误信息
         if ($error_log_arr){
@@ -243,6 +334,11 @@ class GuangdiantongHandleProcesses extends Command
                 $app_id_str = implode(',',array_unique($error_log_arr['PlacementId']));
                 $error_msg_array[] = '广告位匹配失败,ID为:'.$app_id_str;
                 $error_msg_mail[] = '广告位匹配失败，ID为：'.$app_id_str;
+            }
+            if (isset($error_log_arr['ad_type']) && !empty($error_log_arr['ad_type'])){
+                $ad_type = implode(',',array_unique($error_log_arr['ad_type']));
+                $error_msg_array[] = '广告类型匹配失败,code为:'.$ad_type;
+                $error_msg_mail[] = '广告类型匹配失败，code为：'.$ad_type;
             }
             if(!empty($error_msg_array)) {
 
