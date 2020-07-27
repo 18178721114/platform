@@ -188,8 +188,18 @@ class IronsourceHandleProcesses extends Command
         		//插入错误数据
         		continue;
         	}
+
+            $json_ad_type = '';
+            // 匹配广告类型
+            foreach ($AdType_info as $AdType_k => $AdType_v) {
+                if($json_info['adUnits'] == $AdType_v['name'] ){
+                    $json_ad_type = $AdType_v['ad_type_id'];
+                    break;
+                }
+            }
+
         	foreach ($app_list as $app_k => $app_v) {
-        		if($json_info['appKey'] ==$app_v['platform_app_id']  && $json_info['instanceId'] ==$app_v['ad_slot_id']){
+        		if($json_info['appKey'] ==$app_v['platform_app_id']  && $json_info['instanceId'] ==$app_v['ad_slot_id'] && $json_ad_type == $app_v['ad_type'] ){
         			$array[$k]['app_id'] = $app_v['app_id'];
                     $array[$k]['ad_type'] = $app_v['ad_type'];
                     $array[$k]['flow_type'] = $app_v['flow_type'];
@@ -231,8 +241,8 @@ class IronsourceHandleProcesses extends Command
                             $error_log_arr['ad_type'][] = $json_info['adUnits'].'('.$err_name.')' ;
                         }
 
-                        if ($ad_type || $ad_type === 0){
-                            $new_campaign_ids[$json_info['appKey']][$app_info_detail[0]['id']][$json_info['instanceId']] = $ad_type;
+                        if ($ad_type || $ad_type === 0 || $ad_type === "0"){
+                            $new_campaign_ids[$json_info['appKey']][$app_info_detail[0]['id']][$json_info['instanceId']][] = $ad_type;
                         }
                     }
 
@@ -344,21 +354,23 @@ class IronsourceHandleProcesses extends Command
         	
         }
 
-        //var_dump($new_campaign_ids);die;
         if ($new_campaign_ids) {
             $insert_generalize_ad_app = [];
             foreach ($new_campaign_ids as $package_name => $offer_id) {
                 if (isset($offer_id)) {
                     foreach ($offer_id as $offer_key => $offer_id_nums) {
                         foreach ($offer_id_nums as $offer_id_nums_key => $offer_id_nums_value) {
-                            $insert_generalize_ad_info = [];
-                            $insert_generalize_ad_info['app_ad_platform_id'] = $offer_key;
-                            $insert_generalize_ad_info['ad_slot_id'] = strval($offer_id_nums_key);
-                            $insert_generalize_ad_info['ad_type'] = $offer_id_nums_value;
-                            $insert_generalize_ad_info['status'] = 1;
-                            $insert_generalize_ad_info['create_time'] = date("Y-m-d H:i:s", time());
-                            $insert_generalize_ad_info['update_time'] = date("Y-m-d H:i:s", time());
-                            $insert_generalize_ad_app[] = $insert_generalize_ad_info;
+                            $offer_id_nums_value = array_unique($offer_id_nums_value);
+                            foreach ($offer_id_nums_value as $offer_id_nums_value_v) {
+                                $insert_generalize_ad_info = [];
+                                $insert_generalize_ad_info['app_ad_platform_id'] = $offer_key;
+                                $insert_generalize_ad_info['ad_slot_id'] = strval($offer_id_nums_key);
+                                $insert_generalize_ad_info['ad_type'] = $offer_id_nums_value_v;
+                                $insert_generalize_ad_info['status'] = 1;
+                                $insert_generalize_ad_info['create_time'] = date("Y-m-d H:i:s", time());
+                                $insert_generalize_ad_info['update_time'] = date("Y-m-d H:i:s", time());
+                                $insert_generalize_ad_app[] = $insert_generalize_ad_info;
+                            }
                         }
                     }
                 }
