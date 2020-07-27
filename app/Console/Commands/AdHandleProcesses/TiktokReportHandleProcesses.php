@@ -183,7 +183,7 @@ class TiktokReportHandleProcesses extends Command
                 if($num){
                     if ($tiktok_app_id && $json_info['ad_slot_id'] && isset($json_info['ad_slot_type'])){
 
-                        $app_info_sql = "select ad.`id`,ad.`platform_id`,ad.`platform_app_id`,ca.`os_id`,ca.`app_name` from c_app_ad_platform ad left join c_app ca on ad.app_id = ca.id where ad.`platform_id` = '{$source_id}' and ad.`platform_app_id` = '{$tiktok_app_id}' limit 1";
+                        $app_info_sql = "select ad.`id`,ad.`platform_id`,ad.`platform_app_id`,ca.`os_id`,ca.`app_name` from c_app_ad_platform ad left join c_app ca on ad.app_id = ca.id where ad.`platform_id` = '{$source_id}' and ad.status = 1 and ad.`platform_app_id` = '{$tiktok_app_id}' limit 1";
 
                         $app_info_detail = DB::select($app_info_sql);
                         $app_info_detail = Service::data($app_info_detail);
