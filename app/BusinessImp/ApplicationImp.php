@@ -1274,9 +1274,9 @@ class ApplicationImp extends ApiBaseImp
                 }
             }
         }
-        DB::commit();
+//        DB::commit();
 
-        DB::beginTransaction();
+//        DB::beginTransaction();
         foreach ($app_info_list as $key => $app_info) {
             $dynamic_params = isset($app_info['sub_params']) ? $app_info['sub_params'] : [];
             unset($app_info['sub_params']);
@@ -2339,9 +2339,9 @@ class ApplicationImp extends ApiBaseImp
                 }
             }
         }
-        DB::commit();
-        // 开启事物 保存数据
-        DB::beginTransaction();
+//        DB::commit();
+//         开启事物 保存数据
+//        DB::beginTransaction();
 
         foreach ($generalize_info_list as $key => $generalize_info) {
             $dynamic_params = isset($generalize_info['sub_params']) ? $generalize_info['sub_params'] : [];
