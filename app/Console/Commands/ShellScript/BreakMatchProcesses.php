@@ -63,8 +63,8 @@ class BreakMatchProcesses extends Command
             $info = DB::connection('mysql_channel')->select($sql);
             $info = Service::data($info);
             foreach ($info as $k =>$v){
-                $time = $v['intime']+12*60;
-                $sql_match ="select * from channel_request_ios01 where intime>= '{$time}' and intime>= '{$v['intime']}' limit 1 ";
+                $time = $v['intime']-12*60*60;
+                $sql_match ="select * from channel_request_ios01 where intime>= '{$time}' and intime<= '{$v['intime']}' and idfa = '{$v['idfa']}' limit 1 ";
                 $info1 = DB::connection('mysql_channel')->select($sql_match);
                 $info1 = Service::data($info1);
                 if($info1){
