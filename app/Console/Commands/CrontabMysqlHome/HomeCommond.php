@@ -331,7 +331,7 @@ class HomeCommond extends Command
         FROM
         zplay_divide_develop_cny
         WHERE
-        date >= DATE_SUB('{$month_begin}',INTERVAL 60 DAY) AND date <= '{$month_end}'  group by os_id,app_id,game_creator
+        date >= DATE_SUB('{$month_begin}',INTERVAL 1 month) AND date <= '{$month_end}'  group by os_id,app_id,game_creator
         UNION ALL
         SELECT
         '{$dayid}' as  date_time,
@@ -345,7 +345,7 @@ class HomeCommond extends Command
         FROM
         zplay_divide_develop_cny
         WHERE
-        date >= DATE_SUB('{$month_begin}',INTERVAL 90 DAY) AND date <= '{$month_end1}'  group by os_id,app_id,game_creator
+        date >= DATE_SUB('{$month_begin}',INTERVAL 2 month) AND date <= '{$month_end1}'  group by os_id,app_id,game_creator
 
 
         ";
