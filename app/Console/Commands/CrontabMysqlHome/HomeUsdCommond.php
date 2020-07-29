@@ -356,7 +356,7 @@ class HomeUsdCommond extends Command
         round(sum(tg_cost) + (case when sum(develop_cost_taxAfter)<0  then 0 else sum(develop_cost_taxAfter) end),2)  as total_cost ,
         round(sum(ff_income_taxAfter) + sum(ad_income_taxAfter) - (sum(tg_cost) + (case when sum(develop_cost_taxAfter)<0  then 0 else sum(develop_cost_taxAfter) end)),2)as total_profit
         FROM
-        zplay_divide_develop_cny
+        zplay_divide_develop
         WHERE
         date >= DATE_SUB('{$month_begin}',INTERVAL 2 month) AND date <= '{$month_end1}'  group by os_id,app_id,game_creator
 
