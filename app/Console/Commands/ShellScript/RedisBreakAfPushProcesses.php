@@ -57,27 +57,33 @@ class RedisBreakAfPushProcesses extends Command
         try {
             //获取广告数据长度
             $ad_len = Redis::llen($af_idfa);
-
             if ($ad_len > 0) {
 
                 $be_time = time();
 
 
                 $ad_sql = "insert into " . MYSQL_AD_TABLE_NAME . " ( `active_id`, `application_id`, `mac`, `idfa`, `device_key`, `cronid`, `intime`, `status`) VALUES ";
+                $idfa_str_arr = [];
                 for ($i = 1; $i <= $ad_len; $i++) {
                     $str = Redis::lpop($af_idfa);
-                    if ($str) {
-                        $sel_sql = "select * from  ".MYSQL_AD_TABLE_NAME." where device_key ='$str' ";
-                        $info = DB::connection('mysql_channel')->select($sel_sql);
-                        $info = Service::data($info);
-                        if($info){
-                            continue;
+                    $idfa_str_arr[] = $str;
+                }
+                if ($idfa_str_arr){
+                    foreach ($idfa_str_arr as $idfa_str){
+                        $idfa_arr = json_decode($idfa_str,true);
+                        $af_idfa = isset($idfa_arr['idfa']) ? $idfa_arr['idfa']: '';
+                        $af_install_time = isset($idfa_arr['install_time']) ? strtotime($idfa_arr['install_time']): '';
+                        if ($af_idfa && $af_install_time) {
+                            $sel_sql = "select * from  " . MYSQL_AD_TABLE_NAME . " where device_key ='{$af_idfa}' ";
+                            $info = DB::connection('mysql_channel')->select($sel_sql);
+                            $info = Service::data($info);
+                            if ($info) {
+                                continue;
+                            }
+
+                            $insert_str = "('',1,'','{$af_idfa}','{$af_idfa}','',$af_install_time,0)";
+                            DB::connection('mysql_channel')->insert($ad_sql . $insert_str);
                         }
-
-                        $insert_str = "('',1,'','$str','$str','',$be_time,0)";
-                        DB::connection('mysql_channel')->insert($ad_sql . $insert_str);
-
-
                     }
                 }
 
