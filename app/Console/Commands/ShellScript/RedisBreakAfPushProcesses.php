@@ -57,18 +57,20 @@ class RedisBreakAfPushProcesses extends Command
         try {
             //获取广告数据长度
             $ad_len = Redis::llen($af_idfa);
-            var_dump($ad_len);
             if ($ad_len > 0) {
 
                 $be_time = time();
 
 
                 $ad_sql = "insert into " . MYSQL_AD_TABLE_NAME . " ( `active_id`, `application_id`, `mac`, `idfa`, `device_key`, `cronid`, `intime`, `status`) VALUES ";
+                $idfa_str_arr = [];
                 for ($i = 1; $i <= $ad_len; $i++) {
                     $str = Redis::lpop($af_idfa);
-                    var_dump($str);
-                    if ($str) {
-                        $idfa_arr = json_decode($str,true);
+                    $idfa_str_arr[] = $str;
+                }
+                if ($idfa_str_arr){
+                    foreach ($idfa_str_arr as $idfa_str){
+                        $idfa_arr = json_decode($idfa_str,true);
                         $af_idfa = isset($idfa_arr['idfa']) ? $idfa_arr['idfa']: '';
                         $af_install_time = isset($idfa_arr['install_time']) ? strtotime($idfa_arr['install_time']): '';
                         if ($af_idfa && $af_install_time) {
@@ -82,7 +84,6 @@ class RedisBreakAfPushProcesses extends Command
                             $insert_str = "('',1,'','{$af_idfa}','{$af_idfa}','',$af_install_time,0)";
                             DB::connection('mysql_channel')->insert($ad_sql . $insert_str);
                         }
-
                     }
                 }
 
