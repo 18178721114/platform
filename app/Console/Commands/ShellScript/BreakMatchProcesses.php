@@ -59,7 +59,7 @@ class BreakMatchProcesses extends Command
             $begin_time = time();
 
 
-            $sql = "select * from af_active_new_ios where  status = 0 and intime <= '$begin_time' limit 5000";
+            $sql = "select * from af_active_new_ios where  status = 0 and intime <= '$begin_time'";
             $info = DB::connection('mysql_channel')->select($sql);
             $info = Service::data($info);
             foreach ($info as $k =>$v){
