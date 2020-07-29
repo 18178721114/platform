@@ -59,16 +59,17 @@ class BreakMatchProcesses extends Command
             $begin_time = time();
 
 
-            $sql = "select * from af_active_new_ios where  status = 0 and intime <= '$begin_time'";
+            $sql = "select * from af_active_new_ios where  status = 0 and intime <= '$begin_time' limit 5000";
             $info = DB::connection('mysql_channel')->select($sql);
             $info = Service::data($info);
             foreach ($info as $k =>$v){
                 $time = $v['intime']-12*60*60;
-                $sql_match ="select * from channel_request_ios01 where intime>= '{$time}' and intime<= '{$v['intime']}' and idfa = '{$v['idfa']}' limit 1 ";
+                //$sql_match ="select * from channel_request_ios01 where status = 0 and  intime>= '{$time}' and intime<= '{$v['intime']}' and idfa = '{$v['idfa']}' and application_id = '{$v['application_id']}' limit 1 ";
+                $sql_match ="select * from channel_request_ios01 where   intime>= '{$time}' and intime<= '{$v['intime']}' and idfa = '{$v['idfa']}' and application_id = '{$v['application_id']}' limit 1 ";
                 $info1 = DB::connection('mysql_channel')->select($sql_match);
                 $info1 = Service::data($info1);
                 if($info1){
-                    $insert_sql = "insert into af_match (idfa,intime) VALUES ('{$v['idfa']}','{$v['intime']}')";
+                    $insert_sql = "insert into af_match (idfa,intime,channel) VALUES ('{$v['idfa']}','{$v['intime']}','{$info1[0]['channel_id']}')";
                     DB::connection('mysql_channel')->insert($insert_sql);
                 }
 
