@@ -262,10 +262,13 @@ class AppsFlyerImp extends ApiBaseImp
             Redis::rpush($appsflyer_key, json_encode($params));
 
             // 越狱渠道当天新增设备
-            if (isset($params['idfa']) && $params['idfa']){
-                $idfa = $params['idfa'];
+
+            if (isset($params['idfa']) && $params['idfa'] && isset($params['install_time']) && $params['install_time']){
+                $redis_data = [];
+                $redis_data['idfa'] = $params['idfa'];
+                $redis_data['install_time'] = $params['install_time'];
                 $appsflyer_break_key = env('REDIS_APPSFLYER_KEYS_BREAK');
-                Redis::rpush($appsflyer_break_key,$idfa);
+                Redis::rpush($appsflyer_break_key,json_encode($redis_data));
             }
         }
 
