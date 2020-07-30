@@ -113,6 +113,10 @@ class RedCommond extends Command
                 $insert_data[$k]['red_bags_count'] = $v['red_bags_count'];
                 $insert_data[$k]['red_bags_user_count'] = $v['red_bags_user_count'];
                 $insert_data[$k]['tixian_user_count'] = $v['tixian_user_count'];
+                $insert_data[$k]['friends_count'] = $v['friends_count'];
+                $insert_data[$k]['all_today_other_total'] = $v['all_today_other_total'];
+                $insert_data[$k]['pop_up_count'] = $v['pop_up_count'];
+                $insert_data[$k]['pop_up_user_count'] = $v['pop_up_user_count'];
                 $insert_data[$k]['create_time'] = $create_time;
 
             }
