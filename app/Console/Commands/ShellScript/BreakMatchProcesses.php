@@ -62,6 +62,8 @@ class BreakMatchProcesses extends Command
             $sql = "select * from af_active_new_ios where  status = 0 and intime <= '$begin_time'";
             $info = DB::connection('mysql_channel')->select($sql);
             $info = Service::data($info);
+            $sql = "update  af_active_new_ios set status =1  where  status = 0 and intime <= '$begin_time'";
+            DB::connection('mysql_channel')->update($sql);
             foreach ($info as $k =>$v){
                 $time = $v['intime']-12*60*60;
                 //$sql_match ="select * from channel_request_ios01 where status = 0 and  intime>= '{$time}' and intime<= '{$v['intime']}' and idfa = '{$v['idfa']}' and application_id = '{$v['application_id']}' limit 1 ";
@@ -74,8 +76,7 @@ class BreakMatchProcesses extends Command
                 }
 
             }
-            $sql = "update  af_active_new_ios set status =1  where  status = 0 and intime <= '$begin_time'";
-            DB::connection('mysql_channel')->update($sql);
+
         }catch (\Exception $e) {
             // 异常报错
             exit;
