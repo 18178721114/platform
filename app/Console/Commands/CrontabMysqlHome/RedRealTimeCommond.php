@@ -117,6 +117,10 @@ class RedRealTimeCommond extends Command
                     $insert_data[$k]['red_bags_count'] = $ret['red_bags_count']['red_bags_count'];
                     $insert_data[$k]['red_bags_user_count'] = $ret['red_bags_user_count']['red_bags_user_count'];
                     $insert_data[$k]['tixian_user_count'] = $ret['tixian_user_count']['tixian_count'];
+                    $insert_data[$k]['friends_count'] = $ret['friends_count']['friends_count'];
+                    $insert_data[$k]['all_today_other_total'] = $ret['other_today_total']['other_today_total'];
+                    $insert_data[$k]['pop_up_count'] = $ret['pop_up_count']['pop_up_count'];
+                    $insert_data[$k]['pop_up_user_count'] = $ret['pop_up_user_count']['pop_up_user_count'];
                     $insert_data[$k]['create_time'] = $create_time;
 
 
