@@ -50,51 +50,58 @@ class RedRealTimeCommond extends Command
     {
 
         set_time_limit(0);
-       
+
         $dayid = $this->argument('dayid')?$this->argument('dayid'):date('Y-m-d');
         $mysql_table = 'zplay_red_data_statistics';
         try{
-            $url = 'https://red-bags-sdk.yeaplay.com/sdk-api/show_data_info_json.php?user=zplay&token=f382c6c1528ad5fd0cc7666b14603c50';
-            $info  =self::get_response ( $url );
-            $ret = json_decode($info,true);
-            if($ret) {
-                DB::beginTransaction();
-                $sel_sql = "select count(1) as count  FROM $mysql_table WHERE date_time = '$dayid' ";
-                $sel_info = DB::select($sel_sql);
-                $sel_info = Service::data($sel_info);
-                if ($sel_info[0]['count'] != 0) {
-                    $del_sql = "DELETE FROM $mysql_table WHERE date_time = '$dayid' ";
-                    $delete_info = DB::delete($del_sql);
+            $appid[0]['app_id'] = 'gi008034';
+            $appid[1]['app_id'] = 'gi121005';
+            foreach ($appid as $k => $v) {
+                $url = 'https://red-bags-sdk.yeaplay.com/sdk-api/show_data_info_json.php?user=zplay&token=f382c6c1528ad5fd0cc7666b14603c50&game_id='.$v['app_id'];
+                $info = self::get_response($url);
+                $ret = json_decode($info, true);
+                if ($ret) {
+                    DB::beginTransaction();
+                    //查询应用主键id
+                    $sql = "select id  from c_app where app_id ='{$v['app_id']}' limit 1";
+                    $sel_id = DB::select($sql);
+                    $sel_id = Service::data($sel_id);
+                    $sel_sql = "select count(1) as count  FROM $mysql_table WHERE date_time = '$dayid' and app_id = '{$sel_id[0]['id']}' ";
+                    $sel_info = DB::select($sel_sql);
+                    $sel_info = Service::data($sel_info);
+                    if ($sel_info[0]['count'] != 0) {
+                        $del_sql = "DELETE FROM $mysql_table WHERE date_time = '$dayid' and app_id = '{$sel_id[0]['id']}' ";
+                        $delete_info = DB::delete($del_sql);
 
-                    if (!$delete_info) {
-                        DB::rollBack();
+                        if (!$delete_info) {
+                            DB::rollBack();
+                        }
                     }
-                }
 
-                $app_sql = "select id ,app_id  FROM c_app";
-                $app_info = DB::select($app_sql);
-                $app_info = Service::data($app_info);
+                    $app_sql = "select id ,app_id  FROM c_app";
+                    $app_info = DB::select($app_sql);
+                    $app_info = Service::data($app_info);
 
 
-                $create_time = date("Y-m-d H:i:s", time());
-                $k = 0;
-                $num =0 ;
-                //foreach ($ret as $k => $v) {
+                    $create_time = date("Y-m-d H:i:s", time());
+                    $k = 0;
+                    $num = 0;
+                    //foreach ($ret as $k => $v) {
                     //var_dump($v);die;
                     foreach ($app_info as $a => $b) {
                         if ($ret['all_money_arr']['game_id'] == $b['app_id']) {
                             $insert_data[$k]['app_id'] = $b['id'];
-                            $num =0 ;
+                            $num = 0;
                             break;
-                        }else{
-                            $num ++;
+                        } else {
+                            $num++;
                         }
                     }
-                if($num>0){
-                    $message = date("Y-m-d")."红包数据应用id匹配失败，失败原因:".$ret['all_money_arr']['game_id'];
-                    DataImportImp::saveDataErrorLog(5, 'pad-001', '红包数据', 2, $message);
-                    ApiResponseFactory::apiResponse([],[],1056);
-                }
+                    if ($num > 0) {
+                        $message = date("Y-m-d") . "红包数据应用id匹配失败，失败原因:" . $ret['all_money_arr']['game_id'];
+                        DataImportImp::saveDataErrorLog(5, 'pad-001', '红包数据', 2, $message);
+                        ApiResponseFactory::apiResponse([], [], 1056);
+                    }
 
                     $insert_data[$k]['date_time'] = $dayid;
                     $insert_data[$k]['all_card_count'] = $ret['all_card_arr']['all_card'];
@@ -110,35 +117,38 @@ class RedRealTimeCommond extends Command
                     $insert_data[$k]['red_bags_count'] = $ret['red_bags_count']['red_bags_count'];
                     $insert_data[$k]['red_bags_user_count'] = $ret['red_bags_user_count']['red_bags_user_count'];
                     $insert_data[$k]['tixian_user_count'] = $ret['tixian_user_count']['tixian_count'];
+                    $insert_data[$k]['friends_count'] = $ret['friends_count']['friends_count'];
+                    $insert_data[$k]['all_today_other_total'] = $ret['other_today_total']['other_today_total'];
+                    $insert_data[$k]['pop_up_count'] = $ret['pop_up_count']['pop_up_count'];
+                    $insert_data[$k]['pop_up_user_count'] = $ret['pop_up_user_count']['pop_up_user_count'];
                     $insert_data[$k]['create_time'] = $create_time;
 
 
+                    // }
 
 
-               // }
-
-
-                if ($insert_data) {
-                    $step = array();
-                    $i = 0;
-                    foreach ($insert_data as $kkkk => $insert_data_info) {
-                        if ($kkkk % 1000 == 0) $i++;
-                        if ($insert_data_info) {
-                            $step[$i][] = $insert_data_info;
-                        }
-                    }
-
-                    $is_success = [];
-                    if ($step) {
-                        foreach ($step as $k => $v) {
-                            $result = DataImportLogic::insertAdReportInfo($mysql_table, $v);
-                            if (!$result) {
-                                $is_success[] = $k;
+                    if ($insert_data) {
+                        $step = array();
+                        $i = 0;
+                        foreach ($insert_data as $kkkk => $insert_data_info) {
+                            if ($kkkk % 1000 == 0) $i++;
+                            if ($insert_data_info) {
+                                $step[$i][] = $insert_data_info;
                             }
                         }
-                    }
 
-                    DB::commit();
+                        $is_success = [];
+                        if ($step) {
+                            foreach ($step as $k => $v) {
+                                $result = DataImportLogic::insertAdReportInfo($mysql_table, $v);
+                                if (!$result) {
+                                    $is_success[] = $k;
+                                }
+                            }
+                        }
+
+                        DB::commit();
+                    }
                 }
             }
 
