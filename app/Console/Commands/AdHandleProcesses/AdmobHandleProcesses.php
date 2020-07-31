@@ -276,7 +276,7 @@ class AdmobHandleProcesses extends Command
             }
 
             if (isset($error_log_arr['country']) && !empty($error_log_arr['country'])){
-                sort($error_log_arr['ad_unit_id']);
+                sort($error_log_arr['country']);
                 $country = implode(',',array_unique($error_log_arr['country']));
                 $error_msg_array[] = '国家匹配失败,code为:'.$country;
                 $error_msg_mail[] = '国家匹配失败，code为：'.$country;
