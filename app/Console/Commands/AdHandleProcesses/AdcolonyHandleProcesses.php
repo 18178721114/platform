@@ -47,6 +47,7 @@ class AdcolonyHandleProcesses extends Command
         parent::__construct();
         Redis::select(0);
     }
+    
 
     /**
      * Execute the console command.
