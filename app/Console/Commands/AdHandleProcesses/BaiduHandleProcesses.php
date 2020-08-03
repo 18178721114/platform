@@ -65,7 +65,7 @@ class BaiduHandleProcesses extends Command
         $map['dayid']  =$dayid;
         $map['type']  =2;
         $map['source_id']  =$source_id;
-        //$map['account']  = 'contact@zplay.com';
+        $map['account']  = 'contact@zplay.com';
         $map[] =['income','<>',0] ;
         $info = DataImportLogic::getChannelData('ad_data','erm_data',$map)->get();
         $info = Service::data($info);
