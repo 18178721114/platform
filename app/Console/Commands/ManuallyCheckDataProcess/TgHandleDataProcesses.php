@@ -70,7 +70,7 @@ class TgHandleDataProcesses extends Command
 //            if(count($p_v)<6){
 //                continue;
 //            }
-            if($p_v['总花费(元)']==0){
+            if($p_v['消耗']==0){
                 continue;
             }
             $num = 0;
@@ -93,7 +93,7 @@ class TgHandleDataProcesses extends Command
                 $arr_info[$num_data]['ad_name'] = isset($p_v['广告组'])?addslashes($p_v['广告组']):'' ;
                 $arr_info[$num_data]['app_id'] = $app_id;
                 $arr_info[$num_data]['os_id'] = $os_id;
-                $arr_info[$num_data]['cost'] = isset($p_v['总花费(元)'])?floatval($p_v['总花费(元)']):0 ;
+                $arr_info[$num_data]['cost'] = isset($p_v['消耗'])?floatval($p_v['消耗']):0 ;
                 $arr_info[$num_data]['platform_id'] = $platform_id;
                 $arr_info[$num_data]['create_time'] = date('Y-m-d H:i:s');
 
@@ -105,7 +105,7 @@ class TgHandleDataProcesses extends Command
                 $arr_info_1[$num_data]['ad_name'] = isset($p_v['广告组'])?addslashes($p_v['广告组']):'' ;
                 $arr_info_1[$num_data]['app_id'] = 0;
                 $arr_info_1[$num_data]['os_id'] = 0;
-                $arr_info_1[$num_data]['cost'] = isset($p_v['总花费(元)'])?floatval($p_v['总花费(元)']):0 ;
+                $arr_info_1[$num_data]['cost'] = isset($p_v['消耗'])?floatval($p_v['消耗']):0 ;
                 $arr_info_1[$num_data]['platform_id'] = $platform_id;
                 $arr_info_1[$num_data]['create_time'] = date('Y-m-d H:i:s');
 
