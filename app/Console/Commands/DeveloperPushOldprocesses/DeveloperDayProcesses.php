@@ -187,6 +187,7 @@ class DeveloperDayProcesses extends Command
         $step = array();
         $i = 0;
         foreach ($info as $k => $v) {
+            $v['app_name'] = addslashes($v['app_name']);
             $insert_sql = "insert  into out_divide_develop (`app_id`,`user_id`,`app_name`,`app_os`,`new_user`,`active_user`,`ff_earning`,`ff_income`,`ff_divide`,`ad_earning`,`ad_income`,`ad_divide`,`tg_cost`,`tg_expense`,`stats_date`) values('{$v['app_id']}','{$v['user_id']}','{$v['app_name']}','{$v['app_os']}','{$v['new_user']}','{$v['active_user']}','{$v['ff_earning']}','{$v['ff_income']}','{$v['ff_divide']}','{$v['ad_earning']}','{$v['ad_income']}','{$v['ad_divide']}','{$v['tg_cost']}','{$v['tg_expense']}','{$v['stats_date']}')";
 //            DB::connection('mysql_developer')->insert($insert_sql);
             DB::connection('mysql')->insert($insert_sql);
