@@ -382,7 +382,7 @@ class DataImportImp extends ApiBaseImp
         foreach ($unique_error1 as $key1 => $value1 ){
             foreach ($unique_error2 as $key2 => $value2 ){
                 similar_text($value1['error_detail'],$value2['error_detail'],$percent);
-                if ( $percent > 90 && ($value1['platform_id'] == $value2['platform_id'])){
+                if ( $percent > 95 && ($value1['platform_id'] == $value2['platform_id'])){
                     $new_unique_error[$key1][] = $value2;
                     unset($unique_error2[$key2]);
                 }
