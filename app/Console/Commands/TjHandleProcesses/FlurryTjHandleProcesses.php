@@ -63,7 +63,7 @@ class FlurryTjHandleProcesses extends Command
 
         try {
             //查询pgsql 的数据
-            $flurry_sql = "select * from flurry where dateTime like '$dayid%'";
+            $flurry_sql = "select * from flurry where dateTime like '$dayid%' and new_devices>50";
             $info = DB::select($flurry_sql);
             $info = Service::data($info);
 
