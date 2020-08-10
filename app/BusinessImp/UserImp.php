@@ -124,7 +124,7 @@ class UserImp extends ApiBaseImp
         $map['leftjoin'] = [
             ['role','user.role_id', 'role.id'],
         ];
-        $Info = UserLogic::Userlist($map,$fields)->forPage($page,$page_size)->orderby("user.user_account")->get();
+        $Info = UserLogic::Userlist($map,$fields)->forPage($page,$page_size)->orderby("user.status","desc")->orderby("user.user_account")->get();
         $Info =Service::data($Info);
         // 获取数据总数
         $total = UserLogic::Userlist($map)->count();
