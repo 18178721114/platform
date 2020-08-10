@@ -269,12 +269,14 @@ class AdmobHandleProcesses extends Command
             $error_msg_mail = [];
             $error_log_arr = Service::shield_error($source_id,$error_log_arr);
             if (isset($error_log_arr['ad_unit_id']) && !empty($error_log_arr['ad_unit_id'])){
+                sort($error_log_arr['ad_unit_id']);
                 $ad_unit_id = implode(',',array_unique($error_log_arr['ad_unit_id']));
                 $error_msg_array[] = '广告位匹配失败,ID为:'.$ad_unit_id;
                 $error_msg_mail[] = '广告位匹配失败，ID为：'.$ad_unit_id;
             }
 
             if (isset($error_log_arr['country']) && !empty($error_log_arr['country'])){
+                sort($error_log_arr['country']);
                 $country = implode(',',array_unique($error_log_arr['country']));
                 $error_msg_array[] = '国家匹配失败,code为:'.$country;
                 $error_msg_mail[] = '国家匹配失败，code为：'.$country;

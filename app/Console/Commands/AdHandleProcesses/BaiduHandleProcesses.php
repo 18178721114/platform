@@ -55,10 +55,21 @@ class BaiduHandleProcesses extends Command
     public function handle()
     {
         set_time_limit(0);
-        $source_id ='pad11';
-        $source_name ='Baidu';
-        $dayid = $this->argument('dayid')?$this->argument('dayid'):date('Y-m-d',strtotime('-1 day'));
-        var_dump('百度广告-pad11-'.$dayid);
+        $source_id = 'pad11';
+        $source_name = 'Baidu';
+        $dayid = $this->argument('dayid') ? $this->argument('dayid') : date('Y-m-d', strtotime('-1 day'));
+        var_dump('百度广告-pad11-' . $dayid);
+        try{
+            self::BaiduAdDataProcess($source_id, $source_name, $dayid);
+        }catch (\Exception $e) {
+            $error_msg_info = $dayid.'号,'.$source_name.'广告平台处理程序失败，失败原因：'.$e->getMessage();
+            DataImportImp::saveDataErrorLog(5,$source_id,$source_name,2,$error_msg_info);
+        }
+
+
+    }
+    public static function BaiduAdDataProcess($source_id,$source_name,$dayid){
+        static $stactic_num = 0;
         //查询pgsql 的数据
         $dayid = date('Y-m-d',strtotime($dayid));
         $map =[];
@@ -91,7 +102,8 @@ class BaiduHandleProcesses extends Command
             `c_app_ad_slot`.`interstitial_placement_id`,
             `c_app_ad_slot`.`ad_type`,
             `c_platform`.`currency_type_id`,
-            `c_app_ad_platform`.`flow_type` 
+            `c_app_ad_platform`.`flow_type`,
+            `c_app_ad_platform`.`instance_id` 
             FROM
             `c_app`
             LEFT JOIN `c_app_ad_platform` ON `c_app_ad_platform`.`app_id` = `c_app`.`id`  and `c_app_ad_platform`.`status` = 1
@@ -162,13 +174,18 @@ class BaiduHandleProcesses extends Command
         $num_country = 0;
         $num_adtype =0;
         $error_detail_arr = [];//报错的 详细数据信息
+        $new_campaign_ids = [];
+
         foreach ($info as $k => $v) {
 
         	$json_info = json_decode($v['json_data'],true);
 
         	foreach ($app_list as $app_k => $app_v) {
-        		if($json_info['appid'] ==$app_v['platform_app_id'] ){
+        		if($json_info['appid'] ==$app_v['platform_app_id'] && $json_info['adpositionid'] ==$app_v['ad_slot_id'] ){
         			$array[$k]['app_id'] = $app_v['app_id'];
+                    $array[$k]['flow_type'] = $app_v['flow_type'];
+                    $array[$k]['ad_type'] = $app_v['ad_type'];
+                    $array[$k]['channel_id'] = $app_v['instance_id'];
         			$num = 0;
         			break;
         		}else{
@@ -182,6 +199,37 @@ class BaiduHandleProcesses extends Command
             $err_name = (isset($json_info['adpositionid']) ?$json_info['adpositionid']:'Null').'#'.(isset($json_info['adpositionname']) ?$json_info['adpositionname']:'Null').'#'.(isset($json_info['appid']) ?$json_info['appid']:'Null').'#'.(isset($json_info['appname']) ?$json_info['appname']:'Null');
 
             if($num){
+                if($json_info['appid'] && $json_info['adpositionid']){
+                    $app_info_sql = "select ad.`id`,ad.`platform_id`,ad.`platform_app_id`,ca.`os_id`,ca.`app_name`
+                                     from c_app_ad_platform ad 
+                                     left join c_app ca on ad.app_id = ca.id where ad.`platform_id` = '{$source_id}' and ad.status = 1
+                                     and ad.`platform_app_id` = '{$json_info['appid']}' limit 1";
+                    $app_info_detail = DB::select($app_info_sql);
+                    $app_info_detail = Service::data($app_info_detail);
+                    if (isset($app_info_detail[0]) && $app_info_detail[0]){
+                        $ad_type = '';
+                        // 匹配广告类型
+                        foreach ($AdType_info as $AdType_k => $AdType_v) {
+                            if($json_info['adtypeid'] == $AdType_v['name'] ){
+                                $ad_type = $AdType_v['ad_type_id'];
+                                $num_adtype=0;
+                                break;
+                            }else{
+                                //广告类型失败
+                                $num_adtype++;
+
+                            }
+                        }
+                        if($num_adtype){
+                            $error_log_arr['ad_type'][] = $json_info['adtypeid'].'('.$err_name.')' ;
+                        }
+
+                        if ($ad_type || $ad_type === 0){
+                            $new_campaign_ids[$json_info['appid']][$app_info_detail[0]['id']][$json_info['adpositionid']] = $ad_type;
+                        }
+                    }
+
+                }
                 $error_log_arr['app_id'][] = $json_info['appid'].'('.addslashes(str_replace('\'\'','\'',$err_name)).')';
             }
             $array[$k]['country_id'] =64;//中国
@@ -200,21 +248,21 @@ class BaiduHandleProcesses extends Command
          //    if($num_country){
          //        $error_log_arr['country'][] = isset($json_info['countryCode']) ? $json_info['countryCode'] : 'Unknown Region' ;
          //    }
-        	foreach ($AdType_info as $AdType_k => $AdType_v) {
-        		if($json_info['adtypeid'] == $AdType_v['name'] ){
-        			$array[$k]['ad_type'] = $AdType_v['ad_type_id'];
-                    $array[$k]['flow_type'] = $app_v['flow_type'];
-        			$num_adtype = 0;
-        			break;
-        		}else{
-        			//广告类型失败
-        			$num_adtype++;
-        			
-        		}
-        	}
-            if($num_adtype){
-                $error_log_arr['ad_type'][] = $json_info['adtypeid'].'('.$err_name.')' ;
-            }
+//        	foreach ($AdType_info as $AdType_k => $AdType_v) {
+//        		if($json_info['adtypeid'] == $AdType_v['name'] ){
+//        			$array[$k]['ad_type'] = $AdType_v['ad_type_id'];
+//
+//        			$num_adtype = 0;
+//        			break;
+//        		}else{
+//        			//广告类型失败
+//        			$num_adtype++;
+//
+//        		}
+//        	}
+//            if($num_adtype){
+//                $error_log_arr['ad_type'][] = $json_info['adtypeid'].'('.$err_name.')' ;
+//            }
         	if(($num+$num_country+$num_adtype)>0){
                 $error_detail_arr[$k]['platform_id'] = $source_id;
                 $error_detail_arr[$k]['platform_name'] = $source_name;
@@ -283,6 +331,44 @@ class BaiduHandleProcesses extends Command
         	$array[$k]['update_time'] = date('Y-m-d H:i:s');
         	
         }
+        if ($new_campaign_ids) {
+            $insert_generalize_ad_app = [];
+            foreach ($new_campaign_ids as $package_name => $offer_id) {
+                if ($offer_id) {
+                    foreach ($offer_id as $offer_key => $offer_id_nums) {
+                        foreach ($offer_id_nums as $offer_id_nums_key => $offer_id_nums_value) {
+                            $insert_generalize_ad_info = [];
+                            $insert_generalize_ad_info['app_ad_platform_id'] = $offer_key;
+                            $insert_generalize_ad_info['ad_slot_id'] = strval($offer_id_nums_key);
+                            $insert_generalize_ad_info['ad_type'] = $offer_id_nums_value;
+                            $insert_generalize_ad_info['status'] = 1;
+                            $insert_generalize_ad_info['create_time'] = date("Y-m-d H:i:s", time());
+                            $insert_generalize_ad_info['update_time'] = date("Y-m-d H:i:s", time());
+                            $insert_generalize_ad_app[] = $insert_generalize_ad_info;
+                        }
+                    }
+                }
+            }
+
+            if ($insert_generalize_ad_app) {
+                if($stactic_num ==1){
+                    //反更新没成功 走这里
+                }else {
+                    // 开启事物 保存数据
+                    DB::beginTransaction();
+                    $app_info = DB::table('c_app_ad_slot')->insert($insert_generalize_ad_app);
+//                var_dump($app_info);
+                    if (!$app_info) { // 应用信息已经重复
+                        DB::rollBack();
+                    } else {
+                        DB::commit();
+                        $stactic_num++;
+                        self::BaiduAdDataProcess($source_id, $source_name, $dayid);
+                        exit;
+                    }
+                }
+            }
+        }
                 // 保存错误信息
         if ($error_log_arr){
             $error_msg_array = [];
@@ -333,7 +419,7 @@ class BaiduHandleProcesses extends Command
                         $sql_str.= "('".$v['date']."'," // date
                         ."'".$v['app_id']."',"  //app_id
                         ."'',"// version
-                        ."'',"//channel_id
+                        ."'".$v['channel_id']."',"//channel_id
                         ."'".$v['country_id']."',"//country_id
                         ."'',"//data_platform_id
                         ."'".$v['data_account']."',"//data_account

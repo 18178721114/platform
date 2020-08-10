@@ -63,6 +63,19 @@ class ApplovinHandleProcesses extends Command
         $source_name = 'Applovin';
         var_dump('Applovin-pad33-'.$dayid);
 
+        try{
+            self::ApplovinAdDataProcess($source_id, $source_name, $dayid);
+        }catch (\Exception $e) {
+            echo $e->getMessage();
+            $error_msg_info = $dayid.'号,'.$source_name.'广告平台处理程序失败，失败原因：'.$e->getMessage();
+            DataImportImp::saveDataErrorLog(5,$source_id,$source_name,2,$error_msg_info);
+        }
+
+
+    }
+    public static function ApplovinAdDataProcess($source_id,$source_name,$dayid){
+        static $stactic_num = 0;
+
         $map =[];
         $map['dayid'] = $dayid;
         $map['type'] = 2;
@@ -161,18 +174,22 @@ class ApplovinHandleProcesses extends Command
             exit;
         }
 
+
         $array = [];
         $num = 0;
         $num_country = 0;
         $num_adtype =0;
         $error_log_arr = [];
         $error_detail_arr = [];//报错的 详细数据信息
-        foreach ($info as $k => $v) {
+        $new_campaign_ids = [];
 
+        foreach ($info as $k => $v) {
         	$json_info = json_decode($v['json_data'],true);
         	if(isset($json_info['bidding_integration']) && $json_info['bidding_integration'] !='None' ){
                     continue ;
             }
+
+
         	foreach ($app_list as $app_k => $app_v) {
                 if($app_v['os_id'] ==1){
                     $os = 'ios';
@@ -184,9 +201,15 @@ class ApplovinHandleProcesses extends Command
                     $os = 'amazon';
                 }
 
-                if(($json_info['platform'].'-'.str_replace('\'\'','\'',$json_info['package_name']) == $app_v['platform_app_name']) || ($json_info['platform'].'-'.str_replace('\'\'','\'',$json_info['package_name']) == $os.'-'.$app_v['platform_app_name']) || ($json_info['platform'].'-'.str_replace('\'\'','\'',$json_info['application']) == $app_v['platform_app_name']) || ($json_info['platform'].'-'.str_replace('\'\'','\'',$json_info['application']) == $os.'-'.$app_v['platform_app_name'])){
+                if((($json_info['platform'].'-'.str_replace('\'\'','\'',$json_info['package_name']) == $app_v['platform_app_name'])
+                    || ($json_info['platform'].'-'.str_replace('\'\'','\'',$json_info['package_name']) == $os.'-'.$app_v['platform_app_name'])
+                    || ($json_info['platform'].'-'.str_replace('\'\'','\'',$json_info['application']) == $app_v['platform_app_name'])
+                    || ($json_info['platform'].'-'.str_replace('\'\'','\'',$json_info['application']) == $os.'-'.$app_v['platform_app_name'])) &&
+                    ($json_info['zone_id'] == $app_v['ad_slot_id'])
+                  ){
                     $array[$k]['app_id'] = $app_v['app_id'];
                     $array[$k]['flow_type'] = $app_v['flow_type'];
+                    $array[$k]['ad_type'] = $app_v['ad_type'];
                     $num = 0;
                     break;
                 }else{
@@ -199,10 +222,50 @@ class ApplovinHandleProcesses extends Command
             $err_name = 'Null#'.(isset($json_info['application']) ?$json_info['application']:'Null').'#Null#'.(isset($json_info['package_name']) ?$json_info['package_name']:'Null');
 
 
-
             if ($num){
+
+                $platform_id_name = $json_info['platform'].'-'.str_replace('\'\'','\'',$json_info['package_name']);
+                $platform_id_name_1 = $json_info['platform'].'-'.str_replace('\'\'','\'',$json_info['application']);
+                if($platform_id_name && $json_info['zone_id']){
+
+                    $app_info_sql = "select ad.`id`,ad.`platform_id`,ad.`platform_app_id`,ca.`os_id`,ca.`app_name`
+                                     from c_app_ad_platform ad 
+                                     left join c_app ca on ad.app_id = ca.id where ad.`platform_id` = '{$source_id}' and ad.status = 1
+                                     and (ad.`platform_app_name` = '{$platform_id_name}'  or ad.`platform_app_name` = '{$platform_id_name_1}' or 
+                                     CONCAT(case  when ca.os_id=1 then 'ios' when ca.os_id=2 then 'android' when ca.os_id=3 then 'h5' else 'amazon' end,'-',ad.`platform_app_name`) = '{$platform_id_name}' or
+                                     CONCAT(case  when ca.os_id=1 then 'ios' when ca.os_id=2 then 'android' when ca.os_id=3 then 'h5' else 'amazon' end,'-',ad.`platform_app_name`) = '{$platform_id_name_1}'
+                                     ) limit 1";
+                    $app_info_detail = DB::select($app_info_sql);
+                    $app_info_detail = Service::data($app_info_detail);
+
+                    if (isset($app_info_detail[0]) && $app_info_detail[0]){
+                        $ad_type = '';
+                        // 匹配广告类型
+                        foreach ($AdType_info as $AdType_k => $AdType_v) {
+                            if($json_info['size'].'-'.$json_info['ad_type'] == $AdType_v['name'] ){
+                                $ad_type = $AdType_v['ad_type_id'];
+                                $num_adtype=0;
+                                break;
+                            }else{
+                    //广告类型失败
+                                $num_adtype++;
+
+                            }
+                        }
+                        if ($num_adtype){
+                            $error_log_arr['ad_type'][] = isset($json_info['size']) ? $json_info['size'].'-'.$json_info['ad_type'].'('.$err_name.')' : '' ;
+                        }
+                        if ($ad_type || $ad_type === 0){
+                            $new_campaign_ids[$platform_id_name][$app_info_detail[0]['id']][$json_info['zone_id']] = $ad_type;
+                        }
+
+                    }
+                }
+
                 $error_log_arr['application'][] = $json_info['platform'].'-'.str_replace('\'\'','\'',$json_info['package_name']).'('.$err_name.')';
             }
+
+
 
         	foreach ($country_info as $country_k => $country_v) {
         		if(isset($json_info['country']) && strtoupper($json_info['country']) == $country_v['name'] ){
@@ -219,21 +282,20 @@ class ApplovinHandleProcesses extends Command
             if ($num_country){
                 $error_log_arr['country'][] = isset($json_info['country']) ? $json_info['country'].'('.$err_name.')' : 'Unknown Region';
             }
+//
+//            foreach ($AdType_info as $AdType_k => $AdType_v) {
+//                if($json_info['size'].'-'.$json_info['ad_type'] == $AdType_v['name'] ){
+//                    $array[$k]['ad_type'] = $AdType_v['ad_type_id'];
+//                    $num_adtype = 0;
+//                    break;
+//                }else{
+//                    //广告类型失败
+//                    $num_adtype++;
+//
+//                }
+//            }
 
-            foreach ($AdType_info as $AdType_k => $AdType_v) {
-                if($json_info['size'].'-'.$json_info['ad_type'] == $AdType_v['name'] ){
-                    $array[$k]['ad_type'] = $AdType_v['ad_type_id'];
-                    $num_adtype = 0;
-                    break;
-                }else{
-                    //广告类型失败
-                    $num_adtype++;
-                    
-                }
-            }
-            if ($num_adtype){
-                $error_log_arr['ad_type'][] = isset($json_info['size']) ? $json_info['size'].'('.$err_name.')' : '' ;
-            }
+
 
         	
         	if(($num+$num_country+$num_adtype)>0){
@@ -305,6 +367,44 @@ class ApplovinHandleProcesses extends Command
         	$array[$k]['create_time'] = date('Y-m-d H:i:s');
         	$array[$k]['update_time'] = date('Y-m-d H:i:s');
         	
+        }
+        if ($new_campaign_ids) {
+            $insert_generalize_ad_app = [];
+            foreach ($new_campaign_ids as $package_name => $offer_id) {
+                if ($offer_id) {
+                    foreach ($offer_id as $offer_key => $offer_id_nums) {
+                        foreach ($offer_id_nums as $offer_id_nums_key => $offer_id_nums_value) {
+                            $insert_generalize_ad_info = [];
+                            $insert_generalize_ad_info['app_ad_platform_id'] = $offer_key;
+                            $insert_generalize_ad_info['ad_slot_id'] = strval($offer_id_nums_key);
+                            $insert_generalize_ad_info['ad_type'] = $offer_id_nums_value;
+                            $insert_generalize_ad_info['status'] = 1;
+                            $insert_generalize_ad_info['create_time'] = date("Y-m-d H:i:s", time());
+                            $insert_generalize_ad_info['update_time'] = date("Y-m-d H:i:s", time());
+                            $insert_generalize_ad_app[] = $insert_generalize_ad_info;
+                        }
+                    }
+                }
+            }
+
+            if ($insert_generalize_ad_app) {
+                if($stactic_num ==1){
+                    //反更新没成功 走这里
+                }else {
+                    // 开启事物 保存数据
+                    DB::beginTransaction();
+                    $app_info = DB::table('c_app_ad_slot')->insert($insert_generalize_ad_app);
+//                var_dump($app_info);
+                    if (!$app_info) { // 应用信息已经重复
+                        DB::rollBack();
+                    } else {
+                        DB::commit();
+                        $stactic_num++;
+                        self::ApplovinAdDataProcess($source_id, $source_name, $dayid);
+                        exit;
+                    }
+                }
+            }
         }
 
         // 保存错误信息
