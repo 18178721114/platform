@@ -63,7 +63,7 @@ class FlurryKeepTjHandleProcesses extends Command
         $etime = $this->argument('etime') ? $this->argument('etime') : date('Y-m-d',strtotime('-1 day'));
         try {
             //查询pgsql 的数据
-            $flurry_sql = "select * from scrapy_flurry_retention_detail where dnu > 0 and dayid between '$stime' and '$etime'";
+            $flurry_sql = "select * from scrapy_flurry_retention_detail where dnu > 50 and dayid between '$stime' and '$etime'";
             $info = DB::select($flurry_sql);
             $info = Service::data($info);
 
