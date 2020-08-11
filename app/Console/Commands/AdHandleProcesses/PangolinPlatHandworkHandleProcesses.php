@@ -199,7 +199,7 @@ class PangolinPlatHandworkHandleProcesses extends Command
                                 }
                             }
 
-                            if ($ad_type || $ad_type === 0){
+                            if ($ad_type || $ad_type === 0 || $ad_type === "0"){
                                 $new_campaign_ids[$tiktok_app_id][$app_info_detail[0]['id']][$json_info['代码位ID']] = $ad_type;
                             }
                         }
