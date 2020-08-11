@@ -387,6 +387,7 @@ class ApplovinHandleProcesses extends Command
                 }
             }
 
+            var_dump(json_encode($insert_generalize_ad_app));
             if ($insert_generalize_ad_app) {
                 if($stactic_num ==1){
                     //反更新没成功 走这里
@@ -394,7 +395,7 @@ class ApplovinHandleProcesses extends Command
                     // 开启事物 保存数据
                     DB::beginTransaction();
                     $app_info = DB::table('c_app_ad_slot')->insert($insert_generalize_ad_app);
-//                var_dump($app_info);
+                    var_dump($app_info);
                     if (!$app_info) { // 应用信息已经重复
                         DB::rollBack();
                     } else {
