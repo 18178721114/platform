@@ -215,7 +215,7 @@ class GuangdiantongHandleProcesses extends Command
                             $error_log_arr['ad_type'][] = isset($json_info['PlacementType']) ? $json_info['PlacementType'].'('.$err_name.')' : '' ;
                         }
 
-                        if ($ad_type || $ad_type === 0){
+                        if ($ad_type || $ad_type === 0 || $ad_type === "0"){
                             $new_campaign_ids[$json_info['AppId']][$app_info_detail[0]['id']][$json_info['PlacementId']] = $ad_type;
                         }
                     }

@@ -50,7 +50,7 @@ class RedRealTimeCommond extends Command
     {
 
         set_time_limit(0);
-       
+
         $dayid = $this->argument('dayid')?$this->argument('dayid'):date('Y-m-d');
         $mysql_table = 'zplay_red_data_statistics';
         try{

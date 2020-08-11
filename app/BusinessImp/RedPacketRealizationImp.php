@@ -124,7 +124,7 @@ class RedPacketRealizationImp extends ApiBaseImp
         $end_date = isset($params['end_time']) ? $params['end_time'] : date('Y-m-d');
         // 公司
         $company = isset($params['user_company_id']) ? $params['user_company_id'] : 1;
-        
+
 
         // 拼接查询条件
         $where = '';

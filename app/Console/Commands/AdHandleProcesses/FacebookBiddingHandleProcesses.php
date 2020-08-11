@@ -248,7 +248,7 @@ class FacebookBiddingHandleProcesses extends Command
                         }
 
 //                        var_dump($ad_type);
-                        if ($ad_type || $ad_type === 0){
+                        if ($ad_type || $ad_type === 0 || $ad_type === "0"){
                             $new_campaign_ids[$third_app_id][$app_info_detail[0]['id']][$json_info['placement']] = $ad_type;
                         }
                     }
