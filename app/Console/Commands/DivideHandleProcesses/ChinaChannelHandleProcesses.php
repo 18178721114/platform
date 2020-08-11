@@ -51,8 +51,8 @@ class ChinaChannelHandleProcesses extends Command
             set_time_limit(0);
             $source_id = 'pco01';
             $source_name = '国内安卓渠道广告分成';
-            $start_date = $this->argument('start_date') ? $this->argument('start_date') : date('Y-m-d', strtotime('-8 day'));
-            $end_date = $this->argument('end_date') ? $this->argument('end_date') : date('Y-m-d', strtotime('-1 day'));
+            $start_date = $this->argument('start_date') ? $this->argument('start_date') : date('Y-m-d', strtotime('-9 day'));
+            $end_date = $this->argument('end_date') ? $this->argument('end_date') : date('Y-m-d', strtotime('-2 day'));
 
             $sql = "delete from d_channel_ad where date_time>='$start_date' and date_time<='$end_date';";
             $delete_info = DB::delete($sql);
