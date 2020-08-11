@@ -368,6 +368,7 @@ class ApplovinHandleProcesses extends Command
         	$array[$k]['update_time'] = date('Y-m-d H:i:s');
         	
         }
+        var_dump($new_campaign_ids);
         if ($new_campaign_ids) {
             $insert_generalize_ad_app = [];
             foreach ($new_campaign_ids as $package_name => $offer_id) {
