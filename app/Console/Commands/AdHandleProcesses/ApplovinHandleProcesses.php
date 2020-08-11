@@ -238,10 +238,6 @@ class ApplovinHandleProcesses extends Command
                     $app_info_detail = DB::select($app_info_sql);
                     $app_info_detail = Service::data($app_info_detail);
 
-                    if ($platform_id_name == 'ios-com.armnomads.cleaninc'){
-                        var_dump($app_info_sql);
-                    }
-
                     if (isset($app_info_detail[0]) && $app_info_detail[0]){
                         $ad_type = '';
                         // 匹配广告类型
@@ -256,13 +252,10 @@ class ApplovinHandleProcesses extends Command
 
                             }
                         }
-                        if ($platform_id_name == 'ios-com.armnomads.cleaninc'){
-                            var_dump($ad_type);
-                        }
                         if ($num_adtype){
                             $error_log_arr['ad_type'][] = isset($json_info['size']) ? $json_info['size'].'-'.$json_info['ad_type'].'('.$err_name.')' : '' ;
                         }
-                        if ($ad_type || $ad_type === 0){
+                        if ($ad_type || $ad_type === 0 || $ad_type === "0"){
                             $new_campaign_ids[$platform_id_name][$app_info_detail[0]['id']][$json_info['zone_id']] = $ad_type;
                         }
 
@@ -375,7 +368,6 @@ class ApplovinHandleProcesses extends Command
         	$array[$k]['update_time'] = date('Y-m-d H:i:s');
         	
         }
-        var_dump($new_campaign_ids);
         if ($new_campaign_ids) {
             $insert_generalize_ad_app = [];
             foreach ($new_campaign_ids as $package_name => $offer_id) {
@@ -395,7 +387,6 @@ class ApplovinHandleProcesses extends Command
                 }
             }
 
-            var_dump(json_encode($insert_generalize_ad_app));
             if ($insert_generalize_ad_app) {
                 if($stactic_num ==1){
                     //反更新没成功 走这里
@@ -403,7 +394,7 @@ class ApplovinHandleProcesses extends Command
                     // 开启事物 保存数据
                     DB::beginTransaction();
                     $app_info = DB::table('c_app_ad_slot')->insert($insert_generalize_ad_app);
-                    var_dump($app_info);
+//                var_dump($app_info);
                     if (!$app_info) { // 应用信息已经重复
                         DB::rollBack();
                     } else {
