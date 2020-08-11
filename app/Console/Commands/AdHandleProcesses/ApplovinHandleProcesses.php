@@ -238,6 +238,10 @@ class ApplovinHandleProcesses extends Command
                     $app_info_detail = DB::select($app_info_sql);
                     $app_info_detail = Service::data($app_info_detail);
 
+                    if ($platform_id_name == 'ios-com.armnomads.cleaninc'){
+                        var_dump($app_info_sql);
+                    }
+
                     if (isset($app_info_detail[0]) && $app_info_detail[0]){
                         $ad_type = '';
                         // 匹配广告类型
@@ -251,6 +255,9 @@ class ApplovinHandleProcesses extends Command
                                 $num_adtype++;
 
                             }
+                        }
+                        if ($platform_id_name == 'ios-com.armnomads.cleaninc'){
+                            var_dump($ad_type);
                         }
                         if ($num_adtype){
                             $error_log_arr['ad_type'][] = isset($json_info['size']) ? $json_info['size'].'-'.$json_info['ad_type'].'('.$err_name.')' : '' ;
