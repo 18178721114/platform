@@ -37,20 +37,20 @@ class DeveloperImp extends ApiBaseImp
         if ($search_name) $map['like'][] = ['c_customer_company.company_name','like', $search_name];
         if ($company_id) $map['c_developer.company_id'] = $company_id;
 
-        $fields = ['c_developer.*','c_customer_company.company_name as customer_company_name','c_zplay_company.company_name as zplay_company_name','c_currency_type.currency_name','c_currency_type.currency_en','c_business_manager.manager_name','user.user_account'];
+        $fields = ['c_developer.*','c_customer_company.company_name as customer_company_name','c_zplay_company.company_name as zplay_company_name','c_currency_type.currency_name','c_currency_type.currency_en','user.user_account'];
 
         $map['leftjoin'] = [
             ['c_customer_company','c_customer_company.id', 'c_developer.customer_id'],
             ['c_zplay_company','c_zplay_company.id', 'c_developer.company_id'],
             ['c_currency_type','c_currency_type.id', 'c_developer.currency_type_id'],
-            ['c_business_manager','c_business_manager.id', 'c_developer.business_manager_id'],
             ['user','user.developer_id', 'c_developer.id']
         ];
         // 获取分页数据
         $developer_list = DeveloperLogic::getDeveloperList($map, $fields)->forPage($page,$page_size)->orderby("c_developer.id","desc")->get();
         $developer_list = Service::data($developer_list);
         if (!$developer_list) ApiResponseFactory::apiResponse([],[],1000);
-
+        //商务列表
+        $managerList = CommonImp::getBusinessManagerList(array(),1);
         foreach ($developer_list as $key => $value){
             $currency_name = $value['currency_name'];
             unset($value['currency_name']);
@@ -59,6 +59,13 @@ class DeveloperImp extends ApiBaseImp
             }else{
                 $value['currency_en'] = '';
             }
+         
+            if(in_array($value['business_manager_id'],array_keys($managerList))){
+                $value['manager_name'] = $managerList[$value['business_manager_id']];
+            }else{
+                $value['manager_name'] = "";
+            }
+
             $developer_list[$key] = $value;
         }
 

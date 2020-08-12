@@ -94,7 +94,7 @@ class CommonImp extends ApiBaseImp
      * 负责人
      * @param $params array 请求数据
      */
-    public static function getBusinessManagerList($params)
+    public static function getBusinessManagerList($params,$t=0)
     {
         $search = isset($params['search']) ? $params['search'] : ''; // 搜索条件
         $map = []; // 查询条件
@@ -102,9 +102,25 @@ class CommonImp extends ApiBaseImp
             $map['like'] = ['manager_name','like', $search];
         }
         $fields = ["id", "manager_name as value", "manager_type as type"]; // 查询字段
-        $manager_list = CommonLogic::getBusinessManagerList($map, $fields)->get()->toArray();
-        if (!$manager_list) ApiResponseFactory::apiResponse([],[],1000);
-        ApiResponseFactory::apiResponse(['table_list' => $manager_list],[]);
+        $fields = ["user.id as id","user.name as value"];
+        $map['leftjoin'] = [
+            ['role','user.role_id', 'role.id'],
+        ];
+        $map['role_id'] = 6;
+
+        $manager_list = CommonLogic::getBusinessList($map, $fields)->get()->toArray();
+        if($t==1){
+             $dataList =Service::data($manager_list);
+             $manager = array();
+             foreach($dataList as $v){
+                 $manager[$v['id']] = $v['value'];
+             }
+             return $manager;
+        }else{
+            if (!$manager_list) ApiResponseFactory::apiResponse([],[],1000);
+            ApiResponseFactory::apiResponse(['table_list' => $manager_list],[]);
+        }
+
     }
 
     /**

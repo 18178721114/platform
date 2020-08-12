@@ -158,6 +158,23 @@ class CommonLogic
         }
         return $com_obj;
     }
+    public static  function getBusinessList($map = [], $fields = '*'){
+        $com_obj = DB::table("user");
+        if (isset($map["leftjoin"])) {
+            foreach ($map["leftjoin"] as $leftjoin){
+                $com_obj->leftjoin($leftjoin[0],$leftjoin[1],'=',$leftjoin[2]);
+            }
+            unset($map["leftjoin"]);
+        }
+
+        if ($map) {
+            $com_obj->where($map);
+        }
+        if ($fields) {
+            $com_obj->select($fields);
+        }
+        return $com_obj;
+    }
 
     /**
      *  获取平台类型
