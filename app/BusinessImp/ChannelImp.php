@@ -36,13 +36,13 @@ class ChannelImp extends ApiBaseImp
         if ($company_id) $map['c_channel.company_id'] = $company_id;
         if ($channel_region) $map['c_channel.channel_region'] = $channel_region;
 
-        $fields = ['c_channel.*','c_customer_company.company_name as customer_company_name','c_zplay_company.company_name as zplay_company_name','c_currency_type.currency_name','c_currency_type.currency_en','c_business_manager.manager_name'];
+        $fields = ['c_channel.*','c_customer_company.company_name as customer_company_name','c_zplay_company.company_name as zplay_company_name','c_currency_type.currency_name','c_currency_type.currency_en','user.name as manager_name'];
 
         $map['leftjoin'] = [
             ['c_customer_company','c_customer_company.id', 'c_channel.customer_id'],
             ['c_zplay_company','c_zplay_company.id', 'c_channel.company_id'],
             ['c_currency_type','c_currency_type.id', 'c_channel.currency_type_id'],
-            ['c_business_manager','c_business_manager.id', 'c_channel.business_manager_id']
+            ['user','user.id', 'c_channel.business_manager_id']
         ];
         // 获取分页数据
         $channel_list = ChannelLogic::getChannelList($map, $fields)->forPage($page,$page_size)->orderby("c_channel.sort","desc")->get();

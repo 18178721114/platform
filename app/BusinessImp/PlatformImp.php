@@ -35,13 +35,13 @@ class PlatformImp extends ApiBaseImp
         if ($company_id) $map['c_platform.company_id'] = $company_id;
         $map['c_platform.status'] = 1;
 
-        $fields = ['c_platform.*','c_customer_company.company_name as customer_company_name','c_zplay_company.company_name as zplay_company_name','c_currency_type.currency_name','c_currency_type.currency_en','c_business_manager.manager_name','c_platform_type.platform_type'];
+        $fields = ['c_platform.*','c_customer_company.company_name as customer_company_name','c_zplay_company.company_name as zplay_company_name','c_currency_type.currency_name','c_currency_type.currency_en','user.name as manager_name','c_platform_type.platform_type'];
 
         $map['leftjoin'] = [
             ['c_customer_company','c_customer_company.id', 'c_platform.customer_id'],
             ['c_zplay_company','c_zplay_company.id', 'c_platform.company_id'],
             ['c_currency_type','c_currency_type.id', 'c_platform.currency_type_id'],
-            ['c_business_manager','c_business_manager.id', 'c_platform.business_manager_id'],
+            ['user','user.id', 'c_platform.business_manager_id'],
             ['c_platform_type','c_platform_type.id', 'c_platform.platform_type_id'],
         ];
 //        // 获取分页数据
