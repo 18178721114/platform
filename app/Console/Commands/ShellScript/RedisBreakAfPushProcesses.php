@@ -51,7 +51,7 @@ class RedisBreakAfPushProcesses extends Command
     {
     	set_time_limit(0);
     	Redis::select(2);
-    	define('MYSQL_AD_TABLE_NAME','af_active_new_ios');
+    	define('MYSQL_AD_TABLE_NAME','active_new_ios');
         $af_idfa = env('REDIS_APPSFLYER_KEYS_BREAK');
 
         try {
