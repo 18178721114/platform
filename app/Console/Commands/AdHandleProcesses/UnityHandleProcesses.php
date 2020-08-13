@@ -175,7 +175,7 @@ class UnityHandleProcesses extends Command
             $third_app_id = isset($json_info['source_game_id']) ? $json_info['source_game_id'] : '';
             foreach ($app_list as $app_k => $app_v) {
 
-                if($json_info['source_game_id'] == $app_v['platform_app_id'] && $json_info['placement'] == $app_v['ad_slot_id']){
+                if($json_info['source_game_id'] == $app_v['platform_app_id']){
                     $array[$k]['app_id'] = $app_v['app_id'];
                     $array[$k]['ad_type'] = $app_v['ad_type'];
                     $array[$k]['flow_type'] = $app_v['flow_type'];
@@ -229,26 +229,26 @@ class UnityHandleProcesses extends Command
             if($num_country){
                 $error_log_arr['country'][] = isset($json_info['country']) ? $json_info['country'].'('.$err_name.')' : 'Unknown Region' ;
             }
-//            foreach ($AdType_info as $AdType_k => $AdType_v) {
-//
-//                if($json_info['placement'] == ''){
-//                    $array[$k]['ad_type'] = 9;
-//                    $num_adtype = 0;
-//                    break;
-//                }
-//                if($json_info['placement'] == $AdType_v['name']  ){
-//                    $array[$k]['ad_type'] = $AdType_v['ad_type_id'];
-//                    $num_adtype = 0;
-//                    break;
-//                }else{
-//                    //广告类型失败
-//                    $num_adtype++;
-//
-//                }
-//            }
-//            if($num_adtype){
-//                $error_log_arr['ad_type'][] = $json_info['placement'].'('.$err_name.')';
-//            }
+            foreach ($AdType_info as $AdType_k => $AdType_v) {
+
+                if($json_info['placement'] == ''){
+                    $array[$k]['ad_type'] = 9;
+                    $num_adtype = 0;
+                    break;
+                }
+                if($json_info['placement'] == $AdType_v['name']  ){
+                    $array[$k]['ad_type'] = $AdType_v['ad_type_id'];
+                    $num_adtype = 0;
+                    break;
+                }else{
+                    //广告类型失败
+                    $num_adtype++;
+
+                }
+            }
+           if($num_adtype){
+                $error_log_arr['ad_type'][] = $json_info['placement'].'('.$err_name.')';
+            }
             if(($num+$num_country+$num_adtype)>0){
                 $error_detail_arr[$k]['platform_id'] = $source_id;
                 $error_detail_arr[$k]['platform_name'] = $source_name;
