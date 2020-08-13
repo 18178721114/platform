@@ -159,6 +159,7 @@ class TdUserTjHandleProcesses extends Command
                 if ($num) {
                     //var_dump($json_info['campaign_id']);
                     $error_log_arr['campaign_id'][] = $v['app_name'] . '#' . $v['channel_name'] . '#' . $v['version_id'];
+                    var_dump($error_log_arr);
                 }
 
                 // todo 匹配国家用
