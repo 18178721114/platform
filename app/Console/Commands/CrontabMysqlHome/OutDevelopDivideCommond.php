@@ -81,42 +81,10 @@ class OutDevelopDivideCommond extends Command
                 DB::rollBack();
             }
         }
-//        $sql = "INSERT into out_divide_develop
-//                SELECT
-//                '' as id ,
-//                application.gameid as app_id,
-//                a.developer_id as user_id,
-//                b.app_name,
-//                (CASE
-//                  WHEN app.release_region_id = 1 and app.os_id =1  THEN '1'   -- 操作系统(1、iOS-Global2、Android-Globa3、iOS-CN4、Android-CN)
-//                    WHEN app.release_region_id = 1 and app.os_id = 2 THEN '2'
-//                    WHEN app.release_region_id = 3 and app.os_id = 1 THEN '3'
-//                    WHEN app.release_region_id = 3 and app.os_id = 2 THEN '4'
-//                    ELSE ''
-//                END) as app_os,
-//                b.new_user,
-//                b.active_user,
-//                b.ff_income_taxAfter as ff_earning,
-//                b.ff_income_taxAfter as ff_income,
-//                b.ff_divide_taxAfter as ff_divide,
-//                b.ad_income_taxAfter as ad_earning,
-//                b.ad_income_taxAfter as ad_income,
-//                b.ad_divide_taxAfter as ad_divide,
-//                b.tg_cost as tg_cost,
-//                b.tg_divide as tg_expense,
-//                b.date as stats_date
-//                FROM
-//                    c_developer_app_divide a,
-//                    zplay_divide_develop b,
-//                    c_app app,
-//                 application
-//                WHERE
-//                b.app_id = app.id
-//                and a.app_id =  app.app_id
-//                and a.new_developer_id_key = b.developer_id
-//                and application.new_app_id = a.app_id
-//                and b.date = '$dayid'
-//            ";
+        
+        // 获取铁头的总利润与总收入比例
+        $profitRate= $this->getWillHeroProfitRate($dayid);
+        
         $sql = "INSERT into zplay_divide_develop_report 
                 SELECT
                 '' as id ,
@@ -146,7 +114,38 @@ class OutDevelopDivideCommond extends Command
                     c_app app     	
                 WHERE
                 b.app_id = app.id -- and app.is_dev_show = 2
-                and b.date = '$dayid'";
+                and b.date = '$dayid' and b.app_id not in (955,131,912)";
+        $info = DB::insert($sql);
+        if(!$info){
+            DB::rollBack();
+        }
+        
+        // 合并ga042001、ga008037、ga042004 国内铁头应用的的数据
+        $sql = "INSERT into zplay_divide_develop_report 
+                SELECT
+                '' as id ,
+                131 AS app_id,
+                42 AS developer_id,
+                '铁头英雄_王牌大作战' AS app_name,
+                4 as app_os,
+                SUM(b.new_user) AS new_user,
+                SUM(b.active_user) AS active_user,
+                SUM(b.ff_income_taxAfter) as ff_earning,
+                SUM(b.ff_income_taxAfter) as ff_income,
+                SUM(b.ff_divide_taxAfter) as ff_divide,
+                round(SUM(b.ad_income_taxAfter) * m.profit_rate, 2) as ad_earning,
+                round(SUM(b.ad_income_taxAfter) * m.profit_rate, 2) as ad_income,
+                round(SUM(b.ad_income_taxAfter) * m.profit_rate, 2) * 0.5 as ad_divide,
+                0 as tg_cost,
+                0 as tg_expense,
+                b.date as stats_date
+                FROM
+                    zplay_divide_develop b
+                    left join
+                    (select sum(ad_income_taxAfter-tg_cost)/sum(ad_income_taxAfter) AS profit_rate from zplay_divide_develop where app_id in (955,131,912) and '". substr($dayid, 0, 7)."'=SUBSTR(date,1 ,7)) m
+                    on 1=1
+                where b.date = '$dayid' and b.app_id in (955,131,912)
+                GROUP BY b.date";
         $info = DB::insert($sql);
         if(!$info){
             DB::rollBack();
