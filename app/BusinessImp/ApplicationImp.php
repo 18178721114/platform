@@ -1562,7 +1562,6 @@ class ApplicationImp extends ApiBaseImp
         $statistic_arr = [];
         $update_time = date('Y-m-d H:i:s');
         $create_time = date('Y-m-d H:i:s');
-
         if((!isset($params['overseas']) && !isset($params['domestic'])) ||  $params==null) ApiResponseFactory::apiResponse([],[],700);
 
         $bill_index =0;
@@ -1660,6 +1659,7 @@ class ApplicationImp extends ApiBaseImp
                 $data['billing_point_list'][$bill_point_index]['app_id']=$params['overseas']['appid'];
                 $bill_point_index++;
             }
+      }
         }
         unset($map);
         //国内
@@ -1738,7 +1738,7 @@ class ApplicationImp extends ApiBaseImp
             }
         }
 
-        }
+
 
 
         // 开启事物 保存数据
