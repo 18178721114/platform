@@ -1493,19 +1493,19 @@ class ApplicationImp extends ApiBaseImp
         ];
         $app_billing_statistic_list = ApplicationLogic::changeStatisticBillingList($map,$fields)->forPage($page,$page_size)->get();
         $app_billing_statistic_list = Service::data($app_billing_statistic_list);
-        if (!$app_billing_statistic_list) ApiResponseFactory::apiResponse([],[],1000);
-
+      //  if (!$app_billing_statistic_list) ApiResponseFactory::apiResponse([],[],1000);
         $map =[];
         $map['app_id'] = $appid;
         $map['status'] = 0;
         // 获取Statistic Point数据
         $app_billing_point_statistic_list = ApplicationLogic::changeStatisticBillingPoinList($map)->forPage($page,$page_size)->get();
         $app_billing_point_statistic_list = Service::data($app_billing_point_statistic_list);
-        if (!$app_billing_point_statistic_list) ApiResponseFactory::apiResponse([],[],1000);
+
         $data =[];
         $index =0;
         //计费的基础信息
-        foreach ($app_billing_statistic_list as $key => $app_billing){
+        if ($app_billing_statistic_list){
+            foreach ($app_billing_statistic_list as $key => $app_billing){
             //os_id 1 ios计费不分国内国外    2 安卓 区分国内国外计费
             if($app_list[0]['os_id'] ==  1 || ($app_list[0]['os_id'] ==  2 && $app_list[0]['release_region_id'] ==1)){
                 $data['overseas']['app_package_name'] = $app_billing['app_package_name'];
@@ -1520,10 +1520,12 @@ class ApplicationImp extends ApiBaseImp
                 $index ++;
             }
         }
+        }
         $num =0;
         $num1 =0;
         //计费点信息
-        foreach ($app_billing_point_statistic_list as $k => $app_billing_point){
+        if ($app_billing_point_statistic_list){
+            foreach ($app_billing_point_statistic_list as $k => $app_billing_point){
             //1、海外计费信息2、国内计费信息
             if ($app_list[0]['os_id'] ==  1 || ($app_list[0]['os_id'] ==  2 && $app_list[0]['release_region_id'] ==1)){
                 $data['overseas']['bill_point_list'][$num]['id'] = $app_billing_point['id'];
@@ -1547,8 +1549,13 @@ class ApplicationImp extends ApiBaseImp
                 $num1 ++;
             }
         }
-        ApiResponseFactory::apiResponse($data,[]);
+        }
+        if(!$data){
+            ApiResponseFactory::apiResponse([],[],1000);
+        }else
+         ApiResponseFactory::apiResponse($data,[]);
     }
+
 
     /**
      * 计费信息配置增加
@@ -1680,7 +1687,6 @@ class ApplicationImp extends ApiBaseImp
                 $map['billing_app_id'] =$billing_value['billing_app_id'];
                 $map['pay_platform_id'] =$billing_value['pay_platform_id'];
                 $map['app_package_name'] =$billing_value['app_package_name'];
-
                 $checkBill= ApplicationLogic::changeStatisticBillingList($map)->first();
                 $checkBill =Service::data($checkBill);
                 if(!empty($checkBill))  ApiResponseFactory::apiResponse([],[],714);
@@ -1717,7 +1723,6 @@ class ApplicationImp extends ApiBaseImp
                 $map['status'] = 0;
                 $map['orWhere'][] = ['billing_point_name',$billing_point_value['billing_point_name']];
                 $map['orWhere'][] = ['billing_point_id',$billing_point_value['billing_point_id']];
-
                 $checkBillPoint = ApplicationLogic::changeStatisticBillingPoinList($map)->first();
                 $checkBillPoint =Service::data($checkBillPoint);
 

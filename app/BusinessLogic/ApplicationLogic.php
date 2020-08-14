@@ -545,7 +545,6 @@ class ApplicationLogic
         if ($map) {
             $com_obj->where($map);
         }
-
         if ($fields) {
             $com_obj->select($fields);
         }
