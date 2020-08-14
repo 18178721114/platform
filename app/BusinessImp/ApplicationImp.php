@@ -1612,6 +1612,7 @@ class ApplicationImp extends ApiBaseImp
                 $data['bill_list'][$bill_index]['app_id'] = $params['overseas']['appid'];
                 $bill_index++;
             }
+            if(!empty($params['overseas']['bill_point_list'])){
             foreach ($params['overseas']['bill_point_list'] as $key => $value) {
                 //判断这些字段不能为空
 //                $condition = ['billing_point_name', 'billing_point_id', 'billing_point_price_usd','billing_point_price_cny'];
@@ -1737,7 +1738,7 @@ class ApplicationImp extends ApiBaseImp
             }
         }
 
-
+        }
 
 
         // 开启事物 保存数据
