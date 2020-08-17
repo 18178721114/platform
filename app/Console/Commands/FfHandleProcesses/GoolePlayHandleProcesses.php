@@ -57,7 +57,7 @@ class GoolePlayHandleProcesses extends Command
         set_time_limit(0);
         try {
             $source_id = 'pff02';
-            $billing_name = 'GoolePlay';
+            $billing_name = 'GooglePlay';
             //临时表
             $mysql_table_name = 'zplay_ff_report_daily_temporary';
             //最终表
@@ -129,7 +129,7 @@ class GoolePlayHandleProcesses extends Command
             $divide = DB::select($sql);
             $divide = Service::data($divide);
             if (!$divide) {
-                $error_msg = 'goolePlay计费平台数据处理程序平台数据查询为空';
+                $error_msg = 'googlePlay计费平台数据处理程序平台数据查询为空';
                 DataImportImp::saveDataErrorLog(2, $source_id, $billing_name, 3, $error_msg);
                 exit;
             }
@@ -143,7 +143,7 @@ class GoolePlayHandleProcesses extends Command
             $country_info = CommonLogic::getCountryList($country_map)->get();
             $country_info = Service::data($country_info);
             if (!$country_info) {
-                $error_msg = 'goolePlay计费平台数据处理程序国家信息数据查询为空';
+                $error_msg = 'googlePlay计费平台数据处理程序国家信息数据查询为空';
                 DataImportImp::saveDataErrorLog(2, $source_id, $billing_name, 3, $error_msg);
                 exit;
             }
@@ -185,7 +185,7 @@ class GoolePlayHandleProcesses extends Command
                         $c_currency_info = Service::data($c_currency_type_info);
 
                         if (!$c_currency_info) {
-                            $error_msg = 'goolePlay计费平台数据处理程序汇率类型查询为空1' . $app_v['currency_type'].$app_v['app_package_name'];
+                            $error_msg = 'googlePlay计费平台数据处理程序汇率类型查询为空1' . $app_v['currency_type'].$app_v['app_package_name'];
                             DataImportImp::saveDataErrorLog(2, $source_id, $billing_name, 3, $error_msg);
                             $num++;
                             break;
