@@ -29,6 +29,8 @@ class TiktokTgReportCommond extends Command
      * @var string
      */
     protected $description = 'Command description';
+    
+    private $httpCode = 200;
 
     /**
      * Create a new command instance.
@@ -214,15 +216,13 @@ class TiktokTgReportCommond extends Command
 
             self::getReportData($final_insert_arr, $data_account, $dayid);
         }else{
-//            $error_msg = AD_PLATFORM.'推广平台campaign_id为'.$campaign_id.'的报表数据失败,错误信息:';
-//            if (key_exists('code',$data_arr) && $data_arr['code'] == 0){
-//                $error_msg .= '暂无数据';
-//            }elseif(key_exists('code',$data_arr) && $data_arr['code'] != 0){
-//                $error_msg .= $data_arr['message'];
-//            }else{
-//                $error_msg .= '无数据，接口未返回任何信息';
-//            }
-//            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,4,$error_msg);
+            $error_msg = $dayid.AD_PLATFORM.',账号:'.$data_account.',access_token:'.$access_token.',url:'.$data_url.',推广平台campaign_id为'.$campaign_id.'('.$campaign_name.')的报表数据失败,错误信息:';
+            if (key_exists('code',$data_arr) && $data_arr['code'] == 0){
+                return '暂无数据';
+            } else {
+                $error_msg .= $data.",httpCode:".$this->httpCode;
+            }
+            DataImportImp::saveDataErrorLog(1,SOURCE_ID,AD_PLATFORM,4,$error_msg);
         }
     }
 
@@ -314,6 +314,7 @@ class TiktokTgReportCommond extends Command
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
         $output = curl_exec($ch);
+        $this->httpCode = curl_getinfo($ch,CURLINFO_HTTP_CODE);
         curl_close($ch);
         return $output;
     }
