@@ -26,14 +26,14 @@ class Controller extends BaseController
     public function __construct()
     {
 
-        // ³õÊ¼»¯
+        // ï¿½ï¿½Ê¼ï¿½ï¿½
         $this->init();
 
     }
 
     private function init(){
 
-        //´ÓheaderÀïÈ¡³ö token
+        //ï¿½ï¿½headerï¿½ï¿½È¡ï¿½ï¿½ token
         $sessionid = Request::createFromGlobals()->header('sessionid');
         if ($sessionid){
             $this->sessionId = $sessionid;

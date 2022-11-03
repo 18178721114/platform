@@ -55,6 +55,15 @@ class VungleHandleProcesses extends Command
      */
     public function handle()
     {
+        $a= 3;
+        $b=6;
+        $c=1;
+        if($a=5 || $b=7 && $c =10){
+            $a++;
+            $b++;
+        }
+        var_dump($a,$b,$c);
+        die;
         $source_id='pad09';
         $source_name='Vungle';
         set_time_limit(0);
