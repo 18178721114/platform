@@ -19,7 +19,8 @@ class UserController extends Controller
     public function zhibo_add(){
         ApplicationImp::zhibo_user_add($this->params);
     }
-
-
+    public function zhibo_get_num(){
+        ApplicationImp::zhibo_get_num();
+    }
 
 }

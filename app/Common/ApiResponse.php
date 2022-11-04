@@ -69,14 +69,16 @@ class ApiResponse{
 //                header('Access-Control-Allow-Headers:DNT,X-CustomHeader,Keep-Alive,User- Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,token');
 ////                header('Access-Control-Allow-Credentials:true');
                 $origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
-                $allow_origin = array('http://analysis-test.zplay.cn','http://erm-older-test.zplay.cn','https://analysis.zplay.cn','http://analysis-debug.zplay.cn:8080');
-                if(in_array($origin, $allow_origin))
+                $allow_origin = array('http://wwcm.goldphp.cn:8080','http://analysis-test.zplay.cn','http://erm-older-test.zplay.cn','https://analysis.zplay.cn','http://analysis-debug.zplay.cn:8080');
+                if(in_array($origin, $allow_origin)){
                     header("Access-Control-Allow-Origin:".$origin);
-                header('content-type:application:json;charset=utf8');
-                header('Access-Control-Allow-Methods:GET, POST, OPTIONS, PUT, DELETE');
-                header('Access-Control-Allow-Headers:DNT,X-CustomHeader,Keep-Alive,User- Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,token');
-                header('Access-Control-Allow-Credentials:true');
-                header("HTTP/1.0 401 Unauthorized");die;
+                    //header("Access-Control-Allow-Origin: *");
+                    header('content-type:application:json;charset=utf8');
+                    header('Access-Control-Allow-Methods:GET, POST, OPTIONS, PUT, DELETE');
+                    header('Access-Control-Allow-Headers:DNT,X-CustomHeader,Keep-Alive,User- Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,token');
+                    header('Access-Control-Allow-Credentials:true');
+                    header("HTTP/1.0 401 Unauthorized");die;
+                } 
             }else {
                 if (!$this->err_msg) {
                     $this->err_msg = SetError::getErrorInfo($this->err_code);
@@ -93,9 +95,9 @@ class ApiResponse{
         // 存储日志
         $log_msg = $_REQUEST;
 
-//        if($log_msg){
-//            $this->saveLog($log_msg,$response_array);
-//        }
+    //    if($log_msg){
+    //        $this->saveLog($log_msg,$response_array);
+    //    }
 
         $format = isset($_REQUEST['format']) ? $_REQUEST['format'] : NULL;
 
@@ -112,20 +114,28 @@ class ApiResponse{
         }
 
         if (!$probe){
-            $origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
-//            $allow_origin = array('http://erm-test.zplay.cn','http://erm-older-test.zplay.cn','https://erm.zplay.cn','https://analysis.zplay.cn','http://erm-debug.zplay.cn','http://erm-debug.zplay.cn:8080');
-            $allow_origin = array('http://analysis-test.zplay.cn','http://erm-older-test.zplay.cn','https://analysis.zplay.cn','http://analysis-debug.zplay.cn:8080');
-            if(in_array($origin, $allow_origin))
-                header("Access-Control-Allow-Origin:".$origin);
-            header('content-type:application:json;charset=utf8');
-            header('Access-Control-Allow-Methods:GET, POST, OPTIONS, PUT, DELETE');
-            header('Access-Control-Allow-Headers:DNT,X-CustomHeader,Keep-Alive,User- Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,token');
-            header('Access-Control-Allow-Credentials:true');
-//            header("Access-Control-Allow-Origin:".env("ORIGIN_URL"));
-//            header('content-type:application:json;charset=utf8');
-//            header('Access-Control-Allow-Methods:GET, POST, OPTIONS, PUT, DELETE');
-//            header('Access-Control-Allow-Headers:DNT,X-CustomHeader,Keep-Alive,User- Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,token');
-//            header('Access-Control-Allow-Credentials:true');
+//             $origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
+// //            $allow_origin = array('http://erm-test.zplay.cn','http://erm-older-test.zplay.cn','https://erm.zplay.cn','https://analysis.zplay.cn','http://erm-debug.zplay.cn','http://erm-debug.zplay.cn:8080');
+//             $allow_origin = array('http://wwcm.goldphp.cn:8080','http://analysis-test.zplay.cn','http://erm-older-test.zplay.cn','https://analysis.zplay.cn','http://analysis-debug.zplay.cn:8080');
+//             if(in_array($origin, $allow_origin)){
+//                 header("Access-Control-Allow-Origin:".$origin);
+//                 ///header("Access-Control-Allow-Origin: *");
+//                 header('content-type:application:json;charset=utf8');
+//                 header('Access-Control-Allow-Methods:GET, POST, OPTIONS, PUT, DELETE');
+//                 header('Access-Control-Allow-Headers:DNT,X-CustomHeader,Keep-Alive,User- Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,token');
+//                 header('Access-Control-Allow-Credentials:true');
+//     //            header("Access-Control-Allow-Origin:".env("ORIGIN_URL"));
+//     //            header('content-type:application:json;charset=utf8');
+//     //            header('Access-Control-Allow-Methods:GET, POST, OPTIONS, PUT, DELETE');
+//     //            header('Access-Control-Allow-Headers:DNT,X-CustomHeader,Keep-Alive,User- Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,token');
+//     //            header('Access-Control-Allow-Credentials:true');
+//             }
+             header("Access-Control-Allow-Origin: *");
+             header('content-type:application:json;charset=utf8');
+             header('Access-Control-Allow-Methods:GET, POST, OPTIONS, PUT, DELETE');
+             header('Access-Control-Allow-Headers:DNT,X-CustomHeader,Keep-Alive,User- Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,token');
+             header('Access-Control-Allow-Credentials:true');
+                
             echo $result;
             exit;
         }

@@ -28,7 +28,7 @@ class Zhibo_user extends Model{
      * @var array
      */
     protected $fillable = [
-        'id', 'name', 'phone', 'created'
+        'id', 'name', 'phone', 'created','age','sex','experience','province','city','area',
     ];
 
     /**

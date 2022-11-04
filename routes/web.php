@@ -17,7 +17,9 @@ Route::get('/', function () {
     return view('404');
 });
 
-Route::match(['get'], 'api/user/add', 'Platform\UserController@zhibo_add');
+Route::match(['get','post'], 'api/user/add', 'Platform\UserController@zhibo_add');
+Route::match(['get'], 'api/user/get_num', 'Platform\UserController@zhibo_get_num');
+
 // Route::match(['post'], 'api/user/login', 'DataPlatform\UserController@login');
 
 // Route::match(['post'], 'api/develop/platform/login', 'DataPlatform\UserController@devlogin');
